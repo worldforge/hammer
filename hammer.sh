@@ -5,7 +5,7 @@ set -e
 export PREFIX=$PWD/local
 export SOURCE=$PWD/dev/worldforge
 export DEPS_SOURCE=$PWD/local/src
-export MAKEOPTS="-j3"
+export MAKEOPTS="-s -j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
 function buildwf()
@@ -14,14 +14,9 @@ function buildwf()
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     ./autogen.sh
     ./configure --prefix=$PREFIX
-    make && make install
+    make
+    make -s install
 }
-
-# Validate arugments
-if [ $# -ne 2 ] ; then
-  echo "Invalid arugments!"
-  exit 1
-fi
 
 mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
 
@@ -33,8 +28,10 @@ if [ $1 = "install-deps" ] ; then
   if [ $2 = "all" ] || [ $2 = "cegui" ] ; then
     echo "  Installing CEGUI..."
     cd $DEPS_SOURCE
-    wget -c http://voxel.dl.sourceforge.net/sourceforge/crayzedsgui/CEGUI-0.6.2b.tar.gz
-    tar zxvf CEGUI-0.6.2b.tar.gz
+    if [ ! -d "CEGUI-0.6.2" ] ; then
+      wget -c http://voxel.dl.sourceforge.net/sourceforge/crayzedsgui/CEGUI-0.6.2b.tar.gz
+      tar zxvf CEGUI-0.6.2b.tar.gz
+    fi
     cd CEGUI-0.6.2/
     ./configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat
     make
@@ -46,8 +43,10 @@ if [ $1 = "install-deps" ] ; then
   if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
     echo "  Installing Ogre..."
     cd $DEPS_SOURCE
-    wget -c http://voxel.dl.sourceforge.net/sourceforge/ogre/ogre-v1-6-1.tar.bz2
-    tar -xjf ogre-v1-6-1.tar.bz2
+    if [ ! -d "ogre" ]; then
+      wget -c http://voxel.dl.sourceforge.net/sourceforge/ogre/ogre-v1-6-1.tar.bz2
+      tar -xjf ogre-v1-6-1.tar.bz2
+    fi
     cd ogre
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     ./configure --prefix=$PREFIX --disable-freeimage --disable-ogre-demos
@@ -134,6 +133,11 @@ elif [ $1 = "build" ] ; then
   buildwf "libs/Atlas-C++"
   echo "  Done."
 
+  # Mercator
+  echo "  Mercator..."
+  buildwf "libs/mercator"
+  echo "  Done."
+
   # Eris
   echo "  Eris..."
   buildwf "libs/eris"
@@ -142,11 +146,6 @@ elif [ $1 = "build" ] ; then
   # Libwfut
   echo "  Libwfut..."
   buildwf "libs/libwfut"
-  echo "  Done."
-
-  # Mercator
-  echo "  Mercator..."
-  buildwf "libs/mercator"
   echo "  Done."
 
   # Ember client
