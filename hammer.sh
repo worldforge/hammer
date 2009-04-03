@@ -5,7 +5,7 @@ set -e
 export PREFIX=$PWD/local
 export SOURCE=$PWD/dev/worldforge
 export DEPS_SOURCE=$PWD/local/src
-export MAKEOPTS="-s -j3"
+export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
 function buildwf()
