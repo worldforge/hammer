@@ -12,10 +12,13 @@ function buildwf()
 {
     cd $SOURCE/forge/$1
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-    ./autogen.sh
-    ./configure --prefix=$PREFIX
+    if [ ! -f "Makefile" ] ; then
+      echo "  Generating makefile..."
+      ./autogen.sh
+      ./configure --prefix=$PREFIX
+    fi
     make
-    make -s install
+    make install
 }
 
 mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
@@ -112,7 +115,10 @@ elif [ $1 = "checkout" ] ; then
 # Build source
 elif [ $1 = "build" ] ; then
   echo "Building sources..."
-  
+
+  # Build libraries
+  if [ $2 = "libs" ] || [ $2 = "all" ] ; then
+
   # Varconf
   echo "  Varconf..."
   buildwf "libs/varconf"
@@ -148,10 +154,16 @@ elif [ $1 = "build" ] ; then
   buildwf "libs/libwfut"
   echo "  Done."
 
+  fi
+
+  if [ $2 = "ember" ] || [ $2 = "all" ] ; then
+
   # Ember client
   echo "  Ember client..."
   buildwf "clients/ember"
   echo "  Done."
+
+  fi
 
   echo "Build Done."
 
