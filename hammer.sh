@@ -7,7 +7,7 @@ export SOURCE=$PWD/dev/worldforge
 export DEPS_SOURCE=$PWD/dev
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-export BUILDDIR=`arch`
+export BUILDDIR=`uname -m`
 
 
 function buildwf()
