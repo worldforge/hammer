@@ -4,22 +4,41 @@ set -e
 
 export PREFIX=$PWD/local
 export SOURCE=$PWD/dev/worldforge
-export DEPS_SOURCE=$PWD/local/src
+export DEPS_SOURCE=$PWD/dev
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+export BUILDDIR=`arch`
+
 
 function buildwf()
 {
     cd $SOURCE/forge/$1
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+    if [ ! -f "configure" ] ; then
+      echo "  Running autogen..."
+      NOCONFIGURE=1 ./autogen.sh
+    fi
+
+    mkdir -p $BUILDDIR
+    cd $BUILDDIR
     if [ ! -f "Makefile" ] ; then
-      echo "  Generating makefile..."
-      ./autogen.sh
-      ./configure --prefix=$PREFIX
+      echo "  Running confgure..."
+      ../configure --prefix=$PREFIX
     fi
     make
     make install
 }
+
+
+function checkoutwf()
+{
+  if [ ! -d $1 ]; then
+    git clone git://git.worldforge.org/$1.git
+  else
+    cd $1 && git fetch && git rebase origin/master && cd ..
+  fi
+}
+
 
 mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
 
@@ -32,11 +51,13 @@ if [ $1 = "install-deps" ] ; then
     echo "  Installing CEGUI..."
     cd $DEPS_SOURCE
     if [ ! -d "CEGUI-0.6.2" ] ; then
-      wget -c http://voxel.dl.sourceforge.net/sourceforge/crayzedsgui/CEGUI-0.6.2b.tar.gz
+      wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/CEGUI-0.6.2b.tar.gz
       tar zxvf CEGUI-0.6.2b.tar.gz
     fi
     cd CEGUI-0.6.2/
-    ./configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat
+    mkdir -p $BUILDDIR
+    cd $BUILDDIR
+    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer
     make
     make install
     echo "  Done."
@@ -46,13 +67,17 @@ if [ $1 = "install-deps" ] ; then
   if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
     echo "  Installing Ogre..."
     cd $DEPS_SOURCE
-    if [ ! -d "ogre" ]; then
-      wget -c http://voxel.dl.sourceforge.net/sourceforge/ogre/ogre-v1-6-1.tar.bz2
-      tar -xjf ogre-v1-6-1.tar.bz2
+    if [ ! -d "ogre_1_6_1" ]; then
+      wget -c http://downloads.sourceforge.net/sourceforge/ogre/ogre-v1-6-1.tar.bz2
+      mkdir -p "ogre_1_6_1"
+      cd "ogre_1_6_1"
+      tar -xjf ../ogre-v1-6-1.tar.bz2
     fi
-    cd ogre
+    cd $DEPS_SOURCE/ogre_1_6_1/ogre
+    mkdir -p $BUILDDIR
+    cd $BUILDDIR
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-    ./configure --prefix=$PREFIX --disable-freeimage --disable-ogre-demos
+    ../configure --prefix=$PREFIX --disable-freeimage --disable-ogre-demos
     make
     make install
     echo "  Done."
@@ -80,34 +105,34 @@ elif [ $1 = "checkout" ] ; then
 
   # Skstream
   echo "  Skstream..."
-  git clone git://git.worldforge.org/skstream.git
+  checkoutwf "skstream"
   echo "  Done."
 
   # Wfmath
   echo "  Wfmath..."
-  git clone git://git.worldforge.org/wfmath.git
+  checkoutwf "wfmath"
   echo "  Done."
 
   # Eris
   echo "  Eris..."
-  git clone git://git.worldforge.org/eris.git
+  checkoutwf "eris"
   echo "  Done."
 
   # Libwfut
   echo "  Libwfut..."
-  git clone git://git.worldforge.org/libwfut.git
+  checkoutwf "libwfut"
   echo "  Done."
 
   # Mercator
   echo "  Mercator..."
-  git clone git://git.worldforge.org/mercator.git
+  checkoutwf "mercator"
   echo "  Done."
 
   # Ember client
   echo "  Ember client..."
   mkdir -p $SOURCE/forge/clients
   cd $SOURCE/forge/clients
-  git clone git://git.worldforge.org/ember.git
+  checkoutwf "ember"
   echo "  Done."
 
   echo "Checkout Done."
@@ -163,15 +188,14 @@ elif [ $1 = "build" ] ; then
   buildwf "clients/ember"
   echo "  Done."
 
+  echo "Fetching media..."
+  cd $SOURCE/forge/clients/ember/$BUILDDIR
+  make devmedia
+  echo "Media fetched."
+
   fi
 
   echo "Build Done."
 
-# Media
-elif [ $1 = "fetch-media" ] ; then
-  echo "Fetching media..."
-  cd $SOURCE/forge/clients/ember
-  make devmedia
-  echo "Media fetched."
 fi
 
