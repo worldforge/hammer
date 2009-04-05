@@ -39,11 +39,65 @@ function checkoutwf()
   fi
 }
 
+function show_help()
+{
+  if [ $1 = "main" ] ; then
+    echo "Script for automating the process of installing dependencies" 
+    echo "and compiling Ember in a self contained environment."
+    echo ""
+    echo "Usage: hammer.sh <command> <arguments>"
+    echo "Commands:"
+    echo "  install-deps -  install all 3rd party dependencies"
+    echo "  checkout     -  fetch worldforge source (libraries, clients)"
+    echo "  build        -  build the sources and install in environment"
+    echo ""
+    echo "For more help, type: hammer.sh help <command>"
+  elif [ $1 = "install-deps" ] ; then
+    echo "Install all 3rd party dependencies into build environment."
+    echo ""
+    echo "Usage: hammer.sh install-deps <dependency to install>"
+    echo "Dependencies Available:"
+    echo "  all      -  install all dependencies listed below"
+    echo "  cegui    -  a free library providing windowing and widgets for 
+                        graphics APIs / engines"
+    echo "  ogre     -  3D rendering engine"
+  elif [ $1 = "checkout" ] ; then
+    echo "Fetch latest source code for worldforge libraries and clients."
+    echo ""
+    echo "Usage: hammer.sh checkout"
+    echo "NOTE: make sure to perform CVS login first!"
+    echo "See http://wiki.worldforge.org/wiki/Compiling_Ember:_Script_New#CVS_Login"
+  elif [ $1 = "build" ] ; then
+    echo "Build the sources and install in environment."
+    echo ""
+    echo "Usage: hammer.sh build <target>"
+    echo "Available targets:"
+    echo "  libs  -  build libraries only"
+    echo "  ember -  build ember only"
+    echo ""
+    echo "Hint: after a checkout use 'all'. To rebuild after changing code"
+    echo "only in Ember, use 'ember'. Will build much quicker!"
+  else
+    echo "No help page found!"
+  fi
+}
+
+# Show main help page if no arguments given
+if [ $# -eq 0 ] ; then
+  show_help "main"
+
+# If help command given, show help page
+elif [ $1 = "help" ] ; then
+  if [ $# -eq 2 ] ; then
+    show_help $2
+  else
+    show_help "main"
+  fi
 
 mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
 
 # Dependencies install
-if [ $1 = "install-deps" ] ; then
+elif [ $1 = "install-deps" ] ; then
   echo "Installing deps..."
 
   # CEGUI
