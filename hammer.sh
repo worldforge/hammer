@@ -98,6 +98,12 @@ mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
 
 # Dependencies install
 elif [ $1 = "install-deps" ] ; then
+  if [ $# -ne 2 ] ; then
+    echo "Missing required parameter!"
+    show_help "install-deps"
+    exit 1
+  fi
+
   echo "Installing deps..."
 
   # CEGUI
@@ -121,13 +127,13 @@ elif [ $1 = "install-deps" ] ; then
   if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
     echo "  Installing Ogre..."
     cd $DEPS_SOURCE
-    if [ ! -d "ogre_1_6_1" ]; then
-      wget -c http://downloads.sourceforge.net/sourceforge/ogre/ogre-v1-6-1.tar.bz2
-      mkdir -p "ogre_1_6_1"
-      cd "ogre_1_6_1"
-      tar -xjf ../ogre-v1-6-1.tar.bz2
+    if [ ! -d "ogre_1_6_2" ]; then
+      wget -c http://downloads.sourceforge.net/sourceforge/ogre/ogre-v1-6-2.tar.bz2
+      mkdir -p "ogre_1_6_2"
+      cd "ogre_1_6_2"
+      tar -xjf ../ogre-v1-6-2.tar.bz2
     fi
-    cd $DEPS_SOURCE/ogre_1_6_1/ogre
+    cd $DEPS_SOURCE/ogre_1_6_2/ogre
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
@@ -193,6 +199,12 @@ elif [ $1 = "checkout" ] ; then
 
 # Build source
 elif [ $1 = "build" ] ; then
+  if [ $# -ne 2 ] ; then
+    echo "Missing required parameter!"
+    show_help "build"
+    return 1
+  fi
+
   echo "Building sources..."
 
   # Build libraries
