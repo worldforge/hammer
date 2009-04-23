@@ -82,11 +82,12 @@ function show_help()
   elif [ $1 = "build" ] ; then
     echo "Build the sources and install in environment."
     echo ""
-    echo "Usage: hammer.sh build <target>"
+    echo "Usage: hammer.sh build <target> \"<makeopts>\""
     echo "Available targets:"
     echo "  libs  -  build libraries only"
     echo "  ember -  build ember only"
     echo "  cyphesis - build cyphesis server only"
+    echo "makeopts [optional] - options to pass into make"
     echo ""
     echo "Hint: after a checkout use 'all'. To rebuild after changing code"
     echo "only in Ember, use 'ember'. Will build much quicker!"
@@ -219,10 +220,15 @@ elif [ $1 = "checkout" ] ; then
 
 # Build source
 elif [ $1 = "build" ] ; then
-  if [ $# -ne 2 ] ; then
+  if [ $# -lt 2 ] ; then
     echo "Missing required parameter!"
     show_help "build"
-    return 1
+    exit 1
+  fi
+
+  # Check for make options
+  if [ $# -ge 3 ] ; then
+    MAKEOPTS=$3
   fi
 
   echo "Building sources..."
