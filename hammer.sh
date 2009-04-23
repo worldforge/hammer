@@ -2,13 +2,13 @@
 
 set -e
 
+export HAMMERDIR=$PWD/hammer
 export PREFIX=$PWD/local
 export SOURCE=$PWD/dev/worldforge
 export DEPS_SOURCE=$PWD/dev
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 export BUILDDIR=`uname -m`
-
 
 function buildwf()
 {
@@ -25,7 +25,7 @@ function buildwf()
       echo "  Running confgure..."
       ../configure --prefix=$PREFIX
     fi
-    make
+    make $MAKEOPTS
     make install
 }
 
@@ -39,11 +39,23 @@ function checkoutwf()
   fi
 }
 
+function cyphesis_post_install()
+{
+  cd $PREFIX/bin
+
+  # Rename real cyphesis binary to cyphesis.bin
+  mv cyphesis cyphesis.bin
+
+  # Install our cyphesis.in script as cyphesis
+  cp $HAMMERDIR/cyphesis.in cyphesis
+  chmod +x cyphesis  
+}
+
 function show_help()
 {
   if [ $1 = "main" ] ; then
     echo "Script for automating the process of installing dependencies" 
-    echo "and compiling Ember in a self contained environment."
+    echo "and compiling Worldforge in a self contained environment."
     echo ""
     echo "Usage: hammer.sh <command> <arguments>"
     echo "Commands:"
@@ -74,6 +86,7 @@ function show_help()
     echo "Available targets:"
     echo "  libs  -  build libraries only"
     echo "  ember -  build ember only"
+    echo "  cyphesis - build cyphesis server only"
     echo ""
     echo "Hint: after a checkout use 'all'. To rebuild after changing code"
     echo "only in Ember, use 'ember'. Will build much quicker!"
@@ -195,6 +208,13 @@ elif [ $1 = "checkout" ] ; then
   checkoutwf "ember"
   echo "  Done."
 
+  # Cyphesis
+  echo "  Cyphesis..."
+  mkdir -p $SOURCE/forge/servers
+  cd $SOURCE/forge/servers
+  checkoutwf "cyphesis"
+  echo "  Done."
+
   echo "Checkout Done."
 
 # Build source
@@ -258,6 +278,16 @@ elif [ $1 = "build" ] ; then
   cd $SOURCE/forge/clients/ember/$BUILDDIR
   make devmedia
   echo "Media fetched."
+
+  fi
+
+  if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
+
+  # Cyphesis
+  echo "  Cyphesis..."
+  buildwf "servers/cyphesis"
+  cyphesis_post_install
+  echo "  Done."
 
   fi
 

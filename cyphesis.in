@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Function to find the real directory a program resides in.
+# Feb. 17, 2000 - Sam Lantinga, Loki Entertainment Software
+FindPath()
+{
+    fullpath="`echo $0 | grep /`"
+    if [ "$fullpath" = "" ]; then
+        oIFS="$IFS"
+        IFS=:
+        for path in $PATH
+        do if [ -x "$path/$0" ]; then
+               if [ "$path" = "" ]; then
+                   path="."
+               fi
+               fullpath="$path/$0"
+               break
+           fi
+        done
+        IFS="$oIFS"
+    fi
+    if [ "$fullpath" = "" ]; then
+        fullpath="$0"
+    fi
+ 
+    # Is the sed/ls magic portable?
+    if [ -L "$fullpath" ]; then
+        #fullpath="`ls -l "$fullpath" | awk '{print $01}'`"
+        fullpath=`ls -l "$fullpath" |sed -e 's/.* -> //' |sed -e 's/\*//'`
+    fi
+    dirname $fullpath
+}
+
+
+
+
+
+# Setup variables
+
+#get the dir where this script resides in
+path=`FindPath`
+test=${path[0]}
+#if [ "$fullpath" = "" ]; then
+if [ "$test" = "." ]; then
+	path=${PWD}
+fi
+prefix=${path}/..
+debugging=0
+
+echo "According to my calculations Cyphesis should be installed in $prefix"
+
+exec_prefix=${prefix}
+bindir=${exec_prefix}/bin
+
+LD_LIBRARY=$prefix/lib/cyphesis:$LD_LIBRARY
+LD_LIBRARY_PATH=$prefix/lib/cyphesis:$LD_LIBRARY_PATH
+export LD_LIBRARY
+export LD_LIBRARY_PATH
+
+# Run cyphesis.bin by default
+if [ $# -eq 0 ] ; then
+
+if [ $debugging = 1 ] ; then
+	# Execute real cyphesis binary
+	echo "Starting Cyphesis in debugger...."
+	gdb --args $bindir/cyphesis.bin
+else
+	# Execute real cyphesis binary
+	echo "Starting Cyphesis...."
+	$bindir/cyphesis.bin
+fi
+
+elif [ $1 = "loadrules" ] ; then
+  $bindir/cyloadrules
+
+else
+  echo "Invalid command!"
+fi
