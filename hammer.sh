@@ -20,6 +20,12 @@ CONFIGLOG=config.log    # Configure output
 MAKELOG=build.log      # Make output
 INSTALLLOG=install.log # Install output
 
+# Dependencies
+CEGUI=CEGUI-0.6.2
+CEGUI_DOWNLOAD=CEGUI-0.6.2b.tar.gz
+OGRE=ogre_1_6_2
+OGRE_DOWNLOAD=ogre-v1-6-2.tar.bz2
+
 function buildwf()
 {
     mkdir -p $LOGDIR/$1
@@ -43,7 +49,6 @@ function buildwf()
     echo "  Installing..."
     make install > $LOGDIR/$1/$INSTALLLOG
 }
-
 
 function checkoutwf()
 {
@@ -77,6 +82,7 @@ function show_help()
     echo "  install-deps -  install all 3rd party dependencies"
     echo "  checkout     -  fetch worldforge source (libraries, clients)"
     echo "  build        -  build the sources and install in environment"
+    echo "  clean        -  delete build directory so a fresh build can be performed"
     echo ""
     echo "For more help, type: hammer.sh help <command>"
   elif [ $1 = "install-deps" ] ; then
@@ -106,6 +112,12 @@ function show_help()
     echo ""
     echo "Hint: after a checkout use 'all'. To rebuild after changing code"
     echo "only in Ember, use 'ember'. Will build much quicker!"
+  elif [ $1 = "clean" ] ; then
+    echo "Clean out build files of a project."
+    echo ""
+    echo "Usage: hammer.sh clean <target>"
+    echo "Targets:"
+    echo "  cegui, ogre, libs/<name>, clients/<name>, servers/<name>"
   else
     echo "No help page found!"
   fi
@@ -143,12 +155,12 @@ elif [ $1 = "install-deps" ] ; then
     echo "  Installing CEGUI..."
     mkdir -p $LOGDIR/deps/CEGUI    # create CEGUI log directory
     cd $DEPS_SOURCE
-    if [ ! -d "CEGUI-0.6.2" ] ; then
+    if [ ! -d $CEGUI ] ; then
       echo "  Downloading..."
-      wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/CEGUI-0.6.2b.tar.gz
-      tar zxvf CEGUI-0.6.2b.tar.gz
+      wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD
+      tar zxvf $CEGUI_DOWNLOAD
     fi
-    cd CEGUI-0.6.2/
+    cd $CEGUI
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
@@ -165,14 +177,14 @@ elif [ $1 = "install-deps" ] ; then
     echo "  Installing Ogre..."
     mkdir -p $LOGDIR/deps/ogre
     cd $DEPS_SOURCE
-    if [ ! -d "ogre_1_6_2" ]; then
+    if [ ! -d $OGRE ]; then
       echo "  Downloading..."
-      wget -c http://downloads.sourceforge.net/sourceforge/ogre/ogre-v1-6-2.tar.bz2
-      mkdir -p "ogre_1_6_2"
-      cd "ogre_1_6_2"
-      tar -xjf ../ogre-v1-6-2.tar.bz2
+      wget -c http://downloads.sourceforge.net/sourceforge/ogre/$OGRE_DOWNLOAD
+      mkdir -p $OGRE
+      cd $OGRE
+      tar -xjf ../$OGRE_DOWNLOAD
     fi
-    cd $DEPS_SOURCE/ogre_1_6_2/ogre
+    cd $DEPS_SOURCE/$OGRE/ogre
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
@@ -299,9 +311,7 @@ elif [ $1 = "build" ] ; then
   buildwf "libs/libwfut"
   echo "  Done."
 
-  fi
-
-  if [ $2 = "ember" ] || [ $2 = "all" ] ; then
+  elif [ $2 = "ember" ] || [ $2 = "all" ] ; then
 
   # Ember client
   echo "  Ember client..."
@@ -313,9 +323,7 @@ elif [ $1 = "build" ] ; then
   make devmedia
   echo "Media fetched."
 
-  fi
-
-  if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
+  elif [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
 
   # Cyphesis
   echo "  Cyphesis..."
@@ -323,9 +331,31 @@ elif [ $1 = "build" ] ; then
   cyphesis_post_install
   echo "  Done."
 
+  else
+  echo "  Invalid target."
+  show_help "build"
+
   fi
 
   echo "Build Done."
 
-fi
+elif [ $1 = "clean" ] ; then
+  if [ $# -ne 2 ] ; then
+    echo "Missing required parameter!"
+    show_help "clean"
+    exit 1
+  fi
 
+  # Delete build directory
+  if [ $2 = "cegui" ] ; then
+    rm -rf $DEPS_SOURCE/$CEGUI/$BUILDDIR
+  elif [ $2 = "ogre" ] ; then
+    rm -rf $DEPS_SOURCE/$OGRE/ogre/$BUILDDIR
+  else
+    rm -rf $SOURCE/forge/$2/$BUILDDIR
+  fi
+
+else
+  echo "Invalid command!"
+  show_help "main"
+fi
