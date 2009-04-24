@@ -10,6 +10,10 @@ export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 export BUILDDIR=`uname -m`
 
+# setup directories
+mkdir -p $PREFIX
+mkdir -p $DEPS_SOURCE
+
 # Log Directory
 LOGDIR=$PWD/logs
 mkdir -p $LOGDIR
