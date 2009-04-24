@@ -10,23 +10,36 @@ export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 export BUILDDIR=`uname -m`
 
+# Log Directory
+LOGDIR=$PWD/logs
+mkdir -p $LOGDIR
+
+# Output redirect logs
+AUTOOUTPUT=autogen.log     # Autogen output
+CONFIGOUTPUT=config.log    # Configure output
+MAKEOUTPUT=build.log      # Make output
+INSTALLOUTPUT=install.log # Install output
+
 function buildwf()
 {
+    mkdir -p $LOGDIR/$1
+
     cd $SOURCE/forge/$1
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     if [ ! -f "configure" ] ; then
       echo "  Running autogen..."
-      NOCONFIGURE=1 ./autogen.sh
+      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$1/$AUTOOUTPUT
     fi
 
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     if [ ! -f "Makefile" ] ; then
       echo "  Running confgure..."
-      ../configure --prefix=$PREFIX
+      ../configure --prefix=$PREFIX > $LOGDIR/$1/$CONFIGOUTPUT
     fi
-    make $MAKEOPTS
-    make install
+
+    make $MAKEOPTS > $LOGDIR/$1/$MAKEOUTPUT
+    make install > $LOGDIR/$1/$INSTALLOUTPUT
 }
 
 
