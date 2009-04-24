@@ -15,10 +15,10 @@ LOGDIR=$PWD/logs
 mkdir -p $LOGDIR
 
 # Output redirect logs
-AUTOOUTPUT=autogen.log     # Autogen output
-CONFIGOUTPUT=config.log    # Configure output
-MAKEOUTPUT=build.log      # Make output
-INSTALLOUTPUT=install.log # Install output
+AUTOLOG=autogen.log     # Autogen output
+CONFIGLOG=config.log    # Configure output
+MAKELOG=build.log      # Make output
+INSTALLLOG=install.log # Install output
 
 function buildwf()
 {
@@ -28,18 +28,18 @@ function buildwf()
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     if [ ! -f "configure" ] ; then
       echo "  Running autogen..."
-      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$1/$AUTOOUTPUT
+      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$1/$AUTOLOG
     fi
 
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     if [ ! -f "Makefile" ] ; then
       echo "  Running confgure..."
-      ../configure --prefix=$PREFIX > $LOGDIR/$1/$CONFIGOUTPUT
+      ../configure --prefix=$PREFIX > $LOGDIR/$1/$CONFIGLOG
     fi
 
-    make $MAKEOPTS > $LOGDIR/$1/$MAKEOUTPUT
-    make install > $LOGDIR/$1/$INSTALLOUTPUT
+    make $MAKEOPTS > $LOGDIR/$1/$MAKELOG
+    make install > $LOGDIR/$1/$INSTALLLOG
 }
 
 
@@ -133,28 +133,38 @@ elif [ $1 = "install-deps" ] ; then
 
   echo "Installing deps..."
 
+  # Create deps log directory
+  mkdir -p $LOGDIR/deps
+
   # CEGUI
   if [ $2 = "all" ] || [ $2 = "cegui" ] ; then
     echo "  Installing CEGUI..."
+    mkdir -p $LOGDIR/deps/CEGUI    # create CEGUI log directory
     cd $DEPS_SOURCE
     if [ ! -d "CEGUI-0.6.2" ] ; then
+      echo "  Downloading..."
       wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/CEGUI-0.6.2b.tar.gz
       tar zxvf CEGUI-0.6.2b.tar.gz
     fi
     cd CEGUI-0.6.2/
     mkdir -p $BUILDDIR
     cd $BUILDDIR
-    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer
-    make
-    make install
+    echo "  Configuring..."
+    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer > $LOGDIR/deps/CEGUI/$CONFIGLOG
+    echo "  Building..."
+    make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
+    echo "  Installing..."
+    make install > $LOGDIR/deps/CEGUI/$INSTALLLOG
     echo "  Done."
   fi
   
   # Ogre3D
   if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
     echo "  Installing Ogre..."
+    mkdir -p $LOGDIR/deps/ogre
     cd $DEPS_SOURCE
     if [ ! -d "ogre_1_6_2" ]; then
+      echo "  Downloading..."
       wget -c http://downloads.sourceforge.net/sourceforge/ogre/ogre-v1-6-2.tar.bz2
       mkdir -p "ogre_1_6_2"
       cd "ogre_1_6_2"
@@ -164,9 +174,12 @@ elif [ $1 = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-    ../configure --prefix=$PREFIX --disable-freeimage --disable-ogre-demos
-    make
-    make install
+    echo "  Configuring..."
+    ../configure --prefix=$PREFIX --disable-freeimage --disable-ogre-demos > $LOGDIR/deps/ogre/$CONFIGLOG
+    echo "  Building..."
+    make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
+    echo "  Installing..."
+    make install > $LOGDIR/deps/ogre/$INSTALLLOG
     echo "  Done."
   fi
 
