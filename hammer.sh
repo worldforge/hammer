@@ -38,7 +38,9 @@ function buildwf()
       ../configure --prefix=$PREFIX > $LOGDIR/$1/$CONFIGLOG
     fi
 
+    echo "  Building..."
     make $MAKEOPTS > $LOGDIR/$1/$MAKELOG
+    echo "  Installing..."
     make install > $LOGDIR/$1/$INSTALLLOG
 }
 
