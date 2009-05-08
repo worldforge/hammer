@@ -315,7 +315,9 @@ elif [ $1 = "build" ] ; then
   buildwf "libs/libwfut"
   echo "  Done."
 
-  elif [ $2 = "ember" ] || [ $2 = "all" ] ; then
+  fi
+
+  if [ $2 = "ember" ] || [ $2 = "all" ] ; then
 
   # Ember client
   echo "  Ember client..."
@@ -327,17 +329,15 @@ elif [ $1 = "build" ] ; then
   make devmedia
   echo "Media fetched."
 
-  elif [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
+  fi
+
+  if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
 
   # Cyphesis
   echo "  Cyphesis..."
   buildwf "servers/cyphesis"
   cyphesis_post_install
   echo "  Done."
-
-  else
-  echo "  Invalid target."
-  show_help "build"
 
   fi
 
