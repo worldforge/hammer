@@ -13,6 +13,7 @@ export BUILDDIR=`uname -m`
 # setup directories
 mkdir -p $PREFIX
 mkdir -p $DEPS_SOURCE
+mkdir -p $SOURCE
 
 # Log Directory
 LOGDIR=$PWD/logs
@@ -27,8 +28,8 @@ INSTALLLOG=install.log # Install output
 # Dependencies
 CEGUI=CEGUI-0.6.2
 CEGUI_DOWNLOAD=CEGUI-0.6.2b.tar.gz
-OGRE=ogre_1_6_2
-OGRE_DOWNLOAD=ogre-v1-6-2.tar.bz2
+OGRE=ogre_1_6_3
+OGRE_DOWNLOAD=ogre-v1-6-3.tar.bz2
 
 function buildwf()
 {
