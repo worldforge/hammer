@@ -28,8 +28,8 @@ INSTALLLOG=install.log # Install output
 # Dependencies
 CEGUI=CEGUI-0.6.2
 CEGUI_DOWNLOAD=CEGUI-0.6.2b.tar.gz
-OGRE=ogre_1_6_3
-OGRE_DOWNLOAD=ogre-v1-6-3.tar.bz2
+OGRE=ogre_1_6_4
+OGRE_DOWNLOAD=ogre-v1-6-4.tar.bz2
 
 function buildwf()
 {
@@ -194,7 +194,7 @@ elif [ $1 = "install-deps" ] ; then
     cd $BUILDDIR
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     echo "  Configuring..."
-    ../configure --prefix=$PREFIX --disable-freeimage --disable-ogre-demos > $LOGDIR/deps/ogre/$CONFIGLOG
+    ../configure --prefix=$PREFIX --enable-threading=semi --disable-ogre-demos > $LOGDIR/deps/ogre/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
     echo "  Installing..."
@@ -208,19 +208,17 @@ elif [ $1 = "install-deps" ] ; then
 elif [ $1 = "checkout" ] ; then
   echo "Fetching sources..."
 
-  cd $SOURCE
-  
+  cd $SOURCE/forge/libs
+
   # Varconf
   echo "  Varconf..."
-  cvs -z3 -d :pserver:cvsanon@cvs.worldforge.org:/home/cvspsrv/worldforge -q co forge/libs/varconf
+  checkoutwf "varconf"
   echo "  Done."
 
-  # Atlas-C++  
+  # Atlas-C++
   echo "  Atlas-C++..."
-  cvs -z3 -d :pserver:cvsanon@cvs.worldforge.org:/home/cvspsrv/worldforge -q co forge/libs/Atlas-C++
+  checkoutwf "atlas-c++"
   echo "  Done."
-
-  cd $SOURCE/forge/libs
 
   # Skstream
   echo "  Skstream..."
