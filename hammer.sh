@@ -208,6 +208,7 @@ elif [ $1 = "install-deps" ] ; then
 elif [ $1 = "checkout" ] ; then
   echo "Fetching sources..."
 
+  mkdir -p $SOURCE/forge/libs
   cd $SOURCE/forge/libs
 
   # Varconf
