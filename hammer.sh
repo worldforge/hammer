@@ -99,6 +99,7 @@ function show_help()
     echo "  cegui    -  a free library providing windowing and widgets for 
                         graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
+	echo "Hint: build cegui first then ogre"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
     echo ""
@@ -297,7 +298,7 @@ elif [ $1 = "build" ] ; then
 
   # Atlas-C++
   echo "  Atlas-C++..."
-  buildwf "libs/Atlas-C++"
+  buildwf "libs/atlas-c++"
   echo "  Done."
 
   # Mercator
