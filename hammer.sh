@@ -28,8 +28,8 @@ INSTALLLOG=install.log # Install output
 # Dependencies
 CEGUI=CEGUI-0.6.2
 CEGUI_DOWNLOAD=CEGUI-0.6.2b.tar.gz
-OGRE=ogre_1_6_4
-OGRE_DOWNLOAD=ogre-v1-6-4.tar.bz2
+OGRE=ogre_1_6_5
+OGRE_DOWNLOAD=ogre-v1-6-5.tar.bz2
 
 function buildwf()
 {
