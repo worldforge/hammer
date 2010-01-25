@@ -7,7 +7,7 @@ export PREFIX=$PWD/local
 export SOURCE=$PWD/dev/worldforge
 export DEPS_SOURCE=$PWD/dev
 export MAKEOPTS="-j3"
-export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 export BUILDDIR=`uname -m`
 
 # setup directories
@@ -36,7 +36,6 @@ function buildwf()
     mkdir -p $LOGDIR/$1
 
     cd $SOURCE/forge/$1
-    export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     if [ ! -f "configure" ] ; then
       echo "  Running autogen..."
       NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$1/$AUTOLOG
@@ -45,7 +44,7 @@ function buildwf()
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     if [ ! -f "Makefile" ] ; then
-      echo "  Running confgure..."
+      echo "  Running configure..."
       ../configure --prefix=$PREFIX > $LOGDIR/$1/$CONFIGLOG
     fi
 
@@ -193,7 +192,6 @@ elif [ $1 = "install-deps" ] ; then
     cd $DEPS_SOURCE/$OGRE/ogre
     mkdir -p $BUILDDIR
     cd $BUILDDIR
-    export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     echo "  Configuring..."
     ../configure --prefix=$PREFIX --enable-threading=semi --disable-ogre-demos > $LOGDIR/deps/ogre/$CONFIGLOG
     echo "  Building..."
