@@ -31,6 +31,15 @@ CEGUI_DOWNLOAD=CEGUI-0.6.2b.tar.gz
 OGRE=ogre_1_6_5
 OGRE_DOWNLOAD=ogre-v1-6-5.tar.bz2
 
+CONFIGURE_EXTRA_FLAGS=""
+
+if [ $MSYSTEM = "MINGW32" ] ; then
+	export CXXFLAGS="-march=i686 $CXXFLAGS"
+	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
+	export LDFLAGS="-no-undefined $LDFLAGS"
+fi
+
+
 function buildwf()
 {
     mkdir -p $LOGDIR/$1
@@ -45,7 +54,7 @@ function buildwf()
     cd $BUILDDIR
     if [ ! -f "Makefile" ] ; then
       echo "  Running configure..."
-      ../configure --prefix=$PREFIX > $LOGDIR/$1/$CONFIGLOG
+      ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$1/$CONFIGLOG
     fi
 
     echo "  Building..."
@@ -169,7 +178,7 @@ elif [ $1 = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer > $LOGDIR/deps/CEGUI/$CONFIGLOG
+    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer $CONFIGURE_EXTRA_FLAGS > $LOGDIR/deps/CEGUI/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
@@ -193,7 +202,14 @@ elif [ $1 = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-    ../configure --prefix=$PREFIX --enable-threading=semi --disable-ogre-demos > $LOGDIR/deps/ogre/$CONFIGLOG
+	OGRE_EXTRA_FLAGS=""
+	if [ $MSYSTEM = "MINGW32" ] ; then
+		OGRE_EXTRA_FLAGS="--with-gui=win32 --with-platform=win32 --enable-direct3d"
+		# We need to alter the configure script to use "-mthreads" instead of "-pthread" as the latter isn't available when using mingw gcc
+		# The check for FreeImage also needs to be slightly altered on mingw.
+		sed -i -e 's/-pthread/-mthreads/g' -e 's/char FreeImage_Load ();/#include <FreeImage.h>/g' -e 's/return FreeImage_Load ();/FreeImage_Load(FIF_UNKNOWN, "test.png", 0);/g' ../configure
+	fi
+    ../configure --prefix=$PREFIX --enable-threading=semi --disable-ogre-demos $OGRE_EXTRA_FLAGS $CONFIGURE_EXTRA_FLAGS  > $LOGDIR/deps/ogre/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
     echo "  Installing..."
@@ -320,13 +336,17 @@ elif [ $1 = "build" ] ; then
 
   # Ember client
   echo "  Ember client..."
-  buildwf "clients/ember"
+  #buildwf "clients/ember"
   echo "  Done."
 
-  echo "Fetching media..."
-  cd $SOURCE/forge/clients/ember/$BUILDDIR
-  make devmedia
-  echo "Media fetched."
+  if command -v rsync &> /dev/null; then
+    echo "Fetching media..."
+    cd $SOURCE/forge/clients/ember/$BUILDDIR
+    make devmedia
+    echo "Media fetched."
+  else
+	echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
+  fi
 
   fi
 
