@@ -336,7 +336,7 @@ elif [ $1 = "build" ] ; then
 
   # Ember client
   echo "  Ember client..."
-  #buildwf "clients/ember"
+  buildwf "clients/ember"
   echo "  Done."
 
   if command -v rsync &> /dev/null; then
