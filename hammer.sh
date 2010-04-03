@@ -33,7 +33,7 @@ OGRE_DOWNLOAD=ogre-v1-6-5.tar.bz2
 
 CONFIGURE_EXTRA_FLAGS=""
 
-if [ $MSYSTEM = "MINGW32" ] ; then
+if [ x$MSYSTEM = x"MINGW32" ] ; then
 	export CXXFLAGS="-march=i686 $CXXFLAGS"
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 	export LDFLAGS="-no-undefined $LDFLAGS"
