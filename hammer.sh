@@ -203,7 +203,7 @@ elif [ $1 = "install-deps" ] ; then
     cd $BUILDDIR
     echo "  Configuring..."
 	OGRE_EXTRA_FLAGS=""
-	if [ $MSYSTEM = "MINGW32" ] ; then
+	if [ x$MSYSTEM = x"MINGW32" ] ; then
 		OGRE_EXTRA_FLAGS="--with-gui=win32 --with-platform=win32 --enable-direct3d"
 		# We need to alter the configure script to use "-mthreads" instead of "-pthread" as the latter isn't available when using mingw gcc
 		# The check for FreeImage also needs to be slightly altered on mingw.
