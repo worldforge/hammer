@@ -26,12 +26,13 @@ MAKELOG=build.log      # Make output
 INSTALLLOG=install.log # Install output
 
 # Dependencies
-CEGUI=CEGUI-0.6.2
-CEGUI_DOWNLOAD=CEGUI-0.6.2b.tar.gz
-OGRE=ogre_1_6_5
-OGRE_DOWNLOAD=ogre-v1-6-5.tar.bz2
+CEGUI=CEGUI-0.7.1
+CEGUI_DOWNLOAD=CEGUI-0.7.1.tar.gz
+OGRE=ogre_1_7_1
+OGRE_DOWNLOAD=ogre_src_v1-7-1.tar.bz2
 
 CONFIGURE_EXTRA_FLAGS=""
+CMAKE_EXTRA_FLAGS=""
 
 if [ x$MSYSTEM = x"MINGW32" ] ; then
 	export CXXFLAGS="-march=i686 $CXXFLAGS"
@@ -164,6 +165,37 @@ elif [ $1 = "install-deps" ] ; then
   # Create deps log directory
   mkdir -p $LOGDIR/deps
 
+  # Ogre3D
+  if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
+    echo "  Installing Ogre..."
+    mkdir -p $LOGDIR/deps/ogre
+    cd $DEPS_SOURCE
+    if [ ! -d $OGRE ]; then
+      echo "  Downloading..."
+      wget -c http://downloads.sourceforge.net/sourceforge/ogre/$OGRE_DOWNLOAD
+      mkdir -p $OGRE
+      cd $OGRE
+      tar -xjf ../$OGRE_DOWNLOAD
+    fi
+    cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
+    mkdir -p $BUILDDIR
+    cd $BUILDDIR
+    echo "  Configuring..."
+	OGRE_EXTRA_FLAGS=""
+	if [ x$MSYSTEM = x"MINGW32" ] ; then
+		OGRE_EXTRA_FLAGS="--with-gui=win32 --with-platform=win32 --enable-direct3d"
+		# We need to alter the configure script to use "-mthreads" instead of "-pthread" as the latter isn't available when using mingw gcc
+		# The check for FreeImage also needs to be slightly altered on mingw.
+		sed -i -e 's/-pthread/-mthreads/g' -e 's/char FreeImage_Load ();/#include <FreeImage.h>/g' -e 's/return FreeImage_Load ();/FreeImage_Load(FIF_UNKNOWN, "test.png", 0);/g' ../configure
+	fi
+    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
+    echo "  Building..."
+    make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
+    echo "  Installing..."
+    make install > $LOGDIR/deps/ogre/$INSTALLLOG
+    echo "  Done."
+  fi
+
   # CEGUI
   if [ $2 = "all" ] || [ $2 = "cegui" ] ; then
     echo "  Installing CEGUI..."
@@ -183,37 +215,6 @@ elif [ $1 = "install-deps" ] ; then
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/deps/CEGUI/$INSTALLLOG
-    echo "  Done."
-  fi
-  
-  # Ogre3D
-  if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
-    echo "  Installing Ogre..."
-    mkdir -p $LOGDIR/deps/ogre
-    cd $DEPS_SOURCE
-    if [ ! -d $OGRE ]; then
-      echo "  Downloading..."
-      wget -c http://downloads.sourceforge.net/sourceforge/ogre/$OGRE_DOWNLOAD
-      mkdir -p $OGRE
-      cd $OGRE
-      tar -xjf ../$OGRE_DOWNLOAD
-    fi
-    cd $DEPS_SOURCE/$OGRE/ogre
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
-    echo "  Configuring..."
-	OGRE_EXTRA_FLAGS=""
-	if [ x$MSYSTEM = x"MINGW32" ] ; then
-		OGRE_EXTRA_FLAGS="--with-gui=win32 --with-platform=win32 --enable-direct3d"
-		# We need to alter the configure script to use "-mthreads" instead of "-pthread" as the latter isn't available when using mingw gcc
-		# The check for FreeImage also needs to be slightly altered on mingw.
-		sed -i -e 's/-pthread/-mthreads/g' -e 's/char FreeImage_Load ();/#include <FreeImage.h>/g' -e 's/return FreeImage_Load ();/FreeImage_Load(FIF_UNKNOWN, "test.png", 0);/g' ../configure
-	fi
-    ../configure --prefix=$PREFIX --enable-threading=semi --disable-ogre-demos $OGRE_EXTRA_FLAGS $CONFIGURE_EXTRA_FLAGS  > $LOGDIR/deps/ogre/$CONFIGLOG
-    echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
-    echo "  Installing..."
-    make install > $LOGDIR/deps/ogre/$INSTALLLOG
     echo "  Done."
   fi
 
