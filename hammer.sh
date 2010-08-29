@@ -108,13 +108,11 @@ function show_help()
     echo "  cegui    -  a free library providing windowing and widgets for 
                         graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
-	echo "Hint: build cegui first then ogre"
+	echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
     echo ""
     echo "Usage: hammer.sh checkout"
-    echo "NOTE: make sure to perform CVS login first!"
-    echo "See http://wiki.worldforge.org/wiki/Compiling_Ember:_Script_New#CVS_Login"
   elif [ $1 = "build" ] ; then
     echo "Build the sources and install in environment."
     echo ""
