@@ -26,10 +26,10 @@ MAKELOG=build.log      # Make output
 INSTALLLOG=install.log # Install output
 
 # Dependencies
-CEGUI=CEGUI-0.7.2
-CEGUI_DOWNLOAD=CEGUI-0.7.2.tar.gz
-OGRE=ogre_1_7_1
-OGRE_DOWNLOAD=ogre_src_v1-7-1.tar.bz2
+CEGUI=CEGUI-0.7.5
+CEGUI_DOWNLOAD=CEGUI-0.7.5.tar.gz
+OGRE=ogre_1_7_2
+OGRE_DOWNLOAD=ogre_src_v1-7-2.tar.bz2
 
 CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
