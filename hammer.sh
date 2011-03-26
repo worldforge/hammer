@@ -67,7 +67,7 @@ function buildwf()
 function checkoutwf()
 {
   if [ ! -d $1 ]; then
-    git clone git://git.worldforge.org/$1.git
+    git clone git://github.com/worldforge/$1.git
   else
     cd $1 && git fetch && git rebase origin/master && cd ..
   fi
@@ -232,7 +232,7 @@ elif [ $1 = "checkout" ] ; then
 
   # Atlas-C++
   echo "  Atlas-C++..."
-  checkoutwf "atlas-c++"
+  checkoutwf "atlas-cpp"
   echo "  Done."
 
   # Skstream
