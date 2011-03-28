@@ -311,7 +311,7 @@ elif [ $1 = "build" ] ; then
 
   # Atlas-C++
   echo "  Atlas-C++..."
-  buildwf "libs/atlas-c++"
+  buildwf "libs/atlas-cpp"
   echo "  Done."
 
   # Mercator
