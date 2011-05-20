@@ -69,7 +69,7 @@ function checkoutwf()
   if [ ! -d $1 ]; then
     git clone git://github.com/worldforge/$1.git
   else
-    cd $1 && git fetch && git rebase origin/master && cd ..
+    cd $1 && git remote set-url origin git://github.com/worldforge/$1.git && git fetch && git rebase origin/master && cd ..
   fi
 }
 
