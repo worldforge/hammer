@@ -28,8 +28,8 @@ INSTALLLOG=install.log # Install output
 # Dependencies
 CEGUI=CEGUI-0.7.5
 CEGUI_DOWNLOAD=CEGUI-0.7.5.tar.gz
-OGRE=ogre_1_7_2
-OGRE_DOWNLOAD=ogre_src_v1-7-2.tar.bz2
+OGRE=ogre_1_7_3
+OGRE_DOWNLOAD=ogre_src_v1-7-3.tar.bz2
 
 CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
