@@ -1,0 +1,7 @@
+work
+# Ignore temporary files
+*~
+# Ignore vi swap files
+*.swp
+# Ignore desktop files
+.directory
