@@ -2,10 +2,11 @@
 
 set -e
 
-export HAMMERDIR=$PWD/hammer
-export PREFIX=$PWD/local
-export SOURCE=$PWD/dev/worldforge
-export DEPS_SOURCE=$PWD/dev
+export HAMMERDIR=$PWD
+export WORKDIR=$HAMMERDIR/work
+export PREFIX=$WORKDIR/local
+export SOURCE=$WORKDIR/build/worldforge
+export DEPS_SOURCE=$WORKDIR/build/deps
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 export BUILDDIR=`uname -m`
@@ -16,7 +17,7 @@ mkdir -p $DEPS_SOURCE
 mkdir -p $SOURCE
 
 # Log Directory
-LOGDIR=$PWD/logs
+LOGDIR=$WORKDIR/logs
 mkdir -p $LOGDIR
 
 # Output redirect logs
@@ -45,7 +46,7 @@ function buildwf()
 {
     mkdir -p $LOGDIR/$1
 
-    cd $SOURCE/forge/$1
+    cd $SOURCE/$1
     if [ ! -f "configure" ] ; then
       echo "  Running autogen..."
       NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$1/$AUTOLOG
@@ -222,8 +223,8 @@ elif [ $1 = "install-deps" ] ; then
 elif [ $1 = "checkout" ] ; then
   echo "Fetching sources..."
 
-  mkdir -p $SOURCE/forge/libs
-  cd $SOURCE/forge/libs
+  mkdir -p $SOURCE/libs
+  cd $SOURCE/libs
 
   # Varconf
   echo "  Varconf..."
@@ -262,15 +263,15 @@ elif [ $1 = "checkout" ] ; then
 
   # Ember client
   echo "  Ember client..."
-  mkdir -p $SOURCE/forge/clients
-  cd $SOURCE/forge/clients
+  mkdir -p $SOURCE/clients
+  cd $SOURCE/clients
   checkoutwf "ember"
   echo "  Done."
 
   # Cyphesis
   echo "  Cyphesis..."
-  mkdir -p $SOURCE/forge/servers
-  cd $SOURCE/forge/servers
+  mkdir -p $SOURCE/servers
+  cd $SOURCE/servers
   checkoutwf "cyphesis"
   echo "  Done."
 
@@ -340,11 +341,11 @@ elif [ $1 = "build" ] ; then
 
   if command -v rsync &> /dev/null; then
     echo "Fetching media..."
-    cd $SOURCE/forge/clients/ember/$BUILDDIR
+    cd $SOURCE/clients/ember/$BUILDDIR
     make devmedia
     echo "Media fetched."
   else
-	echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
+    echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
   fi
 
   fi
@@ -374,7 +375,7 @@ elif [ $1 = "clean" ] ; then
   elif [ $2 = "ogre" ] ; then
     rm -rf $DEPS_SOURCE/$OGRE/ogre/$BUILDDIR
   else
-    rm -rf $SOURCE/forge/$2/$BUILDDIR
+    rm -rf $SOURCE/$2/$BUILDDIR
   fi
 
 else
