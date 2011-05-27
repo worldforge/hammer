@@ -2,12 +2,11 @@
 
 set -e
 
-export PREFIX="/local"
+export PREFIX="$PWD/work/local"
 export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
-export PKG_CONFIG_LIBDIR="$PREFIX/lib:/usr/local/lib:/mingw/lib:/lib:$PKG_CONFIG_LIBDIR"
 export MAKEOPTS="-j4"
-BUILDDEPS=$PWD/deps
+BUILDDEPS=$PWD/work/build/deps
 PACKAGEDIR=$BUILDDEPS/package
 LOGDIR=$BUILDDEPS/logs
 DLDIR=$BUILDDEPS/dl
@@ -34,7 +33,6 @@ wget -c -P $DLDIR http://downloads.sourceforge.net/freeimage/FreeImage3150.zip
 bsdtar -xf $DLDIR/FreeImage3150.zip
 cd FreeImage
 make -f Makefile.minGW FREEIMAGE_LIBRARY_TYPE=STATIC DLLTOOLFLAGS="" $MAKEOPTS
-#make -f Makefile.minGW $MAKEOPTS
 cp Dist/FreeImage.a $PREFIX/lib/libFreeImage.a
 cp Dist/FreeImage.h $PREFIX/include/FreeImage.h
 cd ..
