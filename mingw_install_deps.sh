@@ -24,7 +24,8 @@ cd $PACKAGEDIR
 #install rsync
 #maybe we should host this file
 #wget -c -P $DLDIR http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
-wget -c -P $DLDIR http://k002.kiwi6.com/hotlink/w8nv7zl9qh/rsync_3_0_8_tar.lzma
+#wget -c -P $DLDIR http://k002.kiwi6.com/hotlink/w8nv7zl9qh/rsync_3_0_8_tar.lzma
+wget -c -P $DLDIR http://sajty.elementfx.com/rsync-3.0.8.tar.lzma
 bsdtar -xf $DLDIR/rsync-3.0.8.tar.lzma
 cp rsync.exe $PREFIX/bin/rsync.exe
 
