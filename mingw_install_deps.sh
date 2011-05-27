@@ -160,11 +160,11 @@ cd tolua++-1.0.93
 #note: creating makefile would be better
 cp include/tolua++.h $PREFIX/include/tolua++.h
 cd src/lib
-gcc -O2 -c -I$PREFIX/include -L$PREFIX/lib *.c
+gcc $CFLAGS -c -I$PREFIX/include -L$PREFIX/lib *.c
 ar cq libtolua++.a *.o
 cp libtolua++.a $PREFIX/lib/libtolua++.a
 cd ../bin
-gcc -O2 -o tolua++ -I$PREFIX/include -L$PREFIX/lib -mwindows tolua.c toluabind.c -ltolua++ -llua
+gcc $CFLAGS $LDFLAGS -o tolua++ -I$PREFIX/include -L$PREFIX/lib -mwindows tolua.c toluabind.c -ltolua++ -llua
 cp tolua++.exe $PREFIX/bin/tolua++.exe
 cd ../../..
 
