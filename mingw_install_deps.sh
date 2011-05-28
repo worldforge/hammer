@@ -55,7 +55,7 @@ wget -c -P $DLDIR http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg
 bsdtar -xf $DLDIR/pkg-config_0.25-1_win32.zip
 wget -c -P $DLDIR http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config-dev_0.25-1_win32.zip
 bsdtar -xf $DLDIR/pkg-config-dev_0.25-1_win32.zip
-cp -r $PWD /
+cp -r $PWD/* $PREFIX
 cd ../..
 
 #install 7za
@@ -225,3 +225,4 @@ $CONFIGURE_EXTRA_FLAGS
 make $MAKEOPTS
 make install
 cd ..
+
