@@ -206,6 +206,8 @@ cmake --with-gui=win32 --with-platform=win32 --enable-direct3d -DCMAKE_INSTALL_P
 -DOGRE_BUILD_SAMPLES=false -DOGRE_BUILD_PLUGIN_BSP=false -DOGRE_BUILD_PLUGIN_OCTREE=false -DOGRE_BUILD_PLUGIN_PCZ=false -DOGRE_BUILD_COMPONENT_RTSHADERSYSTEM=false ..
 make all $MAKEOPTS
 make install
+cp -r $PREFIX/bin/RelWithDebInfo/* $PREFIX/bin
+cp -r $PREFIX/lib/RelWithDebInfo/* $PREFIX/lib
 cd ../..
 
 #install CEGUI
@@ -214,7 +216,7 @@ bsdtar -xf $DLDIR/CEGUI-0.7.5.tar.gz
 cd CEGUI-0.7.5
 ./configure --prefix=$PREFIX --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer \
 --enable-freeimage --enable-ogre-renderer --enable-lua-module --enable-external-toluapp \
-Ogre_CFLAGS="-IOGRE" Ogre_LIBS="-lOgreMain" \
+Ogre_CFLAGS="-I$PREFIX/include -I$PREFIX/include/OGRE" Ogre_LIBS="-lOgreMain" \
 FreeImage_CFLAGS="-DUSE_FREEIMAGE_LIBRARY -I$PREFIX/include" FreeImage_LIBS="-lFreeImage" \
 Lua_CFLAGS="-I$PREFIX/include" Lua_LIBS="-llua" \
 toluapp_CFLAGS="-I$PREFIX/include" toluapp_LIBS="-ltolua++" \
