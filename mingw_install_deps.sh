@@ -25,9 +25,12 @@ cd $PACKAGEDIR
 #maybe we should host this file
 #wget -c -P $DLDIR http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
 #wget -c -P $DLDIR http://k002.kiwi6.com/hotlink/w8nv7zl9qh/rsync_3_0_8_tar.lzma
+mkdir -p rsync
+cd rsync
 wget -c -P $DLDIR http://sajty.elementfx.com/rsync-3.0.8.tar.lzma
 bsdtar -xf $DLDIR/rsync-3.0.8.tar.lzma
 cp rsync.exe $PREFIX/bin/rsync.exe
+cd ..
 
 #install freeimage
 wget -c -P $DLDIR http://downloads.sourceforge.net/freeimage/FreeImage3150.zip
@@ -59,10 +62,12 @@ cp -r $PWD/* $PREFIX
 cd ../..
 
 #install 7za
+mkdir -p 7za
+cd 7za
 wget -c -P $DLDIR http://downloads.sourceforge.net/sevenzip/7za920.zip
 bsdtar -xf $DLDIR/7za920.zip
 cp ./7za.exe $PREFIX/bin/7za.exe
-
+cd ..
 
 #install cmake
 wget -c -P $DLDIR http://www.cmake.org/files/v2.8/cmake-2.8.4.tar.gz
@@ -194,11 +199,13 @@ cp -r "$CG_INC_PATH" $PREFIX
 cp "$CG_BIN_PATH/cg.dll" $PREFIX/bin/cg.dll
 pexports $PREFIX/bin/cg.dll | sed "s/^_//" > libCg.def
 dlltool --add-underscore -d libCg.def -l $PREFIX/lib/libCg.a
+rm libCg.def
 
 #install Ogre3D
 wget -c -P $DLDIR http://sourceforge.net/projects/ogre/files/ogre/1.7/ogre_src_v1-7-3.tar.bz2/download
 7za x -y $DLDIR/ogre_src_v1-7-3.tar.bz2
 7za x -y ogre_src_v1-7-3.tar
+rm ogre_src_v1-7-3.tar
 cd ogre_src_v1-7-3
 mkdir -p build
 cd build
