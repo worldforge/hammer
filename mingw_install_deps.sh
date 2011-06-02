@@ -3,18 +3,25 @@
 set -e
 
 export PREFIX="$PWD/work/local"
+export PATH="$PREFIX/bin:$PATH"
+export CPATH="$PREFIX/include:$CPATH"
+export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+export ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 export MAKEOPTS="-j4"
+LOGDIR=$PWD/work/logs/deps
 BUILDDEPS=$PWD/work/build/deps
-PACKAGEDIR=$BUILDDEPS/package
-LOGDIR=$BUILDDEPS/logs
-DLDIR=$BUILDDEPS/dl
+PACKAGEDIR=$BUILDDEPS/packages
+DLDIR=$BUILDDEPS/downloads
+LOCKDIR=$BUILDDEPS/locks
 
+mkdir -p $LOGDIR
 mkdir -p $BUILDDEPS
 mkdir -p $PACKAGEDIR
-mkdir -p $LOGDIR
 mkdir -p $DLDIR
+mkdir -p $LOCKDIR
 mkdir -p $PREFIX/bin
 mkdir -p $PREFIX/lib
 mkdir -p $PREFIX/include
@@ -41,11 +48,10 @@ cp Dist/FreeImage.a $PREFIX/lib/libFreeImage.a
 cp Dist/FreeImage.h $PREFIX/include/FreeImage.h
 cd ..
 
-export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG $CFLAGS"
-#without -msse2 orge is not building
-export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG $CXXFLAGS"
-#-no-undefined unrecognised option
-export LDFLAGS="-no-undefined $LDFLAGS"
+
+export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS"
+#without -msse2 ogre is not building
+export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CXXFLAGS"
 
 #install pkg-config:
 mkdir -p pkg-config/local

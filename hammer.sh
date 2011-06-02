@@ -36,9 +36,13 @@ CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
 
 if [ x$MSYSTEM = x"MINGW32" ] ; then
-	export CXXFLAGS="-march=i686 $CXXFLAGS"
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-	export LDFLAGS="-no-undefined $LDFLAGS"
+	export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads $CXXFLAGS"
+	export PATH="$PREFIX/bin:$PATH"
+	export CPATH="$PREFIX/include:$CPATH"
+	export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
+	export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
+	export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
 
