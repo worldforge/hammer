@@ -133,51 +133,49 @@ make install
 cd ..
 
 #install zziplib
-wget -c -P $DLDIR http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.60/zziplib-0.13.60.tar.bz2/download
-bsdtar -xf $DLDIR/zziplib-0.13.60.tar.bz2
-cd zziplib-0.13.60
-mkdir -p build
-cd build
-../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS
-make $MAKEOPTS
-make install
-cd ../..
+FILENAME="zziplib-0.13.60.tar.bz2"
+installpackage "http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.60/$FILENAME/download" "$FILENAME"
 
 #install freetype
-wget -c -P $DLDIR http://sourceforge.net/projects/freetype/files/freetype2/2.4.4/freetype-2.4.4.tar.bz2/download
-bsdtar -xf $DLDIR/freetype-2.4.4.tar.bz2
-cd freetype-2.4.4
-./configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS
-make $MAKEOPTS
-make install
-cd ..
-
-#install libCURL
-wget -c -P $DLDIR http://curl.haxx.se/download/curl-7.21.6.tar.bz2
-bsdtar -xf $DLDIR/curl-7.21.6.tar.bz2
-cd curl-7.21.6
-./configure --prefix=$PREFIX --without-ssl --without-gnutls
-make
-make install
-cd ..
+FILENAME="freetype-2.4.4.tar.bz2"
+installpackage "http://sourceforge.net/projects/freetype/files/freetype2/2.4.4/$FILENAME/download" "$FILENAME"
 
 #install SDL
-wget -c -P $DLDIR http://www.libsdl.org/release/SDL-1.2.14.tar.gz
-bsdtar -xf $DLDIR/SDL-1.2.14.tar.gz
-cd SDL-1.2.14
-./configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS
-make $MAKEOPTS
-make install
-cd ..
+FILENAME="SDL-1.2.14.tar.gz"
+installpackage "http://www.libsdl.org/release/$FILENAME" "$FILENAME"
+#install libCURL
+FILENAME="curl-7.21.6.tar.bz2"
+installpackage "http://curl.haxx.se/download/$FILENAME" "$FILENAME"
+
+#install pcre
+FILENAME="pcre-8.12.tar.bz2"
+installpackage "http://sourceforge.net/projects/pcre/files/pcre/8.12/$FILENAME/download" "$FILENAME"
 
 #install sigc++
-wget -c -P $DLDIR http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.9.tar.bz2
-bsdtar -xf $DLDIR/libsigc++-2.2.9.tar.bz2
-cd libsigc++-2.2.9
-./configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS
-make $MAKEOPTS
-make install
-cd ..
+#hacks:
+#	7za is not supporting PAX, need to use bsdtar
+PKGNAME="libsigc++-2.2.9"
+PKGLOGDIR="$LOGDIR/$PKGNAME"
+PKGLOCKFILE="$LOCKDIR/${PKGNAME}_installed.lock"
+if [ ! -f $PKGLOCKFILE ]; then
+	printc "Installing $PKGNAME..."
+	mkdir -p $PKGLOGDIR
+	printc "    Downloading..."
+	wget -q -c -P $DLDIR http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.gz
+	printc "    Extracting..."
+	bsdtar -xf  $DLDIR/$PKGNAME.tar.gz
+	mkdir -p $PKGNAME/mingw_build
+	cd $PKGNAME/mingw_build
+	printc "    Running configure..."
+	../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $PKGLOGDIR/configure.log
+	printc "    Building..."
+	make $MAKEOPTS > $PKGLOGDIR/build.log
+	
+	printc "    Installing..."
+	make install > $PKGLOGDIR/install.log
+	cd ../..
+	touch $PKGLOCKFILE
+fi
 
 #install boost
 #bjam generated in msys is not working, we need prebuilt bjam.
@@ -193,15 +191,6 @@ cp -r boost $PREFIX/include
 cd ..
 mv $PREFIX/lib/libboost_date_time.dll $PREFIX/bin/libboost_date_time.dll
 mv $PREFIX/lib/libboost_thread.dll $PREFIX/bin/libboost_thread.dll
-
-#install pcre
-wget -c -P $DLDIR http://sourceforge.net/projects/pcre/files/pcre/8.12/pcre-8.12.tar.bz2/download
-bsdtar -xf $DLDIR/pcre-8.12.tar.bz2
-cd pcre-8.12
-./configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS
-make $MAKEOPTS
-make install
-cd ..
 
 #install lua
 wget -c -P $DLDIR http://www.lua.org/ftp/lua-5.1.4.tar.gz
