@@ -36,6 +36,41 @@ function extract(){
 		7za x -y $1 > /dev/null
 	fi
 }
+function printc(){
+	echo -e "\033[33m$1\033[0m"
+}
+#install without hacks
+#$1: URL
+#$2: archive filename to detect http redirection problems.
+function installpackage(){
+	PKGNAME=$(echo "$2" | sed "s/\.[^\.]*$//;s/\.tar[^\.]*$//") 
+	PKGLOGDIR="$LOGDIR/$PKGNAME"
+	PKGLOCKFILE="$LOCKDIR/${PKGNAME}_installed.lock"
+	if [ ! -f $PKGLOCKFILE ]; then
+		printc "Installing $PKGNAME..."
+		mkdir -p $PKGLOGDIR
+		printc "    Downloading..."
+		wget -q -c -P $DLDIR $1
+		printc "    Extracting..."
+		extract $DLDIR/$2 2> $PKGLOGDIR/extract.log
+		mkdir -p $PKGNAME/mingw_build
+		cd $PKGNAME
+		if [ ! -f "configure" ] ; then
+			printc "    Running autogen..."
+			NOCONFIGURE=1 ./autogen.sh > $PKGLOGDIR/autogen.log
+		fi
+		cd mingw_build
+		printc "    Running configure..."
+		../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $PKGLOGDIR/configure.log
+		printc "    Building..."
+		make $MAKEOPTS > $PKGLOGDIR/build.log
+		
+		printc "    Installing..."
+		make install > $PKGLOGDIR/install.log
+		cd ../..
+		touch $PKGLOCKFILE
+	fi
+}
 #install rsync
 #maybe we should host this file
 #wget -c -P $DLDIR http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
