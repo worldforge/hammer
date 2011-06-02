@@ -28,6 +28,14 @@ mkdir -p $PREFIX/include
 
 cd $PACKAGEDIR
 
+#this is needed, because tar and bsdtar makes segfaults sometimes.
+function extract(){
+	if [[ $1 == *.tar* ]]; then
+		7za x -y -so $1 | 7za x -y -si -ttar > /dev/null
+	else
+		7za x -y $1 > /dev/null
+	fi
+}
 #install rsync
 #maybe we should host this file
 #wget -c -P $DLDIR http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
