@@ -71,6 +71,22 @@ function installpackage(){
 		touch $PKGLOCKFILE
 	fi
 }
+
+#install 7za
+#hacks:
+#	this is needed, because tar and bsdtar makes segfaults sometimes.
+PKGLOCKFILE="$LOCKDIR/7za_installed.lock"
+if [ ! -f $PKGLOCKFILE ]; then
+	printc "Installing 7za..."
+	mkdir -p 7za
+	cd 7za
+	wget -q -c -P $DLDIR http://downloads.sourceforge.net/sevenzip/7za920.zip
+	bsdtar -xf $DLDIR/7za920.zip
+	cp ./7za.exe $PREFIX/bin/7za.exe
+	cd ..
+	touch $PKGLOCKFILE
+fi
+
 #install rsync
 #maybe we should host this file
 #wget -c -P $DLDIR http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
@@ -81,6 +97,16 @@ wget -c -P $DLDIR http://sajty.elementfx.com/rsync-3.0.8.tar.lzma
 bsdtar -xf $DLDIR/rsync-3.0.8.tar.lzma
 cp rsync.exe $PREFIX/bin/rsync.exe
 cd ..
+
+#install glib
+FILENAME="glib-2.28.7.tar.bz2"
+installpackage "http://ftp.gnome.org/pub/gnome/sources/glib/2.28/$FILENAME" "$FILENAME"
+
+#install pkg-config:
+export GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include -mms-bitfields"
+export GLIB_LIBS="-L$PREFIX/lib/ -lglib-2.0 -lintl " 
+FILENAME="pkg-config-0.26.tar.gz"
+installpackage "http://pkgconfig.freedesktop.org/releases/$FILENAME" "$FILENAME"
 
 #install freeimage
 wget -c -P $DLDIR http://downloads.sourceforge.net/freeimage/FreeImage3150.zip
@@ -95,28 +121,6 @@ cd ..
 export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS"
 #without -msse2 ogre is not building
 export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CXXFLAGS"
-
-#install pkg-config:
-mkdir -p pkg-config/local
-cd pkg-config/local
-wget -c -P $DLDIR http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.26/glib_2.26.1-1_win32.zip
-bsdtar -xf $DLDIR/glib_2.26.1-1_win32.zip
-wget -c -P $DLDIR http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip
-bsdtar -xf $DLDIR/gettext-runtime_0.18.1.1-2_win32.zip
-wget -c -P $DLDIR http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.25-1_win32.zip
-bsdtar -xf $DLDIR/pkg-config_0.25-1_win32.zip
-wget -c -P $DLDIR http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config-dev_0.25-1_win32.zip
-bsdtar -xf $DLDIR/pkg-config-dev_0.25-1_win32.zip
-cp -r $PWD/* $PREFIX
-cd ../..
-
-#install 7za
-mkdir -p 7za
-cd 7za
-wget -c -P $DLDIR http://downloads.sourceforge.net/sevenzip/7za920.zip
-bsdtar -xf $DLDIR/7za920.zip
-cp ./7za.exe $PREFIX/bin/7za.exe
-cd ..
 
 #install cmake
 wget -c -P $DLDIR http://www.cmake.org/files/v2.8/cmake-2.8.4.tar.gz
