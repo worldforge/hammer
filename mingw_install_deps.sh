@@ -10,7 +10,11 @@ export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 export ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-export MAKEOPTS="-j4"
+if [ "$NUMBER_OF_PROCESSORS" == "" ]; then
+	export MAKEOPTS="-j3"
+else
+	export MAKEOPTS="-j$NUMBER_OF_PROCESSORS"
+fi
 LOGDIR=$PWD/work/logs/deps
 BUILDDEPS=$PWD/work/build/deps
 PACKAGEDIR=$BUILDDEPS/packages
