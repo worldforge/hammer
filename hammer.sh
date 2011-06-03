@@ -157,6 +157,11 @@ mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
 
 # Dependencies install
 elif [ $1 = "install-deps" ] ; then
+  if [ x$MSYSTEM = x"MINGW32" ] ; then
+    SCRIPTDIR=`dirname "$0"`
+    $SCRIPTDIR/mingw_install_deps.sh
+    exit 0
+  fi
   if [ $# -ne 2 ] ; then
     echo "Missing required parameter!"
     show_help "install-deps"
@@ -185,12 +190,6 @@ elif [ $1 = "install-deps" ] ; then
     cd $BUILDDIR
     echo "  Configuring..."
 	OGRE_EXTRA_FLAGS=""
-	if [ x$MSYSTEM = x"MINGW32" ] ; then
-		OGRE_EXTRA_FLAGS="--with-gui=win32 --with-platform=win32 --enable-direct3d"
-		# We need to alter the configure script to use "-mthreads" instead of "-pthread" as the latter isn't available when using mingw gcc
-		# The check for FreeImage also needs to be slightly altered on mingw.
-		sed -i -e 's/-pthread/-mthreads/g' -e 's/char FreeImage_Load ();/#include <FreeImage.h>/g' -e 's/return FreeImage_Load ();/FreeImage_Load(FIF_UNKNOWN, "test.png", 0);/g' ../configure
-	fi
     cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
