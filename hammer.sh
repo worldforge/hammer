@@ -226,6 +226,8 @@ elif [ $1 = "install-deps" ] ; then
 elif [ $1 = "checkout" ] ; then
   echo "Fetching sources..."
 
+  if [ $2 = "libs" ] || [ $2 = "all" ] ; then
+
   mkdir -p $SOURCE/libs
   cd $SOURCE/libs
 
@@ -263,21 +265,25 @@ elif [ $1 = "checkout" ] ; then
   echo "  Mercator..."
   checkoutwf "mercator"
   echo "  Done."
+  fi
 
+  if [ $2 = "ember" ] || [ $2 = "all" ] ; then
   # Ember client
   echo "  Ember client..."
   mkdir -p $SOURCE/clients
   cd $SOURCE/clients
   checkoutwf "ember"
   echo "  Done."
+  fi
 
+  if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
   # Cyphesis
   echo "  Cyphesis..."
   mkdir -p $SOURCE/servers
   cd $SOURCE/servers
   checkoutwf "cyphesis"
   echo "  Done."
-
+  fi
   echo "Checkout Done."
 
 # Build source
