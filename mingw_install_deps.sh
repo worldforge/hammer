@@ -15,6 +15,24 @@ if [ "$NUMBER_OF_PROCESSORS" == "" ]; then
 else
 	export MAKEOPTS="-j$NUMBER_OF_PROCESSORS"
 fi
+
+#ogre gets linking error with freeimage if we don't disable flags.
+if [ "$CFLAGS" != "" ] ; then
+	echo "WARNING: Unsetting your CFLAGS environment variable for some libs."
+	CFLAGS_SAVE="$CFLAGS"
+	unset CFLAGS
+fi
+if [ "$CXXFLAGS" != "" ] ; then
+	echo "WARNING: Unsetting your CXXFLAGS environment variable for some libs."
+	CXXFLAGS_SAVE="$CXXFLAGS"
+	unset CXXFLAGS
+fi
+if [ "$LDFLAGS" != "" ] ; then
+	echo "WARNING: Unsetting your LDFLAGS environment variable for some libs."
+	LDFLAGS_SAVE="$LDFLAGS"
+	unset LDFLAGS
+fi
+
 LOGDIR=$PWD/work/logs/deps
 BUILDDEPS=$PWD/work/build/deps
 PACKAGEDIR=$BUILDDEPS/packages
@@ -106,6 +124,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	cd ..
 	touch $PKGLOCKFILE
 fi
+
 #install glib
 FILENAME="glib-2.28.7.tar.bz2"
 installpackage "http://ftp.gnome.org/pub/gnome/sources/glib/2.28/$FILENAME" "$FILENAME"
@@ -171,9 +190,10 @@ if [ ! -f $PKGLOCKFILE ]; then
 	touch $PKGLOCKFILE
 fi
 
-export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS"
+export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS_SAVE"
 #without -msse2 ogre is not building
-export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CXXFLAGS"
+export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CXXFLAGS_SAVE"
+export LDFLAGS="-L$PREFIX/lib $LDFLAGS_SAVE"
 
 #install zziplib
 FILENAME="zziplib-0.13.60.tar.bz2"
@@ -186,6 +206,7 @@ installpackage "http://sourceforge.net/projects/freetype/files/freetype2/2.4.4/$
 #install SDL
 FILENAME="SDL-1.2.14.tar.gz"
 installpackage "http://www.libsdl.org/release/$FILENAME" "$FILENAME"
+
 #install libCURL
 FILENAME="curl-7.21.6.tar.bz2"
 installpackage "http://curl.haxx.se/download/$FILENAME" "$FILENAME"
@@ -258,6 +279,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	cd ..
 	touch $PKGLOCKFILE
 fi
+
 #install tolua++
 #hacks:
 #	tolua uses scons, which needs python, which is big.
@@ -306,7 +328,6 @@ if [ ! -f $PKGLOCKFILE ]; then
 	rm libCg.def
 	touch $PKGLOCKFILE
 fi
-
 
 #install Ogre3D
 #hacks:

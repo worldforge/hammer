@@ -35,7 +35,7 @@ OGRE_DOWNLOAD=ogre_src_v1-7-3.tar.bz2
 CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
 
-if [ x$MSYSTEM = x"MINGW32" ] ; then
+if [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 	export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads $CXXFLAGS"
 	export PATH="$PREFIX/bin:$PATH"
