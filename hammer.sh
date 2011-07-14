@@ -48,33 +48,49 @@ fi
 
 function buildwf()
 {
-    mkdir -p $LOGDIR/$1
+    if [ x"$2" = x"" ]; then
+      PRJNAME="$1"
+    else
+      PRJNAME="$2"
+    fi
+
+    mkdir -p $LOGDIR/$PRJNAME
 
     cd $SOURCE/$1
     if [ ! -f "configure" ] ; then
       echo "  Running autogen..."
-      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$1/$AUTOLOG
+      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
     fi
 
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     if [ ! -f "Makefile" ] ; then
       echo "  Running configure..."
-      ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$1/$CONFIGLOG
+      ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
     fi
 
     echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/$1/$MAKELOG
+    make $MAKEOPTS > $LOGDIR/$PRJNAME/$MAKELOG
     echo "  Installing..."
-    make install > $LOGDIR/$1/$INSTALLLOG
+    make install > $LOGDIR/$PRJNAME/$INSTALLLOG
 }
 
 function checkoutwf()
 {
-  if [ ! -d $1 ]; then
-    git clone git://github.com/worldforge/$1.git
+  if [ x"$2" = x"" ]; then
+    USER="worldforge"
   else
-    cd $1 && git remote set-url origin git://github.com/worldforge/$1.git && git fetch && git rebase origin/master && cd ..
+    USER="$2"
+  fi
+  if [ x"$3" = x"" ]; then
+    BRANCH="master"
+  else
+    BRANCH="$3"
+  fi
+  if [ ! -d $1 ]; then
+    git clone git://github.com/$USER/$1.git -b $BRANCH
+  else
+    cd $1 && git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase origin/$BRANCH && cd ..
   fi
 }
 
@@ -272,7 +288,8 @@ elif [ $1 = "checkout" ] ; then
   echo "  Ember client..."
   mkdir -p $SOURCE/clients
   cd $SOURCE/clients
-  checkoutwf "ember"
+  #get github.com/sajty/ember.git with webember branch
+  checkoutwf "ember" "sajty" "webember"
   echo "  Done."
   fi
 
@@ -284,6 +301,18 @@ elif [ $1 = "checkout" ] ; then
   checkoutwf "cyphesis"
   echo "  Done."
   fi
+
+  if [ $2 = "webember" ] || [ $2 = "all" ] ; then
+  echo "  FireBreath..."
+  mkdir -p $SOURCE/clients/webember
+  cd $SOURCE/clients/webember
+  checkoutwf "FireBreath" "sajty"
+  echo "  Done."
+  echo "  WebEmber..."
+  checkoutwf "WebEmber" "sajty"
+  echo "  Done."
+  fi
+
   echo "Checkout Done."
 
 # Build source
@@ -366,7 +395,37 @@ elif [ $1 = "build" ] ; then
   buildwf "servers/cyphesis"
   cyphesis_post_install
   echo "  Done."
+  fi
 
+
+  if [ $2 = "webember" ] || [ $2 = "all" ] ; then
+  
+  echo "  WebEmber..."
+  CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember --enable-shared"
+  #we ned to change the BUILDDIR to separate the ember and webember build directories.
+  export BUILDDIR="${BUILDDIR}_webember"
+  buildwf "clients/ember" "webember"
+  echo "  Done."
+
+  if command -v rsync &> /dev/null; then
+    echo "Fetching media..."
+    cd $SOURCE/clients/ember/$BUILDDIR
+    make devmedia > $LOGDIR/webember/media.log
+    echo "Media fetched."
+  else
+    echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
+  fi
+
+    # WebEmber
+    echo "  WebEmber plugin..."
+    mkdir -p $LOGDIR/webember_plugin
+    mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
+    cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin -DBUILD_EXAMPLES=false -DWITH_SYSTEM_BOOST=true .. > $LOGDIR/webember_plugin/cmake.log
+    make $MAKEOPTS > $LOGDIR/webember_plugin/build.log
+    mkdir -p ~/.mozilla/plugins
+    cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
+    echo "  Done."
   fi
 
   echo "Build Done."
