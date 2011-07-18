@@ -283,7 +283,7 @@ elif [ $1 = "checkout" ] ; then
   echo "  Done."
   fi
 
-  if [ $2 = "ember" ] || [ $2 = "all" ] ; then
+  if [ $2 = "ember" ] || [ $2 = "webember" ] || [ $2 = "all" ] ; then
   # Ember client
   echo "  Ember client..."
   mkdir -p $SOURCE/clients
