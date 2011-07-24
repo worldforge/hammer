@@ -192,7 +192,7 @@ fi
 
 export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS_SAVE"
 #without -msse2 ogre is not building
-export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CXXFLAGS_SAVE"
+export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -DBOOST_THREAD_USE_LIB -I$PREFIX/include $CXXFLAGS_SAVE"
 export LDFLAGS="-L$PREFIX/lib $LDFLAGS_SAVE"
 
 #install zziplib
@@ -242,22 +242,16 @@ if [ ! -f $PKGLOCKFILE ]; then
 fi
 
 #install boost
-#hacks:
-#	bjam generated in msys is not working, we need prebuilt bjam.
-#	"./bjam install" is not working in msys, we need to install it manually.
 PKGLOCKFILE="$LOCKDIR/boost_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/boost/files/boost-jam/3.1.18/boost-jam-3.1.18-1-ntx86.zip/download
-	extract $DLDIR/boost-jam-3.1.18-1-ntx86.zip
 	wget -c -P $DLDIR http://sourceforge.net/projects/boost/files/boost/1.46.1/boost_1_46_1.tar.bz2/download
 	extract $DLDIR/boost_1_46_1.tar.bz2
-	ln -s $PWD/boost-jam-3.1.18-1-ntx86/bjam.exe $PWD/boost_1_46_1/bjam
 	cd boost_1_46_1
-	./bjam --with-thread --with-date_time --stagedir=$PREFIX --layout=system variant=release link=shared toolset=gcc
-	#"./bjam install" is not working in msys, we need to install the headers manually.
-	cp -r boost $PREFIX/include
-	mv $PREFIX/lib/libboost_date_time.dll $PREFIX/bin/libboost_date_time.dll
-	mv $PREFIX/lib/libboost_thread.dll $PREFIX/bin/libboost_thread.dll
+	./bootstrap.sh --with-toolset=mingw
+	#solution found here: http://stackoverflow.com/questions/5012429/building-boost-under-msys-cant-find-mingw-jam
+	sed -i "s/mingw/gcc/g" project-config.jam;
+	./bjam --with-thread --with-date_time --prefix=$PREFIX --layout=system variant=release link=static toolset=gcc install
+
 	cd ..
 	touch $PKGLOCKFILE
 fi
