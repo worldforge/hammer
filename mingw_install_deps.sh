@@ -190,9 +190,8 @@ if [ ! -f $PKGLOCKFILE ]; then
 	touch $PKGLOCKFILE
 fi
 
-export CFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS_SAVE"
-#without -msse2 ogre is not building
-export CXXFLAGS="-O3 -msse2 -ffast-math -mthreads -DNDEBUG -DBOOST_THREAD_USE_LIB -I$PREFIX/include $CXXFLAGS_SAVE"
+export CFLAGS="-O2 -msse2 -mthreads -DNDEBUG -I$PREFIX/include $CFLAGS_SAVE"
+export CXXFLAGS="-O2 -msse2 -mthreads -DNDEBUG -DBOOST_THREAD_USE_LIB -I$PREFIX/include $CXXFLAGS_SAVE"
 export LDFLAGS="-L$PREFIX/lib $LDFLAGS_SAVE"
 
 #install zziplib
