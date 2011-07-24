@@ -43,6 +43,7 @@ if [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
 	export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
 	export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+	export MAKEOPTS="$MAKEOPTS LDFLAGS=-no-undefined"
 fi
 
 
@@ -303,6 +304,7 @@ elif [ $1 = "checkout" ] ; then
   fi
 
   if [ $2 = "webember" ] || [ $2 = "all" ] ; then
+  if [[ x$MSYSTEM != x"MINGW32" ]] ; then
   echo "  FireBreath..."
   mkdir -p $SOURCE/clients/webember
   cd $SOURCE/clients/webember
@@ -311,6 +313,7 @@ elif [ $1 = "checkout" ] ; then
   echo "  WebEmber..."
   checkoutwf "WebEmber" "sajty"
   echo "  Done."
+  fi
   fi
 
   echo "Checkout Done."
@@ -401,9 +404,10 @@ elif [ $1 = "build" ] ; then
   if [ $2 = "webember" ] || [ $2 = "all" ] ; then
   
   echo "  WebEmber..."
-  CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember --enable-shared"
+  CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
   #we ned to change the BUILDDIR to separate the ember and webember build directories.
-  export BUILDDIR="${BUILDDIR}_webember"
+  #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
+  export BUILDDIR="build"
   buildwf "clients/ember" "webember"
   echo "  Done."
 
@@ -418,13 +422,24 @@ elif [ $1 = "build" ] ; then
 
     # WebEmber
     echo "  WebEmber plugin..."
-    mkdir -p $LOGDIR/webember_plugin
-    mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
-    cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
-    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin -DBUILD_EXAMPLES=false -DWITH_SYSTEM_BOOST=true .. > $LOGDIR/webember_plugin/cmake.log
-    make $MAKEOPTS > $LOGDIR/webember_plugin/build.log
-    mkdir -p ~/.mozilla/plugins
-    cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
+    if [[ x$MSYSTEM = x"MINGW32" ]] ; then
+      # Firebreath is not supporting mingw yet, we will use msvc prebuilt for webember.
+      mkdir -p $SOURCE/clients/ember/$BUILDDIR
+      cd $SOURCE/clients/ember/$BUILDDIR
+      wget -c http://sajty.elementfx.com/npWebEmber.dll
+      cp npWebEmber.dll $PREFIX/bin/npWebEmber.dll
+      regsvr32 -s $PREFIX/bin/npWebEmber.dll
+      #To uninstall: regsvr32 -u $PREFIX/bin/npWebEmber.dll
+    else
+      mkdir -p $LOGDIR/webember_plugin
+      mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
+      cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
+      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin -DBUILD_EXAMPLES=false -DWITH_SYSTEM_BOOST=true .. > $LOGDIR/webember_plugin/cmake.log
+      make $MAKEOPTS > $LOGDIR/webember_plugin/build.log
+      mkdir -p ~/.mozilla/plugins
+      cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
+    fi
+    
     echo "  Done."
   fi
 
