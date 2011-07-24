@@ -37,7 +37,7 @@ CMAKE_EXTRA_FLAGS=""
 
 if [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB $CXXFLAGS"
+	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
 	export PATH="$PREFIX/bin:$PATH"
 	export CPATH="$PREFIX/include:$CPATH"
 	export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
