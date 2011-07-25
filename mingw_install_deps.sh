@@ -212,7 +212,12 @@ installpackage "http://curl.haxx.se/download/$FILENAME" "$FILENAME"
 
 #install pcre
 FILENAME="pcre-8.12.tar.bz2"
+#--enable-unicode-properties is needed for ember.
+CONFIGURE_EXTRA_FLAGS_SAVE="$CONFIGURE_EXTRA_FLAGS"
+export CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-unicode-properties"
 installpackage "http://sourceforge.net/projects/pcre/files/pcre/8.12/$FILENAME/download" "$FILENAME"
+CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS_SAVE"
+
 
 #install sigc++
 #hacks:
