@@ -234,6 +234,23 @@ elif [ $1 = "install-deps" ] ; then
     make install > $LOGDIR/deps/ogre/$INSTALLLOG
     echo "  Done."
   fi
+  
+  # tolua++
+  if [ $2 = "tolua++" ] ; then
+   cd $DEPS_SOURCE
+    wget -c http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
+    tar -xjf tolua++-1.0.93.tar.bz2
+    cd tolua++-1.0.93
+    cp include/tolua++.h $PREFIX/include/tolua++.h
+    cd src/lib
+    gcc $CFLAGS -c -I$PREFIX/include *.c
+    ar cq libtolua++.a *.o
+    cp libtolua++.a $PREFIX/lib/libtolua++.a
+    cd ../bin
+    gcc $CFLAGS $LDFLAGS -o tolua++ -I$PREFIX/include -L$PREFIX/lib tolua.c toluabind.c -ltolua++ -llua
+    cp tolua++ $PREFIX/bin/tolua++
+    cd ../../..
+  fi
 
   # CEGUI
   if [ $2 = "all" ] || [ $2 = "cegui" ] ; then
