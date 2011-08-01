@@ -227,12 +227,22 @@ elif [ $1 = "install-deps" ] ; then
     cd $BUILDDIR
     echo "  Configuring..."
 	OGRE_EXTRA_FLAGS=""
-    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
-    echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
-    echo "  Installing..."
-    make install > $LOGDIR/deps/ogre/$INSTALLLOG
-    echo "  Done."
+    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS
+    if [[ $OSTYPE == *darwin* ]] ; then
+        xcodebuild -configuration RelWithDebInfo
+        xcodebuild -configuration RelWithDebInfo -target install
+        #install is only installing the framework, we need to copy libs manually.
+        cp lib/RelWithDebInfo/*.dylib $PREFIX/lib
+        cp -r $PREFIX/lib/RelWithDebInfo/Ogre.framework $PREFIX/lib/Ogre.framework
+        #on mac, we have only Ogre.framework 
+        sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-framework Ogre/g" $PREFIX/lib/pkgconfig/OGRE.pc
+    else
+        echo "  Building..."
+        make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
+        echo "  Installing..."
+        make install > $LOGDIR/deps/ogre/$INSTALLLOG
+        echo "  Done."
+    fi
   fi
   
   # tolua++
