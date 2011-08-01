@@ -147,8 +147,8 @@ function show_help()
     echo "Usage: hammer.sh install-deps <dependency to install>"
     echo "Dependencies Available:"
     echo "  all      -  install all dependencies listed below"
-    echo "  cegui    -  a free library providing windowing and widgets for 
-                        graphics APIs / engines"
+    echo "  cegui    -  a free library providing windowing and widgets for "
+    echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
 	echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
