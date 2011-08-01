@@ -300,7 +300,7 @@ elif [ $1 = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer $CONFIGURE_EXTRA_FLAGS > $LOGDIR/deps/CEGUI/$CONFIGLOG
+    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer --disable-corona --disable-devil --disable-stb --disable-tga $CONFIGURE_EXTRA_FLAGS > $LOGDIR/deps/CEGUI/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
