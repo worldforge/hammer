@@ -35,7 +35,27 @@ OGRE_DOWNLOAD=ogre_src_v1-7-3.tar.bz2
 CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
 
-if [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
+if [[ $OSTYPE == *darwin* ]] ; then
+	#the default architecture is universal build: i864;x86_64
+	#To save space and time, we will only build x86_64
+	CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
+	
+	#on mac libtool is called glibtool.
+	#Automake should set this, but it has messed up the order of variable definitions.
+	export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
+	
+	#to fix some failing checks:
+	export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
+	export CFLAGS="-O2 -g -DTOLUA_EXPORT -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
+	export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
+	
+	#without CPATH cegui is not finding freeimage and tolua++.
+	export CPATH="$PREFIX/include:/opt/local/include:$CPATH"
+	
+	#needed to find tolua++ program
+	export export PATH="$PATH:$PREFIX/bin"
+	
+elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
 	export PATH="$PREFIX/bin:$PATH"
