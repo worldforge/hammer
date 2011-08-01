@@ -244,6 +244,30 @@ elif [ $1 = "install-deps" ] ; then
         echo "  Done."
     fi
   fi
+
+  # freealut
+  if [ $2 = "freealut" ] ; then
+    echo "  Installing freealut..."
+    cd $DEPS_SOURCE
+    
+    echo "  Downloading..."
+    wget -c http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-1.1.0-src.zip
+    tar -xjf freealut-1.1.0-src.zip
+    cd freealut-1.1.0-src
+    echo "  Running autogen..."
+    autoreconf --install --force --warnings=all
+
+    mkdir -p $BUILDDIR
+    cd $BUILDDIR
+    echo "  Running configure..."
+    ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS \
+    CFLAGS="-O2 -g -framework OpenAL"
+    
+    echo "  Building..."
+    make $MAKEOPTS
+    echo "  Installing..."
+    make install
+  fi
   
   # tolua++
   if [ $2 = "tolua++" ] ; then
