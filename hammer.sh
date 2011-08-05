@@ -221,6 +221,12 @@ elif [ $1 = "install-deps" ] ; then
       mkdir -p $OGRE
       cd $OGRE
       tar -xjf ../$OGRE_DOWNLOAD
+      if [[ $OSTYPE == *darwin* ]] ; then
+        cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
+        echo "  Patching..."
+        ls .
+        patch -p1 < $SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch
+      fi
     fi
     cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
     mkdir -p $BUILDDIR
