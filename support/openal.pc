@@ -1,0 +1,11 @@
+prefix=/opt/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/Library/Frameworks
+includedir=${prefix}/include
+
+Name: OpenAL
+Description: OpenAL is a cross-platform 3D audio API
+Requires: 
+Version: 1.3
+Libs: -F${libdir} -framework OpenAL
+Cflags: 

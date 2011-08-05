@@ -10,6 +10,7 @@ export DEPS_SOURCE=$WORKDIR/build/deps
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 export BUILDDIR=`uname -m`
+export SUPPORTDIR=$HAMMERDIR/support
 
 # setup directories
 mkdir -p $PREFIX
@@ -253,14 +254,18 @@ elif [ $1 = "install-deps" ] ; then
     wget -c http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-1.1.0-src.zip
     tar -xjf freealut-1.1.0-src.zip
     cd freealut-1.1.0-src
+    if [[ $OSTYPE == *darwin* ]] ; then
+      cp $SUPPORTDIR/openal.pc $PREFIX/lib/pkgconfig/openal.pc
+    fi
     echo "  Running autogen..."
     autoreconf --install --force --warnings=all
 
     mkdir -p $BUILDDIR
     cd $BUILDDIR
+    
     echo "  Running configure..."
     ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS \
-    CFLAGS="-O2 -g -framework OpenAL"
+    CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
     
     echo "  Building..."
     make $MAKEOPTS
