@@ -227,15 +227,16 @@ elif [ $1 = "install-deps" ] ; then
     cd $BUILDDIR
     echo "  Configuring..."
 	OGRE_EXTRA_FLAGS=""
-    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS
+    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
-        xcodebuild -configuration RelWithDebInfo
-        xcodebuild -configuration RelWithDebInfo -target install
-        #install is only installing the framework, we need to copy libs manually.
-        cp lib/RelWithDebInfo/*.dylib $PREFIX/lib
-        cp -r $PREFIX/lib/RelWithDebInfo/Ogre.framework $PREFIX/lib/Ogre.framework
+    	echo "  Building..."
+        xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
+        echo "  Installing..."
+        xcodebuild -configuration RelWithDebInfo -target install > $LOGDIR/deps/ogre/$INSTALLLOG
+        cp -r lib/RelWithDebInfo/* $PREFIX/lib
         #on mac, we have only Ogre.framework 
-        sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-framework Ogre/g" $PREFIX/lib/pkgconfig/OGRE.pc
+        sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-F\${libdir} -framework Ogre/g" $PREFIX/lib/pkgconfig/OGRE.pc
+        echo "  Done."
     else
         echo "  Building..."
         make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
@@ -248,6 +249,7 @@ elif [ $1 = "install-deps" ] ; then
   # freealut
   if [ $2 = "freealut" ] ; then
     echo "  Installing freealut..."
+    mkdir -p $LOGDIR/deps/freealut
     cd $DEPS_SOURCE
     
     echo "  Downloading..."
@@ -268,14 +270,14 @@ elif [ $1 = "install-deps" ] ; then
     CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
     
     echo "  Building..."
-    make $MAKEOPTS
+    make $MAKEOPTS > $LOGDIR/deps/freealut/$MAKELOG
     echo "  Installing..."
-    make install
+    make install > $LOGDIR/deps/freealut/$INSTALLLOG
   fi
   
   # tolua++
   if [ $2 = "tolua++" ] ; then
-   cd $DEPS_SOURCE
+    cd $DEPS_SOURCE
     wget -c http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
     tar -xjf tolua++-1.0.93.tar.bz2
     cd tolua++-1.0.93
