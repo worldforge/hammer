@@ -44,9 +44,8 @@ if [[ $OSTYPE == *darwin* ]] ; then
 	#Automake should set this, but it has messed up the order of variable definitions.
 	export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
 	
-	#to fix some failing checks:
-	export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
-	export CFLAGS="-O2 -g -DTOLUA_EXPORT -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
+	export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
+	export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
 	export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
 	
 	#without CPATH cegui is not finding freeimage and tolua++.
@@ -295,8 +294,16 @@ elif [ $1 = "install-deps" ] ; then
       echo "  Downloading..."
       wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD
       tar zxvf $CEGUI_DOWNLOAD
+      if [[ $OSTYPE == *darwin* ]] ; then
+        echo "  Patching..."
+        cd $DEPS_SOURCE/$CEGUI
+        sed -i "" -e "s/\"macPlugins.h\"/\"implementations\/mac\/macPlugins.h\"/g" cegui/src/CEGUIDynamicModule.cpp
+        #Do not change indentation for the include line.
+        sed -i "" -e '1i\
+#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
+      fi
     fi
-    cd $CEGUI
+    cd $DEPS_SOURCE/$CEGUI
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
@@ -305,6 +312,10 @@ elif [ $1 = "install-deps" ] ; then
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/deps/CEGUI/$INSTALLLOG
+    if [[ $OSTYPE == *darwin* ]] ; then
+      #on mac we use -DCEGUI_STATIC, which will disable the plugin interface and we need to link the libraries manually.
+      sed -i "" -e "s/-lCEGUIBase/-lCEGUIBase -lCEGUIFalagardWRBase -lCEGUIFreeImageImageCodec -lCEGUITinyXMLParser/g" $PREFIX/lib/pkgconfig/CEGUI.pc
+    fi
     echo "  Done."
   fi
 
@@ -476,7 +487,7 @@ elif [ $1 = "build" ] ; then
   
   echo "  WebEmber..."
   CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
-  #we ned to change the BUILDDIR to separate the ember and webember build directories.
+  #we need to change the BUILDDIR to separate the ember and webember build directories.
   #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
   export BUILDDIR="build"
   buildwf "clients/ember" "webember"
