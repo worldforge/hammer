@@ -247,7 +247,7 @@ elif [ $1 = "install-deps" ] ; then
   fi
 
   # freealut
-  if [ $2 = "freealut" ] ; then
+  if [ $2 = "all" ] && [[ $OSTYPE == *darwin* ]] || [ $2 = "freealut" ] ; then
     echo "  Installing freealut..."
     mkdir -p $LOGDIR/deps/freealut
     cd $DEPS_SOURCE
@@ -276,7 +276,8 @@ elif [ $1 = "install-deps" ] ; then
   fi
   
   # tolua++
-  if [ $2 = "tolua++" ] ; then
+  if [ $2 = "all" ] && [[ $OSTYPE == *darwin* ]] || [ $2 = "tolua++" ] ; then
+    #the "all" keyword will only work on mac, but "tolua++" will work on any OS.
     cd $DEPS_SOURCE
     wget -c http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
     tar -xjf tolua++-1.0.93.tar.bz2
