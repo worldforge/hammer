@@ -53,7 +53,7 @@ if [[ $OSTYPE == *darwin* ]] ; then
 	export CPATH="$PREFIX/include:/opt/local/include:$CPATH"
 	
 	#needed to find tolua++ program
-	export export PATH="$PATH:$PREFIX/bin"
+	export PATH="$PATH:$PREFIX/bin"
 	
 elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
@@ -519,7 +519,7 @@ elif [ $1 = "build" ] ; then
     # WebEmber
     echo "  WebEmber plugin..."
     if [[ x$MSYSTEM = x"MINGW32" ]] ; then
-      # Firebreath is not supporting mingw yet, we will use msvc prebuilt for webember.
+      # Firebreath is not supporting mingw32 yet, we will use msvc prebuilt for webember.
       mkdir -p $SOURCE/clients/ember/$BUILDDIR
       cd $SOURCE/clients/ember/$BUILDDIR
       wget -c http://sajty.elementfx.com/npWebEmber.dll
@@ -530,12 +530,21 @@ elif [ $1 = "build" ] ; then
       mkdir -p $LOGDIR/webember_plugin
       mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
       cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
-      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin -DBUILD_EXAMPLES=false -DWITH_SYSTEM_BOOST=true .. > $LOGDIR/webember_plugin/cmake.log
-      make $MAKEOPTS > $LOGDIR/webember_plugin/build.log
-      mkdir -p ~/.mozilla/plugins
-      cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
-    fi
-    
+
+      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin -DBUILD_EXAMPLES=false -DWITH_SYSTEM_BOOST=true $CMAKE_EXTRA_FLAGS .. > $LOGDIR/webember_plugin/cmake.log
+      if  [[ $OSTYPE == *darwin* ]] ; then
+        echo "  Building..."
+        xcodebuild -configuration RelWithDebInfo > $LOGDIR/webember_plugin/$MAKELOG
+        echo "  Installing..."
+        cp -r projects/WebEmber/RelWithDebInfo/webember.plugin $PREFIX/lib
+      else
+        echo "  Building..."
+        make $MAKEOPTS > $LOGDIR/webember_plugin/build.log
+        echo "  Installing..."
+        mkdir -p ~/.mozilla/plugins
+        cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
+      fi
+    fi    
     echo "  Done."
   fi
 
