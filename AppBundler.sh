@@ -10,9 +10,12 @@ export WORKDIR=$HAMMERDIR/work
 export PREFIX=$WORKDIR/local
 export DEPS_SOURCE=$WORKDIR/build/deps
 export MAKEOPTS="-j3"
-export EMBER_APP="$HAMMERDIR/ember.app"
+export EMBER_APP="$WORKDIR/ember.app"
+export WEBEMBER_PLUGIN="$WORKDIR/WebEmber.plugin"
 export DYLIBBUNDLER="$PREFIX/bin/dylibbundler"
 export OPENAL_FRAMEWORK="/opt/local/Library/Frameworks/OpenAl.framework"
+
+BUNDLE=""
 
 #install dylibbundler if its not installed
 if [ ! -f $DYLIBBUNDLER ]; then
@@ -31,19 +34,45 @@ fi
 
 
 if [ $# -eq 0 ] ; then
-    echo "Usage: AppBundler.sh <command>"
-    echo "Commands:"
-    echo "  ember -  creates ember.app"
+  echo "Usage: AppBundler.sh <command>"
+  echo "Commands:"
+  echo "  ember -  creates ember.app"
+  exit 0
+fi
+
+if [ $1 = "ember" ] ; then
+  BUNDLE="$EMBER_APP"
+elif [ $1 = "webember" ] ; then
+  BUNDLE="$WEBEMBER_PLUGIN"
+fi
+
+#files for ember and webember
+if [ x"$BUNDLE" != x"" ] ; then
+  
+  #prepare directories
+  mkdir -p $BUNDLE/Contents/MacOS
+  mkdir -p $BUNDLE/Contents/Frameworks
+  mkdir -p $BUNDLE/Contents/Plugins
+  mkdir -p $BUNDLE/Contents/lib
+  mkdir -p $BUNDLE/Contents/Resources
+  
+  #install media
+  cp -r $PREFIX/etc $BUNDLE/Contents/Resources
+  cp -r $PREFIX/share/ember/media $BUNDLE/Contents/Resources
+  cp $PREFIX/share/icons/worldforge/ember.png $BUNDLE/Contents/Resources/ember.png
+  
+  #install Ogre plugins
+  cp -r $PREFIX/lib/Plugin_* $BUNDLE/Contents/Plugins
+  cp $PREFIX/lib/RenderSystem_GL.dylib $BUNDLE/Contents/Plugins/RenderSystem_GL.dylib
+  
+  #install frameworks
+  cp -r $PREFIX/lib/Ogre.framework $BUNDLE/Contents/Frameworks
+  cp -r $OPENAL_FRAMEWORK $BUNDLE/Contents/Frameworks
+fi
+
 
 #bundle ember
-elif [ $1 = "ember" ] ; then
-
-  #prepare directories
-  mkdir -p $EMBER_APP/Contents/MacOS
-  mkdir -p $EMBER_APP/Contents/Frameworks
-  mkdir -p $EMBER_APP/Contents/Plugins
-  mkdir -p $EMBER_APP/Contents/libs
-  mkdir -p $EMBER_APP/Contents/Resources
+if [ $1 = "ember" ] ; then
   
   #install App configuration file
   echo -e \
@@ -73,19 +102,44 @@ elif [ $1 = "ember" ] ; then
   #install executable
   cp $PREFIX/bin/ember.bin $EMBER_APP/Contents/MacOS/ember.bin
   
-  #install media
-  cp -r $PREFIX/etc $EMBER_APP/Contents/Resources
-  cp -r $PREFIX/share/ember/media $EMBER_APP/Contents/Resources
-  cp $PREFIX/share/icons/worldforge/ember.png $EMBER_APP/Contents/Resources/ember.png
-  
+
   #install libraries
   $DYLIBBUNDLER -od -b -x $EMBER_APP/Contents/MacOS/ember.bin -d $EMBER_APP/Contents/libs
   
-  #install Ogre plugins
-  cp -r $PREFIX/lib/Plugin_* $EMBER_APP/Contents/Plugins
-  cp $PREFIX/lib/RenderSystem_GL.dylib $EMBER_APP/Contents/Plugins/RenderSystem_GL.dylib
-  
-  #install frameworks
-  cp -r $PREFIX/lib/Ogre.framework $EMBER_APP/Contents/Frameworks
-  cp -r $OPENAL_FRAMEWORK $EMBER_APP/Contents/Frameworks
+
 fi
+
+if [ $1 = "webember" ] ; then
+  #install webember
+  cp $PREFIX/lib/libWebEmber-0.1.dylib $WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib
+
+  #install libraries
+  $DYLIBBUNDLER -od -b -x $WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib -d $WEBEMBER_PLUGIN/Contents/lib -p @loader_path/../lib
+
+  
+  #change framework linkage from @executable_path to @loader_path
+  install_name_tool -change \
+  "@executable_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
+  "@loader_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
+  "$WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib"
+
+  install_name_tool -change \
+  "@executable_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
+  "@loader_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
+  "$WEBEMBER_PLUGIN/Contents/lib/libCEGUIOgreRenderer-0.7.5.dylib"
+  
+  install_name_tool -change \
+  "@executable_path/../Frameworks/OpenAL.framework/Versions/A/OpenAL" \
+  "@loader_path/../Frameworks/OpenAL.framework/Versions/A/OpenAL" \
+  "$WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib"
+  
+  for f in $WEBEMBER_PLUGIN/Contents/Plugins/*; do
+    install_name_tool -change \
+    "@executable_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
+    "@loader_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
+    "$f"
+  done
+  
+fi
+
+
