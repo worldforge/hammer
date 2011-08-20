@@ -11,6 +11,12 @@ export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 export BUILDDIR=`uname -m`
 export SUPPORTDIR=$HAMMERDIR/support
+#needed to find tolua++ program if installed in prefix
+export PATH="$PATH:$PREFIX/bin"
+export CPATH="$PREFIX/include:$CPATH"
+export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
+export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
 
 # setup directories
 mkdir -p $PREFIX
@@ -49,19 +55,12 @@ if [[ $OSTYPE == *darwin* ]] ; then
 	export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
 	export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
 	
-	#without CPATH cegui is not finding freeimage and tolua++.
-	export CPATH="$PREFIX/include:/opt/local/include:$CPATH"
-	
-	#needed to find tolua++ program
-	export PATH="$PATH:$PREFIX/bin"
+	#without CPATH cegui is not finding freeimage.
+	export CPATH="/opt/local/include:$CPATH"
 	
 elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
-	export PATH="$PREFIX/bin:$PATH"
-	export CPATH="$PREFIX/include:$CPATH"
-	export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
-	export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
 	export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 	export MAKEOPTS="$MAKEOPTS LDFLAGS=-no-undefined"
 fi
@@ -531,7 +530,7 @@ elif [ $1 = "build" ] ; then
       mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
       cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
 
-      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin -DBUILD_EXAMPLES=false -DWITH_SYSTEM_BOOST=true $CMAKE_EXTRA_FLAGS .. > $LOGDIR/webember_plugin/cmake.log
+      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin $CMAKE_EXTRA_FLAGS .. > $LOGDIR/webember_plugin/cmake.log
       if  [[ $OSTYPE == *darwin* ]] ; then
         echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/webember_plugin/$MAKELOG
