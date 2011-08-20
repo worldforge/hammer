@@ -282,18 +282,35 @@ elif [ $1 = "install-deps" ] ; then
   
   # tolua++
   if [ $2 = "all" ] && [[ $OSTYPE == *darwin* ]] || [ $2 = "tolua++" ] ; then
-    #the "all" keyword will only work on mac, but "tolua++" will work on any OS.
+    #the "all" keyword will only work on mac, but "tolua++" will work on linux and mac, if you set LUA_CFLAGS and LUA_LDFLAGS.
+    #LUA_CFLAGS="`pkg-config --cflags lua5.1`"
+    #LUA_LDFLAGS="`pkg-config --libs lua5.1`"
+    if [ "x$LUA_CFLAGS" == "x" ] ; then
+      LUA_CFLAGS=""
+    fi
+    if [ "x$LUA_LDFLAGS" == "x" ] ; then
+      LUA_LDFLAGS="-llua"
+    fi
     cd $DEPS_SOURCE
     wget -c http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
     tar -xjf tolua++-1.0.93.tar.bz2
     cd tolua++-1.0.93
+    mkdir -p $PREFIX/include
     cp include/tolua++.h $PREFIX/include/tolua++.h
     cd src/lib
-    gcc $CFLAGS -c -I$PREFIX/include *.c
-    ar cq libtolua++.a *.o
-    cp libtolua++.a $PREFIX/lib/libtolua++.a
+    gcc $CFLAGS -c -fPIC -I$PREFIX/include *.c $LUA_CFLAGS
+    mkdir -p $PREFIX/lib
+    if [[ $OSTYPE == *darwin* ]] ; then
+      #ar cq libtolua++.a *.o
+       gcc -shared -Wl,-soname,libtolua++.dylib -o libtolua++.dylib *.o
+      cp libtolua++.dylib $PREFIX/lib/libtolua++.dylib
+    else
+      gcc -shared -Wl,-soname,libtolua++.so -o libtolua++.so  *.o
+      cp libtolua++.so $PREFIX/lib/libtolua++.so
+    fi
     cd ../bin
-    gcc $CFLAGS $LDFLAGS -o tolua++ -I$PREFIX/include -L$PREFIX/lib tolua.c toluabind.c -ltolua++ -llua
+    gcc $CFLAGS $LDFLAGS -o tolua++ -I$PREFIX/include $LUA_CFLAGS $LUA_LDFLAGS -L$PREFIX/lib tolua.c toluabind.c -ltolua++
+    mkdir -p $PREFIX/bin
     cp tolua++ $PREFIX/bin/tolua++
     cd ../../..
   fi
