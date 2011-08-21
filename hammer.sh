@@ -62,7 +62,6 @@ elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
 	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
 	export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
-	export MAKEOPTS="$MAKEOPTS LDFLAGS=-no-undefined"
 fi
 
 
@@ -538,7 +537,8 @@ elif [ $1 = "build" ] ; then
       # Firebreath is not supporting mingw32 yet, we will use msvc prebuilt for webember.
       mkdir -p $SOURCE/clients/ember/$BUILDDIR
       cd $SOURCE/clients/ember/$BUILDDIR
-      wget -c http://sajty.elementfx.com/npWebEmber.dll
+      wget -c http://sajty.elementfx.com/npWebEmber.tar.gz
+      tar -xzf npWebEmber.tar.gz
       cp npWebEmber.dll $PREFIX/bin/npWebEmber.dll
       regsvr32 -s $PREFIX/bin/npWebEmber.dll
       #To uninstall: regsvr32 -u $PREFIX/bin/npWebEmber.dll
