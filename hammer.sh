@@ -300,9 +300,8 @@ elif [ $1 = "install-deps" ] ; then
     gcc $CFLAGS -c -fPIC -I$PREFIX/include *.c $LUA_CFLAGS
     mkdir -p $PREFIX/lib
     if [[ $OSTYPE == *darwin* ]] ; then
-      #ar cq libtolua++.a *.o
-       gcc -shared -Wl,-soname,libtolua++.dylib -o libtolua++.dylib *.o
-      cp libtolua++.dylib $PREFIX/lib/libtolua++.dylib
+      ar cq libtolua++.a *.o
+      cp libtolua++.a $PREFIX/lib/libtolua++.a
     else
       gcc -shared -Wl,-soname,libtolua++.so -o libtolua++.so  *.o
       cp libtolua++.so $PREFIX/lib/libtolua++.so
