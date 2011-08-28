@@ -121,7 +121,7 @@ function cyphesis_post_install()
   mv cyphesis cyphesis.bin
 
   # Install our cyphesis.in script as cyphesis
-  cp $HAMMERDIR/cyphesis.in cyphesis
+  cp $SUPPORTDIR/cyphesis.in cyphesis
   chmod +x cyphesis  
 }
 
