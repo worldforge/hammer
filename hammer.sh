@@ -399,8 +399,7 @@ elif [ $1 = "checkout" ] ; then
   echo "  Ember client..."
   mkdir -p $SOURCE/clients
   cd $SOURCE/clients
-  #get github.com/sajty/ember.git with webember branch
-  checkoutwf "ember" "sajty" "webember"
+  checkoutwf "ember"
   echo "  Done."
   fi
 
@@ -421,7 +420,7 @@ elif [ $1 = "checkout" ] ; then
   checkoutwf "FireBreath" "sajty"
   echo "  Done."
   echo "  WebEmber..."
-  checkoutwf "WebEmber" "sajty"
+  checkoutwf "webember"
   echo "  Done."
   fi
   fi
