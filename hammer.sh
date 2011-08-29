@@ -545,7 +545,7 @@ elif [ $1 = "build" ] ; then
       mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
       cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
 
-      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/WebEmber/plugin $CMAKE_EXTRA_FLAGS .. > $LOGDIR/webember_plugin/cmake.log
+      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/webember/plugin $CMAKE_EXTRA_FLAGS .. > $LOGDIR/webember_plugin/cmake.log
       if  [[ $OSTYPE == *darwin* ]] ; then
         echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/webember_plugin/$MAKELOG
