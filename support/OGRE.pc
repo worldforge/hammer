@@ -1,0 +1,12 @@
+prefix=TPL_PREFIX
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+plugindir=${libdir}/opt
+
+Name: OGRE
+Description: Object-Oriented Graphics Rendering Engine
+Version: 1.7.3
+URL: http://www.ogre3d.org
+Libs: -L${libdir} -lOgreMain  -mthreads
+Cflags: -I${includedir} -I${includedir}/OGRE

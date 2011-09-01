@@ -1,0 +1,11 @@
+prefix=TPL_PREFIX
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: OGRE-Terrain
+Description: Outdoor terrain component for OGRE
+Version: 1.7.3
+Requires: OGRE = 1.7.3 , OGRE-Paging = 1.7.3
+Libs: -L${libdir} -lOgreTerrain
+Cflags: -I${includedir}/OGRE/Terrain -mthread

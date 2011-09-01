@@ -38,6 +38,7 @@ BUILDDEPS=$PWD/work/build/deps
 PACKAGEDIR=$BUILDDEPS/packages
 DLDIR=$BUILDDEPS/downloads
 LOCKDIR=$BUILDDEPS/locks
+SUPPORTDIR=$PWD/support
 
 mkdir -p $LOGDIR
 mkdir -p $BUILDDEPS
@@ -269,8 +270,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	make mingw $MAKEOPTS
 	make install INSTALL_TOP=$PREFIX
 	#install lua5.1.pc
-	wget -c -P $DLDIR http://sajty.elementfx.com/lua5.1.pc
-	cp $DLDIR/lua5.1.pc ./lua5.1.pc
+	cp $SUPPORTDIR/lua5.1.pc ./lua5.1.pc
 	export PREFIX_ESCAPED=$(echo $PREFIX | sed -e 's/\(\/\|\\\|&\)/\\&/g')
 	sed -i "s/TPL_PREFIX/$PREFIX_ESCAPED/g" ./lua5.1.pc 
 	mv ./lua5.1.pc $PREFIX/lib/pkgconfig/lua5.1.pc
@@ -348,8 +348,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	cp -r $PREFIX/lib/RelWithDebInfo/* $PREFIX/lib
 
 	#get *.pc files.
-	wget -c -P $DLDIR http://sajty.elementfx.com/ogre_package.zip
-	extract $DLDIR/ogre_package.zip
+	cp $SUPPORTDIR/OGRE*.pc .
 	export PREFIX_ESCAPED=$(echo $PREFIX | sed -e 's/\(\/\|\\\|&\)/\\&/g')
 	find . -maxdepth 1 -name "OGRE*.pc" -exec sed -i "s/TPL_PREFIX/$PREFIX_ESCAPED/g" '{}' \;
 	mv ./OGRE*.pc $PREFIX/lib/pkgconfig
