@@ -34,9 +34,10 @@ fi
 
 
 if [ $# -eq 0 ] ; then
-  echo "Usage: AppBundler.sh <command>"
-  echo "Commands:"
-  echo "  ember -  creates ember.app"
+  echo "Usage: AppBundler.sh <target>"
+  echo "Targets:"
+  echo "  ember    - creates ember.app"
+  echo "  webember - creates webember.plugin"
   exit 0
 fi
 
