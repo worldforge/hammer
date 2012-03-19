@@ -500,10 +500,17 @@ elif [ $1 = "build" ] ; then
   if command -v rsync &> /dev/null; then
     echo "Fetching media..."
     cd $SOURCE/clients/ember/$BUILDDIR
-    make devmedia
-    echo "Media fetched."
+    set +e
+    make devmedia &> $LOGDIR/clients/ember/media.log
+    if [ $? != 0 ]
+    then
+      echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
+    else
+      echo "Media fetched."
+    fi
+    set -e
   else
-    echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
+    echo "Rsync not found, skipping fetching media. You will need to download and install it yourself from http://amber.worldforge.org/media/."
   fi
 
   fi
@@ -531,8 +538,15 @@ elif [ $1 = "build" ] ; then
   if command -v rsync &> /dev/null; then
     echo "Fetching media..."
     cd $SOURCE/clients/ember/$BUILDDIR
-    make devmedia > $LOGDIR/webember/media.log
-    echo "Media fetched."
+    set +e
+    make devmedia &> $LOGDIR/webember/media.log
+    if [ $? != 0 ]
+    then
+      echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
+    else
+      echo "Media fetched."
+    fi
+    set -e
   else
     echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
   fi
