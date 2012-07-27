@@ -233,6 +233,9 @@ elif [ $1 = "install-deps" ] ; then
         ls .
         patch -p1 < $SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch
       fi
+      cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
+      echo "Patching OGRE to deal with SIMD issue (to be removed when fixed in Ogre upstream)"
+      patch -p1 < $SUPPORTDIR/ogre_simd_fix.patch
     fi
     cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
     mkdir -p $BUILDDIR
