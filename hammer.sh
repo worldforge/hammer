@@ -236,6 +236,8 @@ elif [ $1 = "install-deps" ] ; then
       cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
       echo "Patching OGRE to deal with SIMD issue (to be removed when fixed in Ogre upstream)"
       patch -p1 < $SUPPORTDIR/ogre_simd_fix.patch
+      echo "Patching OGRE to deal with GL issue (to be removed when fixed in Ogre upstream)"
+      patch -p1 < $SUPPORTDIR/ogre_commit-d45e64c.patch
     fi
     cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
     mkdir -p $BUILDDIR
