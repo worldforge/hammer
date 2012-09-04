@@ -36,8 +36,8 @@ INSTALLLOG=install.log # Install output
 # Dependencies
 CEGUI=CEGUI-0.7.7
 CEGUI_DOWNLOAD=CEGUI-0.7.7.tar.gz
-OGRE=ogre_1_8_0
-OGRE_DOWNLOAD=ogre_src_v1-8-0.tar.bz2
+OGRE=ogre_1_8_1
+OGRE_DOWNLOAD=ogre_src_v1-8-1.tar.bz2
 
 CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
@@ -233,11 +233,6 @@ elif [ $1 = "install-deps" ] ; then
         ls .
         patch -p1 < $SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch
       fi
-      cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
-      echo "Patching OGRE to deal with SIMD issue (to be removed when fixed in Ogre upstream)"
-      patch -p1 < $SUPPORTDIR/ogre_simd_fix.patch
-      echo "Patching OGRE to deal with GL issue (to be removed when fixed in Ogre upstream)"
-      patch -p1 < $SUPPORTDIR/ogre_commit-d45e64c.patch
     fi
     cd $DEPS_SOURCE/$OGRE/`ls $DEPS_SOURCE/$OGRE`
     mkdir -p $BUILDDIR
