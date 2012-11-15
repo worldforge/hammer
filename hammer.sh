@@ -223,7 +223,7 @@ elif [ $1 = "install-deps" ] ; then
     cd $DEPS_SOURCE
     if [ ! -d $OGRE ]; then
       echo "  Downloading..."
-      wget -c http://downloads.sourceforge.net/sourceforge/ogre/$OGRE_DOWNLOAD
+      curl -C - -OL http://downloads.sourceforge.net/sourceforge/ogre/$OGRE_DOWNLOAD
       mkdir -p $OGRE
       cd $OGRE
       tar -xjf ../$OGRE_DOWNLOAD
@@ -265,7 +265,7 @@ elif [ $1 = "install-deps" ] ; then
     cd $DEPS_SOURCE
     
     echo "  Downloading..."
-    wget -c http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-1.1.0-src.zip
+    curl -C - -OL http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-1.1.0-src.zip
     unzip -o freealut-1.1.0-src.zip
     cd freealut-1.1.0-src
     if [[ $OSTYPE == *darwin* ]] ; then
@@ -299,7 +299,7 @@ elif [ $1 = "install-deps" ] ; then
       LUA_LDFLAGS="-llua"
     fi
     cd $DEPS_SOURCE
-    wget -c http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
+    curl -C - -OL http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
     tar -xjf tolua++-1.0.93.tar.bz2
     cd tolua++-1.0.93
     mkdir -p $PREFIX/include
@@ -328,7 +328,7 @@ elif [ $1 = "install-deps" ] ; then
     cd $DEPS_SOURCE
     if [ ! -d $CEGUI ] ; then
       echo "  Downloading..."
-      wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD
+      curl -C - -OL http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD
       tar zxvf $CEGUI_DOWNLOAD
       if [[ $OSTYPE == *darwin* ]] ; then
         echo "  Patching..."
@@ -557,7 +557,7 @@ elif [ $1 = "build" ] ; then
       # Firebreath is not supporting mingw32 yet, we will use msvc prebuilt for webember.
       mkdir -p $SOURCE/clients/ember/$BUILDDIR
       cd $SOURCE/clients/ember/$BUILDDIR
-      wget -c http://sajty.elementfx.com/npWebEmber.tar.gz
+      curl -C - -OL http://sajty.elementfx.com/npWebEmber.tar.gz
       tar -xzf npWebEmber.tar.gz
       cp npWebEmber.dll $PREFIX/bin/npWebEmber.dll
       regsvr32 -s $PREFIX/bin/npWebEmber.dll
