@@ -494,7 +494,11 @@ elif [ $1 = "build" ] ; then
 
   # Ember client
   echo "  Ember client..."
+  # As Ember now uses the C++11 dialect, we'll compile it in permissive mode until all libraries have been updated to conform. This mainly involves Mercator. Remove the CXXFLAGS dance below once Mercator has been updated to handle C++11.
+  CXXFLAGS_OLD=$CXXFLAGS
+  export CXXFLAGS="$CXXFLAGS -fpermissive"
   buildwf "clients/ember"
+  export CXXFLAGS="$CXXFLAGS_OLD"
   echo "  Done."
 
   if command -v rsync &> /dev/null; then
