@@ -28,8 +28,8 @@ LOGDIR=$WORKDIR/logs
 mkdir -p $LOGDIR
 
 # Output redirect logs
-AUTOLOG=autogen.log     # Autogen output
-CONFIGLOG=config.log    # Configure output
+AUTOLOG=autogen.log    # Autogen output
+CONFIGLOG=config.log   # Configure output
 MAKELOG=build.log      # Make output
 INSTALLLOG=install.log # Install output
 
@@ -43,55 +43,55 @@ CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
 
 if [[ $OSTYPE == *darwin* ]] ; then
-	#the default architecture is universal build: i864;x86_64
-	#To save space and time, we will only build x86_64
-	CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
-	
-	#on mac libtool is called glibtool.
-	#Automake should set this, but it has messed up the order of variable definitions.
-	export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
-	
-	export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
-	export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
-	export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
-	
-	#without CPATH cegui is not finding freeimage.
-	export CPATH="/opt/local/include:$CPATH"
-	
+  #the default architecture is universal build: i864;x86_64
+  #To save space and time, we will only build x86_64
+  CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
+
+  #on mac libtool is called glibtool.
+  #Automake should set this, but it has messed up the order of variable definitions.
+  export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
+
+  export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
+  export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
+  export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
+
+  #without CPATH cegui is not finding freeimage.
+  export CPATH="/opt/local/include:$CPATH"
+
 elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
-	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
-	export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
+  export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
+  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
 
 function buildwf()
 {
-    if [ x"$2" = x"" ]; then
-      PRJNAME="$1"
-    else
-      PRJNAME="$2"
-    fi
+  if [ x"$2" = x"" ]; then
+    PRJNAME="$1"
+  else
+    PRJNAME="$2"
+  fi
 
-    mkdir -p $LOGDIR/$PRJNAME
+  mkdir -p $LOGDIR/$PRJNAME
 
-    cd $SOURCE/$1
-    if [ ! -f "configure" ] ; then
-      echo "  Running autogen..."
-      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
-    fi
+  cd $SOURCE/$1
+  if [ ! -f "configure" ] ; then
+    echo "  Running autogen..."
+    NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
+  fi
 
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
-    if [ ! -f "Makefile" ] ; then
-      echo "  Running configure..."
-      ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
-    fi
+  mkdir -p $BUILDDIR
+  cd $BUILDDIR
+  if [ ! -f "Makefile" ] ; then
+    echo "  Running configure..."
+    ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
+  fi
 
-    echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/$PRJNAME/$MAKELOG
-    echo "  Installing..."
-    make install > $LOGDIR/$PRJNAME/$INSTALLLOG
+  echo "  Building..."
+  make $MAKEOPTS > $LOGDIR/$PRJNAME/$MAKELOG
+  echo "  Installing..."
+  make install > $LOGDIR/$PRJNAME/$INSTALLLOG
 }
 
 function checkoutwf()
@@ -122,7 +122,7 @@ function cyphesis_post_install()
 
   # Install our cyphesis.in script as cyphesis
   cp $SUPPORTDIR/cyphesis.in cyphesis
-  chmod +x cyphesis  
+  chmod +x cyphesis 
 }
 
 function show_help()
@@ -148,7 +148,7 @@ function show_help()
     echo "  cegui    -  a free library providing windowing and widgets for "
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
-	echo "Hint: build ogre first then cegui"
+    echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
     echo ""
@@ -238,23 +238,23 @@ elif [ $1 = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-	OGRE_EXTRA_FLAGS=""
+    OGRE_EXTRA_FLAGS=""
     cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
-    	echo "  Building..."
-        xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
-        echo "  Installing..."
-        xcodebuild -configuration RelWithDebInfo -target install > $LOGDIR/deps/ogre/$INSTALLLOG
-        cp -r lib/RelWithDebInfo/* $PREFIX/lib
-        #on mac, we have only Ogre.framework 
-        sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-F\${libdir} -framework Ogre/g" $PREFIX/lib/pkgconfig/OGRE.pc
-        echo "  Done."
+      echo "  Building..."
+      xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
+      echo "  Installing..."
+      xcodebuild -configuration RelWithDebInfo -target install > $LOGDIR/deps/ogre/$INSTALLLOG
+      cp -r lib/RelWithDebInfo/* $PREFIX/lib
+      #on mac, we have only Ogre.framework 
+      sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-F\${libdir} -framework Ogre/g" $PREFIX/lib/pkgconfig/OGRE.pc
+      echo "  Done."
     else
-        echo "  Building..."
-        make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
-        echo "  Installing..."
-        make install > $LOGDIR/deps/ogre/$INSTALLLOG
-        echo "  Done."
+      echo "  Building..."
+      make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
+      echo "  Installing..."
+      make install > $LOGDIR/deps/ogre/$INSTALLLOG
+      echo "  Done."
     fi
   fi
 
@@ -334,16 +334,14 @@ elif [ $1 = "install-deps" ] ; then
         echo "  Patching..."
         cd $DEPS_SOURCE/$CEGUI
         sed -i "" -e "s/\"macPlugins.h\"/\"implementations\/mac\/macPlugins.h\"/g" cegui/src/CEGUIDynamicModule.cpp
-        #Do not change indentation for the include line.
-        sed -i "" -e '1i\
-#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
+        sed -i "" -e '1i\#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
       fi
     fi
     cd $DEPS_SOURCE/$CEGUI
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer --disable-corona --disable-devil --disable-stb --disable-tga --disable-python-module $CONFIGURE_EXTRA_FLAGS > $LOGDIR/deps/CEGUI/$CONFIGLOG
+    ../configure --prefix=$PREFIX --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer --disable-corona --disable-devil --disable-stb --disable-tga --disable-python-module $CONFIGURE_EXTRA_FLAGS > $LOGDIR/deps/CEGUI/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
@@ -363,74 +361,74 @@ elif [ $1 = "checkout" ] ; then
 
   if [ $2 = "libs" ] || [ $2 = "all" ] ; then
 
-  mkdir -p $SOURCE/libs
-  cd $SOURCE/libs
+    mkdir -p $SOURCE/libs
+    cd $SOURCE/libs
 
-  # Varconf
-  echo "  Varconf..."
-  checkoutwf "varconf"
-  echo "  Done."
+    # Varconf
+    echo "  Varconf..."
+    checkoutwf "varconf"
+    echo "  Done."
 
-  # Atlas-C++
-  echo "  Atlas-C++..."
-  checkoutwf "atlas-cpp"
-  echo "  Done."
+    # Atlas-C++
+    echo "  Atlas-C++..."
+    checkoutwf "atlas-cpp"
+    echo "  Done."
 
-  # Skstream
-  echo "  Skstream..."
-  checkoutwf "skstream"
-  echo "  Done."
+    # Skstream
+    echo "  Skstream..."
+    checkoutwf "skstream"
+    echo "  Done."
 
-  # Wfmath
-  echo "  Wfmath..."
-  checkoutwf "wfmath"
-  echo "  Done."
+    # Wfmath
+    echo "  Wfmath..."
+    checkoutwf "wfmath"
+    echo "  Done."
 
-  # Eris
-  echo "  Eris..."
-  checkoutwf "eris"
-  echo "  Done."
+    # Eris
+    echo "  Eris..."
+    checkoutwf "eris"
+    echo "  Done."
 
-  # Libwfut
-  echo "  Libwfut..."
-  checkoutwf "libwfut"
-  echo "  Done."
+    # Libwfut
+    echo "  Libwfut..."
+    checkoutwf "libwfut"
+    echo "  Done."
 
-  # Mercator
-  echo "  Mercator..."
-  checkoutwf "mercator"
-  echo "  Done."
+    # Mercator
+    echo "  Mercator..."
+    checkoutwf "mercator"
+    echo "  Done."
   fi
 
   if [ $2 = "ember" ] || [ $2 = "webember" ] || [ $2 = "all" ] ; then
-  # Ember client
-  echo "  Ember client..."
-  mkdir -p $SOURCE/clients
-  cd $SOURCE/clients
-  checkoutwf "ember"
-  echo "  Done."
+    # Ember client
+    echo "  Ember client..."
+    mkdir -p $SOURCE/clients
+    cd $SOURCE/clients
+    checkoutwf "ember"
+    echo "  Done."
   fi
 
   if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
-  # Cyphesis
-  echo "  Cyphesis..."
-  mkdir -p $SOURCE/servers
-  cd $SOURCE/servers
-  checkoutwf "cyphesis"
-  echo "  Done."
+    # Cyphesis
+    echo "  Cyphesis..."
+    mkdir -p $SOURCE/servers
+    cd $SOURCE/servers
+    checkoutwf "cyphesis"
+    echo "  Done."
   fi
 
   if [ $2 = "webember" ] || [ $2 = "all" ] ; then
-  if [[ x$MSYSTEM != x"MINGW32" ]] ; then
-  echo "  FireBreath..."
-  mkdir -p $SOURCE/clients/webember
-  cd $SOURCE/clients/webember
-  checkoutwf "FireBreath" "sajty"
-  echo "  Done."
-  echo "  WebEmber..."
-  checkoutwf "webember"
-  echo "  Done."
-  fi
+    if [[ x$MSYSTEM != x"MINGW32" ]] ; then
+      echo "  FireBreath..."
+      mkdir -p $SOURCE/clients/webember
+      cd $SOURCE/clients/webember
+      checkoutwf "FireBreath" "sajty"
+      echo "  Done."
+      echo "  WebEmber..."
+      checkoutwf "webember"
+      echo "  Done."
+    fi
   fi
 
   echo "Checkout Done."
@@ -453,107 +451,101 @@ elif [ $1 = "build" ] ; then
   # Build libraries
   if [ $2 = "libs" ] || [ $2 = "all" ] ; then
 
-  # Varconf
-  echo "  Varconf..."
-  buildwf "libs/varconf"
-  echo "  Done."
+    # Varconf
+    echo "  Varconf..."
+    buildwf "libs/varconf"
+    echo "  Done."
 
-  # Skstream
-  echo "  Skstream..."
-  buildwf "libs/skstream"
-  echo "  Done."
+    # Skstream
+    echo "  Skstream..."
+    buildwf "libs/skstream"
+    echo "  Done."
 
-  # Wfmath
-  echo "  Wfmath..."
-  buildwf "libs/wfmath"
-  echo "  Done."
+    # Wfmath
+    echo "  Wfmath..."
+    buildwf "libs/wfmath"
+    echo "  Done."
 
-  # Atlas-C++
-  echo "  Atlas-C++..."
-  buildwf "libs/atlas-cpp"
-  echo "  Done."
+    # Atlas-C++
+    echo "  Atlas-C++..."
+    buildwf "libs/atlas-cpp"
+    echo "  Done."
 
-  # Mercator
-  echo "  Mercator..."
-  buildwf "libs/mercator"
-  echo "  Done."
+    # Mercator
+    echo "  Mercator..."
+    buildwf "libs/mercator"
+    echo "  Done."
 
-  # Eris
-  echo "  Eris..."
-  buildwf "libs/eris"
-  echo "  Done."
+    # Eris
+    echo "  Eris..."
+    buildwf "libs/eris"
+    echo "  Done."
 
-  # Libwfut
-  echo "  Libwfut..."
-  buildwf "libs/libwfut"
-  echo "  Done."
+    # Libwfut
+    echo "  Libwfut..."
+    buildwf "libs/libwfut"
+    echo "  Done."
 
   fi
 
   if [ $2 = "ember" ] || [ $2 = "all" ] ; then
 
-  # Ember client
-  echo "  Ember client..."
-  # As Ember now uses the C++11 dialect, we'll compile it in permissive mode until all libraries have been updated to conform. This mainly involves Mercator. Remove the CXXFLAGS dance below once Mercator has been updated to handle C++11.
-  CXXFLAGS_OLD=$CXXFLAGS
-  export CXXFLAGS="$CXXFLAGS -fpermissive"
-  buildwf "clients/ember"
-  export CXXFLAGS="$CXXFLAGS_OLD"
-  echo "  Done."
+    # Ember client
+    echo "  Ember client..."
+    buildwf "clients/ember"
+    echo "  Done."
 
-  if command -v rsync &> /dev/null; then
-    echo "Fetching media..."
-    cd $SOURCE/clients/ember/$BUILDDIR
-    set +e
-    make devmedia &> $LOGDIR/clients/ember/media.log
-    if [ $? != 0 ]
-    then
-      echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
+    if command -v rsync &> /dev/null; then
+      echo "Fetching media..."
+      cd $SOURCE/clients/ember/$BUILDDIR
+      set +e
+      make devmedia &> $LOGDIR/clients/ember/media.log
+      if [ $? != 0 ] ; then
+        echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
+      else
+        echo "Media fetched."
+      fi
+      set -e
     else
-      echo "Media fetched."
+      echo "Rsync not found, skipping fetching media. You will need to download and install it yourself from http://amber.worldforge.org/media/."
     fi
-    set -e
-  else
-    echo "Rsync not found, skipping fetching media. You will need to download and install it yourself from http://amber.worldforge.org/media/."
-  fi
 
   fi
 
   if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
 
-  # Cyphesis
-  echo "  Cyphesis..."
-  buildwf "servers/cyphesis"
-  cyphesis_post_install
-  echo "  Done."
+    # Cyphesis
+    echo "  Cyphesis..."
+    buildwf "servers/cyphesis"
+    cyphesis_post_install
+    echo "  Done."
   fi
 
 
   if [ $2 = "webember" ] || [ $2 = "all" ] ; then
   
-  echo "  WebEmber..."
-  CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
-  #we need to change the BUILDDIR to separate the ember and webember build directories.
-  #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
-  export BUILDDIR="build"
-  buildwf "clients/ember" "webember"
-  echo "  Done."
+    echo "  WebEmber..."
+    CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
+    #we need to change the BUILDDIR to separate the ember and webember build directories.
+    #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
+    export BUILDDIR="build"
+    buildwf "clients/ember" "webember"
+    echo "  Done."
 
-  if command -v rsync &> /dev/null; then
-    echo "Fetching media..."
-    cd $SOURCE/clients/ember/$BUILDDIR
-    set +e
-    make devmedia &> $LOGDIR/webember/media.log
-    if [ $? != 0 ]
-    then
-      echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
+    if command -v rsync &> /dev/null; then
+      echo "Fetching media..."
+      cd $SOURCE/clients/ember/$BUILDDIR
+      set +e
+      make devmedia &> $LOGDIR/webember/media.log
+      if [ $? != 0 ] ; then
+        echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
+      else
+        echo "Media fetched."
+      fi
+      set -e
     else
-      echo "Media fetched."
+      echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
     fi
-    set -e
-  else
-    echo "Rsync not found, skipping fetching media. You will need to download and install it yourself."
-  fi
 
     # WebEmber
     echo "  WebEmber plugin..."
