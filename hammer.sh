@@ -334,9 +334,7 @@ elif [ $1 = "install-deps" ] ; then
         echo "  Patching..."
         cd $DEPS_SOURCE/$CEGUI
         sed -i "" -e "s/\"macPlugins.h\"/\"implementations\/mac\/macPlugins.h\"/g" cegui/src/CEGUIDynamicModule.cpp
-        #Do not change indentation for the include line.
-        sed -i "" -e '1i\
-#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
+        sed -i "" -e '1i\#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
       fi
     fi
     cd $DEPS_SOURCE/$CEGUI
