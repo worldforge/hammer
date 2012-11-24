@@ -43,25 +43,25 @@ CONFIGURE_EXTRA_FLAGS=""
 CMAKE_EXTRA_FLAGS=""
 
 if [[ $OSTYPE == *darwin* ]] ; then
-	#the default architecture is universal build: i864;x86_64
-	#To save space and time, we will only build x86_64
-	CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
-	
-	#on mac libtool is called glibtool.
-	#Automake should set this, but it has messed up the order of variable definitions.
-	export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
-	
-	export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
-	export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
-	export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
-	
-	#without CPATH cegui is not finding freeimage.
-	export CPATH="/opt/local/include:$CPATH"
-	
+  #the default architecture is universal build: i864;x86_64
+  #To save space and time, we will only build x86_64
+  CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
+  
+  #on mac libtool is called glibtool.
+  #Automake should set this, but it has messed up the order of variable definitions.
+  export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
+  
+  export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
+  export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
+  export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
+  
+  #without CPATH cegui is not finding freeimage.
+  export CPATH="/opt/local/include:$CPATH"
+  
 elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
-	export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-	export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
-	export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
+  export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
+  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
 
@@ -148,7 +148,7 @@ function show_help()
     echo "  cegui    -  a free library providing windowing and widgets for "
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
-	echo "Hint: build ogre first then cegui"
+  echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
     echo ""
@@ -238,10 +238,10 @@ elif [ $1 = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-	OGRE_EXTRA_FLAGS=""
+  OGRE_EXTRA_FLAGS=""
     cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
-    	echo "  Building..."
+      echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
         echo "  Installing..."
         xcodebuild -configuration RelWithDebInfo -target install > $LOGDIR/deps/ogre/$INSTALLLOG
