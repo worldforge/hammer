@@ -504,8 +504,7 @@ elif [ $1 = "build" ] ; then
       cd $SOURCE/clients/ember/$BUILDDIR
       set +e
       make devmedia &> $LOGDIR/clients/ember/media.log
-      if [ $? != 0 ]
-      then
+      if [ $? != 0 ] ; then
         echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
       else
         echo "Media fetched."
@@ -542,8 +541,7 @@ elif [ $1 = "build" ] ; then
       cd $SOURCE/clients/ember/$BUILDDIR
       set +e
       make devmedia &> $LOGDIR/webember/media.log
-      if [ $? != 0 ]
-      then
+      if [ $? != 0 ] ; then
         echo "Could not fetch media. This can be caused by the amber.worldforge.org server being down, the network being down or a firewall which prevents rsync to be run. You need to get the media manually from http://amber.worldforge.org/media/"
       else
         echo "Media fetched."
