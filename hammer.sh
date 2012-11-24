@@ -46,18 +46,18 @@ if [[ $OSTYPE == *darwin* ]] ; then
   #the default architecture is universal build: i864;x86_64
   #To save space and time, we will only build x86_64
   CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
-  
+
   #on mac libtool is called glibtool.
   #Automake should set this, but it has messed up the order of variable definitions.
   export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
-  
+
   export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
   export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
   export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
-  
+
   #without CPATH cegui is not finding freeimage.
   export CPATH="/opt/local/include:$CPATH"
-  
+
 elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
   export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
   export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
@@ -122,13 +122,13 @@ function cyphesis_post_install()
 
   # Install our cyphesis.in script as cyphesis
   cp $SUPPORTDIR/cyphesis.in cyphesis
-  chmod +x cyphesis  
+  chmod +x cyphesis
 }
 
 function show_help()
 {
   if [ $1 = "main" ] ; then
-    echo "Script for automating the process of installing dependencies" 
+    echo "Script for automating the process of installing dependencies"
     echo "and compiling Worldforge in a self contained environment."
     echo ""
     echo "Usage: hammer.sh <command> <arguments>"
@@ -246,7 +246,7 @@ elif [ $1 = "install-deps" ] ; then
         echo "  Installing..."
         xcodebuild -configuration RelWithDebInfo -target install > $LOGDIR/deps/ogre/$INSTALLLOG
         cp -r lib/RelWithDebInfo/* $PREFIX/lib
-        #on mac, we have only Ogre.framework 
+        #on mac, we have only Ogre.framework
         sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-F\${libdir} -framework Ogre/g" $PREFIX/lib/pkgconfig/OGRE.pc
         echo "  Done."
     else
@@ -263,7 +263,7 @@ elif [ $1 = "install-deps" ] ; then
     echo "  Installing freealut..."
     mkdir -p $LOGDIR/deps/freealut
     cd $DEPS_SOURCE
-    
+
     echo "  Downloading..."
     curl -C - -OL http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-1.1.0-src.zip
     unzip -o freealut-1.1.0-src.zip
@@ -276,17 +276,17 @@ elif [ $1 = "install-deps" ] ; then
 
     mkdir -p $BUILDDIR
     cd $BUILDDIR
-    
+
     echo "  Running configure..."
     ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS \
     CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
-    
+
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/freealut/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/deps/freealut/$INSTALLLOG
   fi
-  
+
   # tolua++
   if [ $2 = "all" ] && [[ $OSTYPE == *darwin* ]] || [ $2 = "tolua++" ] ; then
     #the "all" keyword will only work on mac, but "tolua++" will work on linux and mac, if you set LUA_CFLAGS and LUA_LDFLAGS.
@@ -527,7 +527,7 @@ elif [ $1 = "build" ] ; then
 
 
   if [ $2 = "webember" ] || [ $2 = "all" ] ; then
-  
+
     echo "  WebEmber..."
     CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
     #we need to change the BUILDDIR to separate the ember and webember build directories.
@@ -580,7 +580,7 @@ elif [ $1 = "build" ] ; then
         mkdir -p ~/.mozilla/plugins
         cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
       fi
-    fi    
+    fi
     echo "  Done."
   fi
 
