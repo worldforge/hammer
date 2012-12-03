@@ -109,7 +109,11 @@ function checkoutwf()
   if [ ! -d $1 ]; then
     git clone git://github.com/$USER/$1.git -b $BRANCH
   else
-    cd $1 && git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase origin/$BRANCH && cd ..
+    cd $1
+    if [ x$HAMMERALWAYSSTASH = xyes ]; then
+      git stash save "Hammer stash"
+    fi
+    git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase origin/$BRANCH && cd ..
   fi
 }
 
@@ -151,6 +155,8 @@ function show_help()
     echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
+    echo "If you want Hammer to stash away any local changes, use the"
+    echo "environment variable HAMMERALWAYSSTASH=yes."
     echo ""
     echo "Usage: hammer.sh checkout <target>"
     echo "Available targets:"
