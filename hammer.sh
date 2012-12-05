@@ -40,12 +40,11 @@ OGRE=ogre_1_8_1
 OGRE_DOWNLOAD=ogre_src_v1-8-1.tar.bz2
 
 CONFIGURE_EXTRA_FLAGS=""
-CMAKE_EXTRA_FLAGS=""
 
 if [[ $OSTYPE == *darwin* ]] ; then
   #the default architecture is universal build: i864;x86_64
   #To save space and time, we will only build x86_64
-  CMAKE_EXTRA_FLAGS="-GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
+  CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
 
   #on mac libtool is called glibtool.
   #Automake should set this, but it has messed up the order of variable definitions.
