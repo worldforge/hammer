@@ -168,7 +168,7 @@ fi
 #hacks:
 #	if you set the *FLAGS environment variables, it may fail on a test.
 #	make install copies to the wrong location
-PKGNAME="cmake-2.8.3"
+PKGNAME="cmake-2.8.10"
 PKGLOGDIR="$LOGDIR/$PKGNAME"
 PKGLOCKFILE="$LOCKDIR/${PKGNAME}_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
@@ -181,7 +181,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	mkdir -p $PKGNAME/mingw_build
 	cd $PKGNAME/mingw_build
 	printc "    Running configure..."
-	../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $PKGLOGDIR/configure.log
+	../configure --prefix=$PREFIX > $PKGLOGDIR/configure.log
 	printc "    Building..."
 	make $MAKEOPTS > $PKGLOGDIR/build.log
 	printc "    Installing..."
@@ -196,8 +196,8 @@ export CXXFLAGS="-O2 -msse2 -mthreads -DNDEBUG -DBOOST_THREAD_USE_LIB -I$PREFIX/
 export LDFLAGS="-L$PREFIX/lib $LDFLAGS_SAVE"
 
 #install zziplib
-FILENAME="zziplib-0.13.60.tar.bz2"
-installpackage "http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.60/$FILENAME/download" "$FILENAME"
+FILENAME="zziplib-0.13.62.tar.bz2"
+installpackage "http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.62/$FILENAME/download" "$FILENAME"
 
 #install freetype
 FILENAME="freetype-2.4.4.tar.bz2"
@@ -249,13 +249,13 @@ fi
 #install boost
 PKGLOCKFILE="$LOCKDIR/boost_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/boost/files/boost/1.46.1/boost_1_46_1.tar.bz2/download
-	extract $DLDIR/boost_1_46_1.tar.bz2
-	cd boost_1_46_1
+	wget -c -P $DLDIR http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download
+	extract $DLDIR/boost_1_49_0.tar.bz2
+	cd boost_1_49_0
 	./bootstrap.sh --with-toolset=mingw
 	#solution found here: http://stackoverflow.com/questions/5012429/building-boost-under-msys-cant-find-mingw-jam
 	sed -i "s/mingw/gcc/g" project-config.jam;
-	./bjam --with-thread --with-date_time --prefix=$PREFIX --layout=system variant=release link=static toolset=gcc install
+	./bjam --with-thread --with-date_time --with-chrono --prefix=$PREFIX --layout=system variant=release link=static toolset=gcc install
 
 	cd ..
 	touch $PKGLOCKFILE
@@ -332,9 +332,9 @@ fi
 #	its not creating ogre.pc, we need to create them manually.
 PKGLOCKFILE="$LOCKDIR/Ogre_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/ogre/files/ogre/1.7/ogre_src_v1-7-3.tar.bz2/download
-	extract $DLDIR/ogre_src_v1-7-3.tar.bz2
-	cd ogre_src_v1-7-3
+	wget -c -P $DLDIR http://sourceforge.net/projects/ogre/files/ogre/1.8/1.8.1/ogre_src_v1-8-1.tar.bz2/download
+	extract $DLDIR/ogre_src_v1-8-1.tar.bz2
+	cd ogre_src_v1-8-1
 	mkdir -p build
 	cd build
 	cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -G"MSYS Makefiles" \
@@ -359,9 +359,9 @@ fi
 #install CEGUI
 PKGLOCKFILE="$LOCKDIR/CEGUI_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/crayzedsgui/files/CEGUI%20Mk-2/0.7.5/CEGUI-0.7.5.tar.gz/download
-	extract $DLDIR/CEGUI-0.7.5.tar.gz
-	cd CEGUI-0.7.5
+	wget -c -P $DLDIR http://sourceforge.net/projects/crayzedsgui/files/CEGUI%20Mk-2/0.7.7/CEGUI-0.7.7.tar.gz/download
+	extract $DLDIR/CEGUI-0.7.7.tar.gz
+	cd CEGUI-0.7.7
 	./configure --prefix=$PREFIX --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c \
 	--disable-libxml --disable-expat --disable-directfb-renderer \
 	--enable-freeimage --enable-ogre-renderer --enable-lua-module --enable-external-toluapp \

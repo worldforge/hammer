@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: OGRE-Property
 Description: General purpose property component for OGRE
-Version: 1.7.3
-Requires: OGRE = 1.7.3
+Version: 1.8.1
+Requires: OGRE = 1.8.1
 Libs: -L${libdir} -lOgreProperty
 Cflags: -I${includedir}/OGRE/Property -mthread
