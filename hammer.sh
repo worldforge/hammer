@@ -194,7 +194,7 @@ if [ $# -eq 0 ] ; then
   show_help "main"
 
 # If help command given, show help page
-elif [ $1 = "help" ] ; then
+elif [ "$1" = "help" ] ; then
   if [ $# -eq 2 ] ; then
     show_help $2
   else
@@ -204,7 +204,7 @@ elif [ $1 = "help" ] ; then
   mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
 
 # Dependencies install
-elif [ $1 = "install-deps" ] ; then
+elif [ "$1" = "install-deps" ] ; then
   if [ x$MSYSTEM = x"MINGW32" ] ; then
     SCRIPTDIR=`dirname "$0"`
     $SCRIPTDIR/mingw_install_deps.sh
@@ -222,7 +222,7 @@ elif [ $1 = "install-deps" ] ; then
   mkdir -p $LOGDIR/deps
 
   # Ogre3D
-  if [ $2 = "all" ] || [ $2 = "ogre" ] ; then
+  if [ "$2" = "all" ] || [ "$2" = "ogre" ] ; then
     echo "  Installing Ogre..."
     mkdir -p $LOGDIR/deps/ogre
     cd $DEPS_SOURCE
@@ -264,7 +264,7 @@ elif [ $1 = "install-deps" ] ; then
   fi
 
   # freealut
-  if [ $2 = "all" ] && [[ $OSTYPE == *darwin* ]] || [ $2 = "freealut" ] ; then
+  if [ "$2" = "all" ] && [[ $OSTYPE == *darwin* ]] || [ "$2" = "freealut" ] ; then
     echo "  Installing freealut..."
     mkdir -p $LOGDIR/deps/freealut
     cd $DEPS_SOURCE
@@ -293,7 +293,7 @@ elif [ $1 = "install-deps" ] ; then
   fi
 
   # tolua++
-  if [ $2 = "all" ] && [[ $OSTYPE == *darwin* ]] || [ $2 = "tolua++" ] ; then
+  if [ "$2" = "all" ] && [[ $OSTYPE == *darwin* ]] || [ "$2" = "tolua++" ] ; then
     #the "all" keyword will only work on mac, but "tolua++" will work on linux and mac, if you set LUA_CFLAGS and LUA_LDFLAGS.
     #LUA_CFLAGS="`pkg-config --cflags lua5.1`"
     #LUA_LDFLAGS="`pkg-config --libs lua5.1`"
@@ -327,7 +327,7 @@ elif [ $1 = "install-deps" ] ; then
   fi
 
   # CEGUI
-  if [ $2 = "all" ] || [ $2 = "cegui" ] ; then
+  if [ "$2" = "all" ] || [ "$2" = "cegui" ] ; then
     echo "  Installing CEGUI..."
     mkdir -p $LOGDIR/deps/CEGUI    # create CEGUI log directory
     cd $DEPS_SOURCE
@@ -361,10 +361,15 @@ elif [ $1 = "install-deps" ] ; then
   echo "Install Done."
 
 # Source checkout
-elif [ $1 = "checkout" ] ; then
+elif [ "$1" = "checkout" ] ; then
+  if [ $# -ne 2 ] ; then
+    echo "Missing required parameter!"
+    show_help "checkout"
+    exit 1
+  fi
   echo "Fetching sources..."
 
-  if [ $2 = "libs" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "libs" ] || [ "$2" = "all" ] ; then
 
     mkdir -p $SOURCE/libs
     cd $SOURCE/libs
@@ -405,7 +410,7 @@ elif [ $1 = "checkout" ] ; then
     echo "  Done."
   fi
 
-  if [ $2 = "ember" ] || [ $2 = "webember" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "ember" ] || [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
     # Ember client
     echo "  Ember client..."
     mkdir -p $SOURCE/clients
@@ -414,7 +419,7 @@ elif [ $1 = "checkout" ] ; then
     echo "  Done."
   fi
 
-  if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "cyphesis" ] || [ "$2" = "all" ] ; then
     # Cyphesis
     echo "  Cyphesis..."
     mkdir -p $SOURCE/servers
@@ -423,7 +428,7 @@ elif [ $1 = "checkout" ] ; then
     echo "  Done."
   fi
 
-  if [ $2 = "webember" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
     if [[ x$MSYSTEM != x"MINGW32" ]] ; then
       echo "  FireBreath..."
       mkdir -p $SOURCE/clients/webember
@@ -439,7 +444,7 @@ elif [ $1 = "checkout" ] ; then
   echo "Checkout Done."
 
 # Build source
-elif [ $1 = "build" ] ; then
+elif [ "$1" = "build" ] ; then
   if [ $# -lt 2 ] ; then
     echo "Missing required parameter!"
     show_help "build"
@@ -454,7 +459,7 @@ elif [ $1 = "build" ] ; then
   echo "Building sources..."
 
   # Build libraries
-  if [ $2 = "libs" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "libs" ] || [ "$2" = "all" ] ; then
 
     # Varconf
     echo "  Varconf..."
@@ -493,7 +498,7 @@ elif [ $1 = "build" ] ; then
 
   fi
 
-  if [ $2 = "ember" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "ember" ] || [ "$2" = "all" ] ; then
 
     # Ember client
     echo "  Ember client..."
@@ -517,7 +522,7 @@ elif [ $1 = "build" ] ; then
 
   fi
 
-  if [ $2 = "cyphesis" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "cyphesis" ] || [ "$2" = "all" ] ; then
 
     # Cyphesis
     echo "  Cyphesis..."
@@ -527,7 +532,7 @@ elif [ $1 = "build" ] ; then
   fi
 
 
-  if [ $2 = "webember" ] || [ $2 = "all" ] ; then
+  if [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
 
     echo "  WebEmber..."
     CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
@@ -587,7 +592,7 @@ elif [ $1 = "build" ] ; then
 
   echo "Build Done."
 
-elif [ $1 = "clean" ] ; then
+elif [ "$1" = "clean" ] ; then
   if [ $# -ne 2 ] ; then
     echo "Missing required parameter!"
     show_help "clean"
@@ -595,9 +600,9 @@ elif [ $1 = "clean" ] ; then
   fi
 
   # Delete build directory
-  if [ $2 = "cegui" ] ; then
+  if [ "$2" = "cegui" ] ; then
     rm -rf $DEPS_SOURCE/$CEGUI/$BUILDDIR
-  elif [ $2 = "ogre" ] ; then
+  elif [ "$2" = "ogre" ] ; then
     rm -rf $DEPS_SOURCE/$OGRE/ogre/$BUILDDIR
   else
     rm -rf $SOURCE/$2/$BUILDDIR
