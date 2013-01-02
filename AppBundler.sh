@@ -25,7 +25,7 @@ if [ ! -f $DYLIBBUNDLER ]; then
   mkdir -p $DEPS_SOURCE
   cd $DEPS_SOURCE
   FILENAME="dylibbundler0.3.1.zip"
-  wget -c http://switch.dl.sourceforge.net/project/macdylibbundler/macdylibbundler/0.3.1/$FILENAME
+  curl -c - -OL http://switch.dl.sourceforge.net/project/macdylibbundler/macdylibbundler/0.3.1/$FILENAME
   unzip $FILENAME
   cd dylibbundler
   make
