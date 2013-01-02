@@ -73,7 +73,7 @@ function installpackage(){
 		printc "Installing $PKGNAME..."
 		mkdir -p $PKGLOGDIR
 		printc "    Downloading..."
-		wget -q -c -P $DLDIR $1
+		curl -s -C - -o $DLDIR/$2 -L --create-dirs $1
 		printc "    Extracting..."
 		extract $DLDIR/$2 2> $PKGLOGDIR/extract.log
 		mkdir -p $PKGNAME/mingw_build
@@ -103,7 +103,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing 7za..."
 	mkdir -p 7za
 	cd 7za
-	wget -q -c -P $DLDIR http://downloads.sourceforge.net/sevenzip/7za920.zip
+	curl -s -C - -o $DLDIR/7za920.zip -L --create-dirs http://downloads.sourceforge.net/sevenzip/7za920.zip
 	bsdtar -xf $DLDIR/7za920.zip
 	cp ./7za.exe $PREFIX/bin/7za.exe
 	cd ..
@@ -112,14 +112,14 @@ fi
 
 #install rsync
 #maybe we should host this file
-#wget -c -P $DLDIR http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
-#wget -c -P $DLDIR http://k002.kiwi6.com/hotlink/w8nv7zl9qh/rsync_3_0_8_tar.lzma
+#curl -C - -o $DLDIR/rsync-3.0.8.tar.lzma -L --create-dirs http://download1039.mediafire.com/p2h9ja9uzvtg/g35fh308hmdklz5/rsync-3.0.8.tar.lzma
+#curl -C - -o $DLDIR/rsync_3_0_8_tar.lzma -L --create-dirs http://k002.kiwi6.com/hotlink/w8nv7zl9qh/rsync_3_0_8_tar.lzma
 PKGLOCKFILE="$LOCKDIR/rsync_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing rsync..."
 	mkdir -p rsync
 	cd rsync
-	wget -q -c -P $DLDIR http://sajty.elementfx.com/rsync-3.0.8.tar.lzma
+	curl -s -C - -o $DLDIR/rsync-3.0.8.tar.lzma -L --create-dirs http://sajty.elementfx.com/rsync-3.0.8.tar.lzma
 	extract $DLDIR/rsync-3.0.8.tar.lzma 2> /dev/null
 	cp rsync.exe $PREFIX/bin/rsync.exe
 	cd ..
@@ -151,7 +151,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing $PKGNAME..."
 	mkdir -p $PKGLOGDIR
 	printc "    Downloading..."
-	wget -q -c -P $DLDIR http://downloads.sourceforge.net/freeimage/FreeImage3150.zip
+	curl -s -C - -o $DLDIR/FreeImage3150.zip -L --create-dirs http://downloads.sourceforge.net/freeimage/FreeImage3150.zip
 	printc "    Extracting..."
 	extract $DLDIR/FreeImage3150.zip 2> $PKGLOGDIR/extract.log
 	cd $PKGNAME
@@ -175,7 +175,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing $PKGNAME..."
 	mkdir -p $PKGLOGDIR
 	printc "    Downloading..."
-	wget -q -c -P $DLDIR http://www.cmake.org/files/v2.8/$PKGNAME.tar.gz
+	curl -s -C - -o $DLDIR/$PKGNAME.tar.gz -L --create-dirs http://www.cmake.org/files/v2.8/$PKGNAME.tar.gz
 	printc "    Extracting..."
 	extract $DLDIR/$PKGNAME.tar.gz 2> $PKGLOGDIR/extract.log
 	mkdir -p $PKGNAME/mingw_build
@@ -230,7 +230,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing $PKGNAME..."
 	mkdir -p $PKGLOGDIR
 	printc "    Downloading..."
-	wget -q -c -P $DLDIR http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.gz
+	curl -s -C - -o $DLDIR/$PKGNAME.tar.gz -L --create-dirs http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.gz
 	printc "    Extracting..."
 	bsdtar -xf  $DLDIR/$PKGNAME.tar.gz
 	mkdir -p $PKGNAME/mingw_build
@@ -249,7 +249,7 @@ fi
 #install boost
 PKGLOCKFILE="$LOCKDIR/boost_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download
+	curl -C - -o $DLDIR/boost_1_49_0.tar.bz2 -L --create-dirs http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download
 	extract $DLDIR/boost_1_49_0.tar.bz2
 	cd boost_1_49_0
 	./bootstrap.sh --with-toolset=mingw
@@ -264,7 +264,7 @@ fi
 #install lua
 PKGLOCKFILE="$LOCKDIR/lua_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://www.lua.org/ftp/lua-5.1.4.tar.gz
+	curl -C - -o $DLDIR/lau-5.1.4.tar.gz -L --create-dirs http://www.lua.org/ftp/lua-5.1.4.tar.gz
 	extract $DLDIR/lua-5.1.4.tar.gz
 	cd lua-5.1.4
 	make mingw $MAKEOPTS
@@ -283,7 +283,7 @@ fi
 #	tolua uses scons, which needs python, which is big.
 PKGLOCKFILE="$LOCKDIR/tolua++_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
+	curl -C - -o $DLDIR/tolua++-1.0.93.tar.bz2 -L --create-dirs http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
 	extract $DLDIR/tolua++-1.0.93.tar.bz2
 	cd tolua++-1.0.93
 	cp include/tolua++.h $PREFIX/include/tolua++.h
@@ -301,7 +301,7 @@ fi
 #install openal-soft
 PKGLOCKFILE="$LOCKDIR/openal-soft_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://kcat.strangesoft.net/openal-releases/openal-soft-1.13.tar.bz2
+	curl -C - -o $DLDIR/openal-soft-1.13.tar.bz2 -L -create-dirs http://kcat.strangesoft.net/openal-releases/openal-soft-1.13.tar.bz2
 	extract $DLDIR/openal-soft-1.13.tar.bz2
 	cd openal-soft-1.13
 	cd build
@@ -332,7 +332,7 @@ fi
 #	its not creating ogre.pc, we need to create them manually.
 PKGLOCKFILE="$LOCKDIR/Ogre_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/ogre/files/ogre/1.8/1.8.1/ogre_src_v1-8-1.tar.bz2/download
+	curl -C - -o $DLDIR/ogre_src_v1-8-1.tar.bz2 -L --create-dirs http://sourceforge.net/projects/ogre/files/ogre/1.8/1.8.1/ogre_src_v1-8-1.tar.bz2/download
 	extract $DLDIR/ogre_src_v1-8-1.tar.bz2
 	cd ogre_src_v1-8-1
 	mkdir -p build
@@ -359,7 +359,7 @@ fi
 #install CEGUI
 PKGLOCKFILE="$LOCKDIR/CEGUI_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	wget -c -P $DLDIR http://sourceforge.net/projects/crayzedsgui/files/CEGUI%20Mk-2/0.7.7/CEGUI-0.7.7.tar.gz/download
+	curl -C - -o $DLDIR/CEGUI-0.7.7.tar.gz -L --create-dirs http://sourceforge.net/projects/crayzedsgui/files/CEGUI%20Mk-2/0.7.7/CEGUI-0.7.7.tar.gz/download
 	extract $DLDIR/CEGUI-0.7.7.tar.gz
 	cd CEGUI-0.7.7
 	./configure --prefix=$PREFIX --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c \

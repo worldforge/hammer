@@ -154,7 +154,7 @@ installpackage_dirless "http://prdownloads.sourceforge.net/libpng/$FILENAME?down
 #multiline comment, its never true!
 if [ 1 == 0 ] ; then
   #cmake
-  wget http://www.cmake.org/files/v2.8/cmake-2.8.5.tar.gz
+  curl -C - -OL http://www.cmake.org/files/v2.8/cmake-2.8.5.tar.gz
   tar -xzf cmake-2.8.5.tar.gz
   cd cmake-2.8.5
   ./configure
@@ -163,7 +163,7 @@ if [ 1 == 0 ] ; then
   cd ..
   
   #git
-  wget http://kernel.org/pub/software/scm/git/git-1.7.6.1.tar.bz2
+  curl -C - -OL http://kernel.org/pub/software/scm/git/git-1.7.6.1.tar.bz2
   tar -xjf git-1.7.6.1.tar.bz2
   cd git-1.7.6.1
   ./configure
@@ -299,7 +299,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	make linux CFLAGS="$CFLAGS -fPIC -DLUA_USE_LINUX" LIBS="$LDFLAGS -lm -Wl,-E -ldl -lreadline -lhistory -lncurses -llua" $MAKEOPTS
 	make install INSTALL_TOP="$PREFIX"
 	#install lua5.1.pc
-	wget "http://sajty.elementfx.com/lua5.1.pc"
+	curl -C - -OL "http://sajty.elementfx.com/lua5.1.pc"
 	export PREFIX_ESCAPED=$(echo $PREFIX | sed -e 's/\(\/\|\\\|&\)/\\&/g')
 	sed -i "s/TPL_PREFIX/$PREFIX_ESCAPED/g" ./lua5.1.pc 
 	mv ./lua5.1.pc $PREFIX/lib/pkgconfig/lua5.1.pc
