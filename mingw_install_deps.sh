@@ -204,7 +204,7 @@ FILENAME="freetype-2.4.4.tar.bz2"
 installpackage "http://sourceforge.net/projects/freetype/files/freetype2/2.4.4/$FILENAME/download" "$FILENAME"
 
 #install SDL
-FILENAME="SDL-1.2.14.tar.gz"
+FILENAME="SDL-1.2.15.tar.gz"
 installpackage "http://www.libsdl.org/release/$FILENAME" "$FILENAME"
 
 #install libCURL
