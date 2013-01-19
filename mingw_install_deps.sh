@@ -363,7 +363,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	extract $DLDIR/CEGUI-0.7.7.tar.gz
 	cd CEGUI-0.7.7
 	./configure --prefix=$PREFIX --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c \
-	--disable-libxml --disable-expat --disable-directfb-renderer \
+	--disable-libxml --disable-expat --disable-directfb-renderer --disable-corona --disable-devil --disable-stb --disable-python-module \
 	--enable-freeimage --enable-ogre-renderer --enable-lua-module --enable-external-toluapp \
 	FreeImage_CFLAGS="-DUSE_FREEIMAGE_LIBRARY -I$PREFIX/include" FreeImage_LIBS="-lFreeImage" \
 	toluapp_CFLAGS="-I$PREFIX/include" toluapp_LIBS="-ltolua++" \
