@@ -218,8 +218,8 @@ fi
 #use your package manager!
 
 #install zziplib
-FILENAME="zziplib-0.13.60.tar.bz2"
-installpackage "http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.60/$FILENAME/download" "$FILENAME"
+FILENAME="zziplib-0.13.62.tar.bz2"
+installpackage "http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.62/$FILENAME/download" "$FILENAME"
 
 #install freetype
 FILENAME="freetype-2.4.4.tar.bz2"
