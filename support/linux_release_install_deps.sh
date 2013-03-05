@@ -63,9 +63,11 @@ cd $PACKAGEDIR
 function extract(){
 	if [[ $1 == *.tar.gz ]]; then
 		tar -xzf $1
-	elif [[ $1 == *.tar.bz2 ]]; then
-		tar -xjf $1
-	else
+        elif [[ $1 == *.tar.bz2 ]]; then
+                tar -xjf $1
+        elif [[ $1 == *.tar.xz ]]; then
+                tar -xJf $1
+        else
 		unzip -o -qq $1
 	fi
 }
