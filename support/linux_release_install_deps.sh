@@ -151,24 +151,25 @@ function installpackage_dirless(){
 #use your package manager!
 
 #install zlib
-FILENAME="zlib-1.2.5.tar.bz2"
+FILENAME="zlib-1.2.7.tar.bz2"
 installpackage_dirless "http://prdownloads.sourceforge.net/libpng/$FILENAME?download" "$FILENAME"
 
 #multiline comment, its never true!
 if [ 1 == 0 ] ; then
   #cmake
-  curl -C - -OL http://www.cmake.org/files/v2.8/cmake-2.8.5.tar.gz
-  tar -xzf cmake-2.8.5.tar.gz
-  cd cmake-2.8.5
+  CMAKE_VERSION=2.8.10
+  curl -C - -OL http://www.cmake.org/files/v2.8/cmake-${CMAKE_VERSION}.tar.gz
+  tar -xzf cmake-${CMAKE_VERSION}.tar.gz
+  cd cmake-${CMAKE_VERSION}
   ./configure
   make
   sudo make install
   cd ..
   
   #git
-  curl -C - -OL http://kernel.org/pub/software/scm/git/git-1.7.6.1.tar.bz2
-  tar -xjf git-1.7.6.1.tar.bz2
-  cd git-1.7.6.1
+  curl -C - -OL http://kernel.org/pub/software/scm/git/git-1.8.1.3.tar.bz2
+  tar -xjf git-1.8.1.3.tar.bz2
+  cd git-1.8.1.3
   ./configure
   make
   sudo make install
@@ -193,9 +194,9 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing $PKGNAME..."
 	mkdir -p $PKGLOGDIR
 	printc "    Downloading..."
-	download "http://downloads.sourceforge.net/freeimage/FreeImage3150.zip" "FreeImage3150.zip"
+	download "http://downloads.sourceforge.net/freeimage/FreeImage3154.zip" "FreeImage3154.zip"
 	printc "    Extracting..."
-	extract $DLDIR/FreeImage3150.zip
+	extract $DLDIR/FreeImage3154.zip
 	cd $PKGNAME
 	printc "    Building..."
 	CXXFLAGS_SAVE="$CXXFLAGS"
@@ -210,9 +211,9 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "    Installing..."
 	cp Dist/FreeImage.h $PREFIX/include/FreeImage.h
 	#cp Dist/libfreeimage.a $PREFIX/lib/libfreeimage.a
-	cp Dist/libfreeimage-3.15.0.so $PREFIX/lib/libfreeimage-3.15.0.so
-	ln -sf libfreeimage-3.15.0.so $PREFIX/lib/libfreeimage.so.3
-	ln -sf libfreeimage-3.15.0.so $PREFIX/lib/libfreeimage.so
+	cp Dist/libfreeimage-3.15.4.so $PREFIX/lib/libfreeimage-3.15.4.so
+	ln -sf libfreeimage-3.15.4.so $PREFIX/lib/libfreeimage.so.3
+	ln -sf libfreeimage-3.15.4.so $PREFIX/lib/libfreeimage.so
 	cd ..
 	touch $PKGLOCKFILE
 fi
@@ -225,35 +226,35 @@ FILENAME="zziplib-0.13.62.tar.bz2"
 installpackage "http://sourceforge.net/projects/zziplib/files/zziplib13/0.13.62/$FILENAME/download" "$FILENAME"
 
 #install freetype
-FILENAME="freetype-2.4.4.tar.bz2"
-installpackage "http://sourceforge.net/projects/freetype/files/freetype2/2.4.4/$FILENAME/download" "$FILENAME"
+FILENAME="freetype-2.4.11.tar.bz2"
+installpackage "http://sourceforge.net/projects/freetype/files/freetype2/2.4.11/$FILENAME/download" "$FILENAME"
 
 #install libCURL
-FILENAME="curl-7.21.6.tar.bz2"
+FILENAME="curl-7.29.0.tar.bz2"
 installpackage "http://curl.haxx.se/download/$FILENAME" "$FILENAME"
 
 #install pcre
-FILENAME="pcre-8.12.tar.bz2"
+FILENAME="pcre-8.32.tar.bz2"
 #--enable-unicode-properties is needed for ember.
 CONFIGURE_EXTRA_FLAGS_SAVE="$CONFIGURE_EXTRA_FLAGS"
 export CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-unicode-properties"
-installpackage "http://sourceforge.net/projects/pcre/files/pcre/8.12/$FILENAME/download" "$FILENAME"
+installpackage "http://sourceforge.net/projects/pcre/files/pcre/8.32/$FILENAME/download" "$FILENAME"
 export CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS_SAVE"
 
 
 #install sigc++
 #hacks:
 #	7za is not supporting PAX, need to use tar
-PKGNAME="libsigc++-2.2.9"
+PKGNAME="libsigc++-2.2.11"
 PKGLOGDIR="$LOGDIR/$PKGNAME"
 PKGLOCKFILE="$LOCKDIR/${PKGNAME}_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing $PKGNAME..."
 	mkdir -p $PKGLOGDIR
 	printc "    Downloading..."
-	download http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.gz
+	download http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.xz
 	printc "    Extracting..."
-	tar -xzf  $DLDIR/$PKGNAME.tar.gz
+	tar -xJf  $DLDIR/$PKGNAME.tar.xz
 	mkdir -p $PKGNAME/linux_build
 	cd $PKGNAME/linux_build
 	printc "    Running configure..."
@@ -270,9 +271,9 @@ fi
 #install boost
 PKGLOCKFILE="$LOCKDIR/boost_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	download "http://sourceforge.net/projects/boost/files/boost/1.46.1/boost_1_46_1.tar.bz2/download" "boost_1_46_1.tar.bz2"
-	extract $DLDIR/boost_1_46_1.tar.bz2
-	cd boost_1_46_1
+	download "http://sourceforge.net/projects/boost/files/boost/1.53.0/boost_1_53_0.tar.bz2/download" "boost_1_53_0.tar.bz2"
+	extract $DLDIR/boost_1_53_0.tar.bz2
+	cd boost_1_53_0
 	./bootstrap.sh
 	./bjam dll-path=../lib --with-thread --with-date_time --prefix=$PREFIX --layout=system variant=release install
 	cd ..
@@ -287,11 +288,12 @@ FILENAME="ncurses-5.9.tar.gz"
 installpackage "http://ftp.gnu.org/pub/gnu/ncurses/$FILENAME" "$FILENAME"
 
 #install lua
+LUA_VERSION=5.1.5
 PKGLOCKFILE="$LOCKDIR/lua_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	download "http://www.lua.org/ftp/lua-5.1.4.tar.gz" "lua-5.1.4.tar.gz"
-	extract $DLDIR/lua-5.1.4.tar.gz
-	cd lua-5.1.4
+	download "http://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz" "lua-${LUA_VERSION}.tar.gz"
+	extract $DLDIR/lua-${LUA_VERSION}.tar.gz
+	cd lua-${LUA_VERSION}
 	#hack to build shared instead of static lua
 	sed -i "s/liblua\.a/liblua.so/g" Makefile
 	sed -i "s/liblua\.a/liblua.so/g" src/Makefile
@@ -331,9 +333,9 @@ installpackage "http://connect.creativelabs.com/openal/Downloads/ALUT/$FILENAME"
 #install Ogre3D
 PKGLOCKFILE="$LOCKDIR/Ogre_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	download "http://sourceforge.net/projects/ogre/files/ogre/1.7/ogre_src_v1-7-3.tar.bz2/download" "ogre_src_v1-7-3.tar.bz2"
-	extract $DLDIR/ogre_src_v1-7-3.tar.bz2
-	cd ogre_src_v1-7-3
+	download "http://sourceforge.net/projects/ogre/files/ogre/1.8/ogre_src_v1-8-1.tar.bz2/download" "ogre_src_v1-8-1.tar.bz2"
+	extract $DLDIR/ogre_src_v1-8-1.tar.bz2
+	cd ogre_src_v1-8-1
 	mkdir -p build
 	cd build
 	cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -373,11 +375,12 @@ if [ ! -f $PKGLOCKFILE ]; then
 fi
 
 #install CEGUI
+CEGUI_VERSION=0.7.9
 PKGLOCKFILE="$LOCKDIR/CEGUI_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	download  "http://sourceforge.net/projects/crayzedsgui/files/CEGUI%20Mk-2/0.7.5/CEGUI-0.7.5.tar.gz/download" "CEGUI-0.7.5.tar.gz"
-	extract $DLDIR/CEGUI-0.7.5.tar.gz
-	cd CEGUI-0.7.5
+	download  "http://sourceforge.net/projects/crayzedsgui/files/CEGUI%20Mk-2/${CEGUI_VERSION}/CEGUI-${CEGUI_VERSION}.tar.gz/download" "CEGUI-${CEGUI_VERSION}.tar.gz"
+	extract $DLDIR/CEGUI-${CEGUI_VERSION}.tar.gz
+	cd CEGUI-${CEGUI_VERSION}
 	./configure --prefix=$PREFIX --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c \
 	--disable-libxml --disable-expat --disable-python-module --disable-directfb-renderer \
 	--disable-corona --disable-devil --disable-stb --disable-tga \
