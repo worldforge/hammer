@@ -37,7 +37,8 @@ export ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
 export MAKEOPTS="-j2"
 
-export CFLAGS="-O2 -msse2 -I$PREFIX/include $CFLAGS"
+export CFLAGS="-O2 -msse2 $CFLAGS"
+export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
 export CXXFLAGS="-O2 -msse2 -DCEGUI_STATIC -I$PREFIX/include $CXXFLAGS"
 export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
 
