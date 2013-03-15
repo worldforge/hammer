@@ -262,11 +262,12 @@ if [ ! -f $PKGLOCKFILE ]; then
 fi
 
 #install lua
+LUA_VERSION=5.1.5
 PKGLOCKFILE="$LOCKDIR/lua_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	curl -C - -o $DLDIR/lua-5.1.4.tar.gz -L --create-dirs http://www.lua.org/ftp/lua-5.1.4.tar.gz
-	extract $DLDIR/lua-5.1.4.tar.gz
-	cd lua-5.1.4
+	curl -C - -o $DLDIR/lua-${LUA_VERSION}.tar.gz -L --create-dirs http://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz
+	extract $DLDIR/lua-${LUA_VERSION}.tar.gz
+	cd lua-${LUA_VERSION}
 	make mingw $MAKEOPTS
 	make install INSTALL_TOP=$PREFIX
 	#install lua5.1.pc

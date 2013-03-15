@@ -47,6 +47,7 @@ BUILDDEPS=$PWD/work/build/deps
 PACKAGEDIR=$BUILDDEPS/packages
 DLDIR=$BUILDDEPS/downloads
 LOCKDIR=$BUILDDEPS/locks
+SUPPORTDIR=$PWD/support
 
 mkdir -p $LOGDIR
 mkdir -p $BUILDDEPS
@@ -61,6 +62,7 @@ cd $PACKAGEDIR
 
 #this is needed, because tar and bsdtar makes segfaults sometimes.
 function extract(){
+        echo "Extracting $1."
 	if [[ $1 == *.tar.gz ]]; then
 		tar -xzf $1
         elif [[ $1 == *.tar.bz2 ]]; then
@@ -75,10 +77,11 @@ function extract(){
 #on linux wget is not following redirects from sourceforge, so we need to use curl.
 function download(){
 	if [ "$2" == "" ] || [ ! -f $DLDIR/$2 ] ; then
+                echo "Downloading $1 to $DLDIR/$2."
 		CURDIR="$PWD"
 		cd $DLDIR
 		#note: curl 7.20 is needed for -J option!
-		curl -L -O -J $1
+		curl -L -o $2 $1
 		cd $CURDIR
 	fi
 }
@@ -252,7 +255,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	printc "Installing $PKGNAME..."
 	mkdir -p $PKGLOGDIR
 	printc "    Downloading..."
-	download http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.xz
+	download http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/$PKGNAME.tar.xz $PKGNAME.tar.xz
 	printc "    Extracting..."
 	tar -xJf  $DLDIR/$PKGNAME.tar.xz
 	mkdir -p $PKGNAME/linux_build
@@ -271,9 +274,9 @@ fi
 #install boost
 PKGLOCKFILE="$LOCKDIR/boost_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	download "http://sourceforge.net/projects/boost/files/boost/1.53.0/boost_1_53_0.tar.bz2/download" "boost_1_53_0.tar.bz2"
-	extract $DLDIR/boost_1_53_0.tar.bz2
-	cd boost_1_53_0
+        download "http://sourceforge.net/projects/boost/files/boost/1.46.1/boost_1_46_1.tar.bz2/download" "boost_1_46_1.tar.bz2"
+        extract $DLDIR/boost_1_46_1.tar.bz2
+        cd boost_1_46_1
 	./bootstrap.sh
 	./bjam dll-path=../lib --with-thread --with-date_time --prefix=$PREFIX --layout=system variant=release install
 	cd ..
@@ -304,7 +307,7 @@ if [ ! -f $PKGLOCKFILE ]; then
 	make linux CFLAGS="$CFLAGS -fPIC -DLUA_USE_LINUX" LIBS="$LDFLAGS -lm -Wl,-E -ldl -lreadline -lhistory -lncurses -llua" $MAKEOPTS
 	make install INSTALL_TOP="$PREFIX"
 	#install lua5.1.pc
-	curl -C - -OL "http://sajty.elementfx.com/lua5.1.pc"
+	cp $SUPPORTDIR/lua5.1.pc ./lua5.1.pc
 	export PREFIX_ESCAPED=$(echo $PREFIX | sed -e 's/\(\/\|\\\|&\)/\\&/g')
 	sed -i "s/TPL_PREFIX/$PREFIX_ESCAPED/g" ./lua5.1.pc 
 	mv ./lua5.1.pc $PREFIX/lib/pkgconfig/lua5.1.pc
@@ -333,15 +336,16 @@ installpackage "http://connect.creativelabs.com/openal/Downloads/ALUT/$FILENAME"
 #install Ogre3D
 PKGLOCKFILE="$LOCKDIR/Ogre_installed.lock"
 if [ ! -f $PKGLOCKFILE ]; then
-	download "http://sourceforge.net/projects/ogre/files/ogre/1.8/ogre_src_v1-8-1.tar.bz2/download" "ogre_src_v1-8-1.tar.bz2"
+	download "https://sourceforge.net/projects/ogre/files/ogre/1.8/1.8.1/ogre_src_v1-8-1.tar.bz2/download" "ogre_src_v1-8-1.tar.bz2"
 	extract $DLDIR/ogre_src_v1-8-1.tar.bz2
 	cd ogre_src_v1-8-1
 	mkdir -p build
 	cd build
+        #note that we must build with rtshader support to get CEGUI (0.7.9) to compile
 	cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DOGRE_INSTALL_DEPENDENCIES=false -DOGRE_BUILD_SAMPLES=false -DOGRE_BUILD_PLUGIN_BSP=false \
 	-DOGRE_BUILD_PLUGIN_OCTREE=false -DOGRE_BUILD_PLUGIN_PCZ=false -DOGRE_BUILD_RENDERSYSTEM_D3D9=false \
-	-DOGRE_BUILD_COMPONENT_RTSHADERSYSTEM=false -DOGRE_FULL_RPATH=true -DCMAKE_SKIP_BUILD_RPATH=false \
+	-DOGRE_BUILD_COMPONENT_RTSHADERSYSTEM=true -DOGRE_FULL_RPATH=true -DCMAKE_SKIP_BUILD_RPATH=false \
 	-DCMAKE_BUILD_WITH_INSTALL_RPATH=false -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_RPATH="../lib" ..
 	make all $MAKEOPTS
 	make install
