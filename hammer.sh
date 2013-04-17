@@ -17,6 +17,8 @@ export CPATH="$PREFIX/include:$CPATH"
 export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
 export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
+#allows compiling with 'constexpr'
+export CXXFLAGS="-std=gnu++11"
 
 # setup directories
 mkdir -p $PREFIX
