@@ -17,6 +17,8 @@ export CPATH="$PREFIX/include:$CPATH"
 export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
 export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
+#for msys/mingw we need to specify the include directory
+export CXXFLAGS="-I$PREFIX/include $CXXFLAGS"
 
 # setup directories
 mkdir -p $PREFIX
