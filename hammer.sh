@@ -140,10 +140,11 @@ function show_help()
     echo ""
     echo "Usage: hammer.sh <command> <arguments>"
     echo "Commands:"
-    echo "  install-deps -  install all 3rd party dependencies"
-    echo "  checkout     -  fetch worldforge source (libraries, clients)"
-    echo "  build        -  build the sources and install in environment"
-    echo "  clean        -  delete build directory so a fresh build can be performed"
+    echo "  install-deps  -  install all 3rd party dependencies"
+    echo "  checkout      -  fetch worldforge source (libraries, clients)"
+    echo "  build         -  build the sources and install in environment"
+    echo "  clean         -  delete build directory so a fresh build can be performed"
+    echo "  release_ember -  change ember to a specific release"
     echo ""
     echo "For more help, type: hammer.sh help <command>"
   elif [ $1 = "install-deps" ] ; then
@@ -189,6 +190,11 @@ function show_help()
     echo "Usage: hammer.sh clean <target>"
     echo "Targets:"
     echo "  cegui, ogre, libs/<name>, clients/<name>, servers/<name>"
+  elif [ $1 = "release_ember" ] ; then
+    echo "Change the previously checked-out ember to a specific release."
+    echo ""
+    echo "Usage: hammer.sh release_ember <version number>"
+    echo "e.g. hammer.sh release_ember 0.7.1"
   else
     echo "No help page found!"
   fi
@@ -646,6 +652,10 @@ elif [ "$1" = "clean" ] ; then
   else
     rm -rf $SOURCE/$2/$BUILDDIR
   fi
+
+elif [ "$1" = "release_ember" ] ; then
+  cd $SOURCE/clients/ember
+  git checkout "release-$2"
 
 else
   echo "Invalid command!"
