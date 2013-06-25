@@ -40,6 +40,8 @@ CEGUI=CEGUI-0.7.7
 CEGUI_DOWNLOAD=CEGUI-0.7.7.tar.gz
 OGRE=ogre_1_8_1
 OGRE_DOWNLOAD=ogre_src_v1-8-1.tar.bz2
+CG=Cg_3.1.0013
+CG_DOWNLOAD=Cg-3.1_April2012
 
 CONFIGURE_EXTRA_FLAGS=""
 
@@ -138,10 +140,11 @@ function show_help()
     echo ""
     echo "Usage: hammer.sh <command> <arguments>"
     echo "Commands:"
-    echo "  install-deps -  install all 3rd party dependencies"
-    echo "  checkout     -  fetch worldforge source (libraries, clients)"
-    echo "  build        -  build the sources and install in environment"
-    echo "  clean        -  delete build directory so a fresh build can be performed"
+    echo "  install-deps  -  install all 3rd party dependencies"
+    echo "  checkout      -  fetch worldforge source (libraries, clients)"
+    echo "  build         -  build the sources and install in environment"
+    echo "  clean         -  delete build directory so a fresh build can be performed"
+    echo "  release_ember -  change ember to a specific release"
     echo ""
     echo "For more help, type: hammer.sh help <command>"
   elif [ $1 = "install-deps" ] ; then
@@ -153,6 +156,7 @@ function show_help()
     echo "  cegui    -  a free library providing windowing and widgets for "
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
+    echo "  cg       -  interactive effects toolkit"
     echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
@@ -186,6 +190,11 @@ function show_help()
     echo "Usage: hammer.sh clean <target>"
     echo "Targets:"
     echo "  cegui, ogre, libs/<name>, clients/<name>, servers/<name>"
+  elif [ $1 = "release_ember" ] ; then
+    echo "Change the previously checked-out ember to a specific release."
+    echo ""
+    echo "Usage: hammer.sh release_ember <version number>"
+    echo "e.g. hammer.sh release_ember 0.7.1"
   else
     echo "No help page found!"
   fi
@@ -222,6 +231,40 @@ elif [ "$1" = "install-deps" ] ; then
 
   # Create deps log directory
   mkdir -p $LOGDIR/deps
+
+  # Cg Toolkit
+  if [ "$2" = "all" ] || [ "$2" = "cg" ] ; then
+    echo "  Installing Cg Toolkit..."
+    if [[ $OSTYPE == *darwin* ]] ; then
+      CG_DOWNLOAD+=".dmg"
+      CG_LIB_LOCATION="Library/Frameworks/Cg.framework/Versions/1.0/Cg"
+    elif [[ $OSTYPE == linux-gnu ]] ; then
+      if [[ `uname -m` == x86_64 ]] ; then
+        CG_DOWNLOAD+="_x86_64.tgz"
+        CG_LIB_LOCATION="usr/lib64/libCg.so"
+      elif [[ `uname -m` == i*86 ]] ; then
+        CG_DOWNLOAD+="_x86.tgz"
+        CG_LIB_LOCATION="usr/lib/libCg.so"
+      fi
+    fi
+    mkdir -p $LOGDIR/deps/cg
+    cd $DEPS_SOURCE
+    if [ ! -d $CG ]; then
+      echo "  Downloading..."
+      curl -C - -OL http://developer.download.nvidia.com/cg/Cg_3.1/$CG_DOWNLOAD
+      if [[ $OSTYPE == *darwin* ]] ; then
+        hdiutil mount $CG_DOWNLOAD
+        cp "/Volumes/Cg-3.1.0013/Cg-3.1.0013.app/Contents/Resources/Installer Items/NVIDIA_Cg.tgz" .
+        hdiutil unmount "/Volumes/Cg-3.1.0013/"
+        CG_DOWNLOAD="NVIDIA_Cg.tgz"
+      fi
+      mkdir -p $CG
+      cd $CG
+      tar -xf ../$CG_DOWNLOAD
+    fi
+    mkdir -p $PREFIX/lib
+    cp $DEPS_SOURCE/$CG/$CG_LIB_LOCATION $PREFIX/lib
+  fi
 
   # Ogre3D
   if [ "$2" = "all" ] || [ "$2" = "ogre" ] ; then
@@ -609,6 +652,10 @@ elif [ "$1" = "clean" ] ; then
   else
     rm -rf $SOURCE/$2/$BUILDDIR
   fi
+
+elif [ "$1" = "release_ember" ] ; then
+  cd $SOURCE/clients/ember
+  git checkout "release-$2"
 
 else
   echo "Invalid command!"
