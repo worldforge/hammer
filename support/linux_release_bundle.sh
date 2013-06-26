@@ -10,7 +10,7 @@ REL="$PWD/release"
 
 export LD_LIBRARY_PATH="$WORK/lib"
 if [ ! -d $WORK ] ; then
-  echo "Error: $WORK directory not existing!"
+  echo "Error: $WORK directory does not exist!"
   exit 1
 fi
 
