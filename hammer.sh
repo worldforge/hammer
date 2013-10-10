@@ -583,7 +583,7 @@ elif [ "$1" = "build" ] ; then
     CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
     #we need to change the BUILDDIR to separate the ember and webember build directories.
     #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
-    export BUILDDIR="build"
+    export BUILDDIR=web$BUILDDIR
     buildwf "clients/ember" "webember"
     echo "  Done."
 
@@ -632,6 +632,7 @@ elif [ "$1" = "build" ] ; then
         cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
       fi
     fi
+    export BUILDDIR=`getconf LONG_BIT`
     echo "  Done."
   fi
 
