@@ -9,7 +9,7 @@ export SOURCE=$WORKDIR/build/worldforge
 export DEPS_SOURCE=$WORKDIR/build/deps
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
-export BUILDDIR=`uname -m`
+export BUILDDIR=`getconf LONG_BIT`
 export SUPPORTDIR=$HAMMERDIR/support
 #needed to find tolua++ program if installed in prefix
 export PATH="$PATH:$PREFIX/bin"
@@ -239,10 +239,10 @@ elif [ "$1" = "install-deps" ] ; then
       CG_DOWNLOAD+=".dmg"
       CG_LIB_LOCATION="Library/Frameworks/Cg.framework/Versions/1.0/Cg"
     elif [[ $OSTYPE == linux-gnu ]] ; then
-      if [[ `uname -m` == x86_64 ]] ; then
+      if [[ $BUILDDIR == 64 ]] ; then
         CG_DOWNLOAD+="_x86_64.tgz"
         CG_LIB_LOCATION="usr/lib64/libCg.so"
-      elif [[ `uname -m` == i*86 ]] ; then
+      elif [[ $BUILDDIR == 32 ]] ; then
         CG_DOWNLOAD+="_x86.tgz"
         CG_LIB_LOCATION="usr/lib/libCg.so"
       fi
