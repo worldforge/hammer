@@ -8,7 +8,7 @@ export PREFIX=$WORKDIR/local
 export SOURCE=$WORKDIR/build/worldforge
 export DEPS_SOURCE=$WORKDIR/build/deps
 export MAKEOPTS="-j3"
-export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PKG_CONFIG_PATH
 export BUILDDIR=`getconf LONG_BIT`
 export SUPPORTDIR=$HAMMERDIR/support
 #needed to find tolua++ program if installed in prefix
@@ -17,8 +17,6 @@ export CPATH="$PREFIX/include:$CPATH"
 export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
 export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
-#for msys/mingw we need to specify the include directory
-export CXXFLAGS="-I$PREFIX/include $CXXFLAGS"
 
 # setup directories
 mkdir -p $PREFIX
@@ -36,8 +34,8 @@ MAKELOG=build.log      # Make output
 INSTALLLOG=install.log # Install output
 
 # Dependencies
-CEGUI=CEGUI-0.7.9
-CEGUI_DOWNLOAD=CEGUI-0.7.9.tar.gz
+CEGUI=cegui-0.8.2
+CEGUI_DOWNLOAD=cegui-0.8.2.tar.gz
 OGRE=ogre_1_8_1
 OGRE_DOWNLOAD=ogre_src_v1-8-1.tar.bz2
 CG=Cg_3.1.0013
@@ -65,6 +63,8 @@ elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
   export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
   export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
   export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+  #for msys/mingw we need to specify the include directory
+  export CXXFLAGS="-I$PREFIX/include $CXXFLAGS"
 fi
 
 
@@ -391,7 +391,7 @@ elif [ "$1" = "install-deps" ] ; then
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     echo "  Configuring..."
-    ../configure --prefix=$PREFIX  --disable-samples --disable-opengl-renderer --disable-irrlicht-renderer --disable-xerces-c --disable-libxml --disable-expat --disable-directfb-renderer --disable-corona --disable-devil --disable-stb --disable-tga --disable-python-module $CONFIGURE_EXTRA_FLAGS > $LOGDIR/deps/CEGUI/$CONFIGLOG
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_EXTRA_FLAGS ..  > $LOGDIR/deps/CEGUI/$CONFIGLOG 
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
