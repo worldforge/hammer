@@ -340,18 +340,24 @@ elif [ "$1" = "install-deps" ] ; then
   # tolua++
   if [ "$2" = "all" ] && [[ $OSTYPE == *darwin* ]] || [ "$2" = "tolua++" ] ; then
     #the "all" keyword will only work on mac, but "tolua++" will work on linux and mac, if you set LUA_CFLAGS and LUA_LDFLAGS.
-    #LUA_CFLAGS="`pkg-config --cflags lua5.1`"
-    #LUA_LDFLAGS="`pkg-config --libs lua5.1`"
+    NORMAL_LUA_VERSION="`pkg-config --modversion lua`"
+    if [ ! $NORMAL_LUA_VERSION == 5.1* ]; then
+        LUA_CFLAGS="`pkg-config --cflags lua5.1`"
+        LUA_LDFLAGS="`pkg-config --libs lua5.1`"
+    fi
     if [ "x$LUA_CFLAGS" == "x" ] ; then
       LUA_CFLAGS=""
     fi
     if [ "x$LUA_LDFLAGS" == "x" ] ; then
       LUA_LDFLAGS="-llua"
     fi
+    TOLUA_VER="tolua++-1.0.93"
     cd $DEPS_SOURCE
-    curl -C - -OL http://www.codenix.com/~tolua/tolua++-1.0.93.tar.bz2
-    tar -xjf tolua++-1.0.93.tar.bz2
-    cd tolua++-1.0.93
+    if [ ! -d $TOLUA_VER ] ; then
+        curl -C - -OL http://www.codenix.com/~tolua/$TOLUA_VER.tar.bz2
+        tar -xjf $TOLUA_VER.tar.bz2
+    fi
+    cd $TOLUA_VER
     mkdir -p $PREFIX/include
     cp include/tolua++.h $PREFIX/include/tolua++.h
     cd src/lib
