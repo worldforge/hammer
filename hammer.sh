@@ -354,7 +354,7 @@ elif [ "$1" = "install-deps" ] ; then
     TOLUA_VER="tolua++-1.0.93"
     cd $DEPS_SOURCE
     if [ ! -d $TOLUA_VER ] ; then
-        curl -C - -OL http://www.codenix.com/~tolua/$TOLUA_VER.tar.bz2
+        curl -OL http://www.codenix.com/~tolua/$TOLUA_VER.tar.bz2
         tar -xjf $TOLUA_VER.tar.bz2
     fi
     cd $TOLUA_VER
