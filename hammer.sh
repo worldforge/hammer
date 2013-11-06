@@ -18,6 +18,9 @@ export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
 export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
 
+# This is set so CEGUI can find its dependencies in the local prefix
+export CMAKE_PREFIX_PATH=$PREFIX
+
 # setup directories
 mkdir -p $PREFIX
 mkdir -p $DEPS_SOURCE
