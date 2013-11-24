@@ -170,6 +170,7 @@ function show_help()
     echo "  ember    - fetch ember only"
     echo "  webember - fetch ember and webember"
     echo "  cyphesis - fetch cyphesis server only"
+    echo "  worlds   - fetch worlds only"
   elif [ $1 = "build" ] ; then
     echo "Build the sources and install in environment."
     echo ""
@@ -461,6 +462,15 @@ elif [ "$1" = "checkout" ] ; then
     echo "  Done."
   fi
 
+  if [ "$2" = "worlds" ] || [ "$2" = "all" ] ; then
+    # Worlds
+    echo "  Worlds..."
+    mkdir -p $SOURCE
+    cd $SOURCE
+    checkoutwf "worlds"
+    echo "  Done."
+  fi
+
   if [ "$2" = "ember" ] || [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
     # Ember client
     echo "  Ember client..."
@@ -547,6 +557,14 @@ elif [ "$1" = "build" ] ; then
     buildwf "libs/libwfut"
     echo "  Done."
 
+  fi
+
+  if [ "$2" = "worlds" ] || [ "$2" = "all" ] ; then
+
+    # Worlds
+    echo "  Worlds..."
+    buildwf "worlds"
+    echo "  Done."
   fi
 
   if [ "$2" = "ember" ] || [ "$2" = "all" ] ; then
