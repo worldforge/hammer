@@ -37,8 +37,8 @@ MAKELOG=build.log      # Make output
 INSTALLLOG=install.log # Install output
 
 # Dependencies
-CEGUI=cegui-0.8.2
-CEGUI_DOWNLOAD=cegui-0.8.2.tar.gz
+CEGUI=cegui-0.8.3
+CEGUI_DOWNLOAD=cegui-0.8.3.tar.gz
 OGRE=ogre_1_8_1
 OGRE_DOWNLOAD=ogre_src_v1-8-1.tar.bz2
 CG=Cg_3.1.0013
