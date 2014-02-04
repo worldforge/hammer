@@ -293,7 +293,7 @@ elif [ "$1" = "install-deps" ] ; then
     cd $BUILDDIR
     echo "  Configuring..."
     OGRE_EXTRA_FLAGS=""
-    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
+    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="" -DOGRE_BUILD_SAMPLES=false $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
       echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
