@@ -439,11 +439,6 @@ elif [ "$1" = "checkout" ] ; then
     checkoutwf "atlas-cpp"
     echo "  Done."
 
-    # Skstream
-    echo "  Skstream..."
-    checkoutwf "skstream"
-    echo "  Done."
-
     # Wfmath
     echo "  Wfmath..."
     checkoutwf "wfmath"
@@ -528,11 +523,6 @@ elif [ "$1" = "build" ] ; then
     # Varconf
     echo "  Varconf..."
     buildwf "libs/varconf"
-    echo "  Done."
-
-    # Skstream
-    echo "  Skstream..."
-    buildwf "libs/skstream"
     echo "  Done."
 
     # Wfmath
