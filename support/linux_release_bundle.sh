@@ -1,16 +1,16 @@
 #!/bin/bash
 
-#this script will copy everything from work/local to release
-#it will recursively detect all ember dependencies, which are installed into the $WORK dir.
-#also it will automatically resolve symlinks and copies the file only, because symlinks are not rpath compatible.
-#it will also copy install.sh uninstall.sh and npWebEmber.so files for webember if availible
+# This script will copy everything from work/local to work/release; it will also
+# recursively detect all ember dependencies which are installed in the $WORK dir.
+# It will also automatically resolve symlinks and copies the file only, because symlinks are not rpath compatible.
+# It will also copy install.sh, uninstall.sh, and npWebEmber.so files for webember, if they are availible.
 
 WORK="$PWD/work/local"
-REL="$PWD/release"
+REL="$PWD/work/release"
 
 export LD_LIBRARY_PATH="$WORK/lib"
-if [ ! -d $WORK ] ; then
-  echo "Error: $WORK directory does not exist!"
+if [ ! -d $WORK/lib ] ; then
+  echo "Error: $WORK/lib directory does not exist!"
   exit 1
 fi
 
@@ -26,7 +26,10 @@ cp -r $WORK/share/ember/* $REL/share/ember
 
 #copy Ogre plugins and cg, which are not found automatically by the linker.
 mkdir -p $REL/lib/OGRE
-cp $WORK/lib/OGRE/*.so $REL/lib/OGRE
+cp $WORK/lib/OGRE/Plugin_CgProgramManager.so $REL/lib/OGRE
+cp $WORK/lib/OGRE/Plugin_OctreeSceneManager.so $REL/lib/OGRE
+cp $WORK/lib/OGRE/Plugin_ParticleFX.so $REL/lib/OGRE
+cp $WORK/lib/OGRE/RenderSystem_GL.so $REL/lib/OGRE
 cp $WORK/lib/libCg.so $REL/lib
 
 #remove temporary work file.
@@ -82,7 +85,7 @@ function copy_sharedlib()
   out="$REL/lib/`basename \"$1\"`"
   cp "$loc" "$out" 
   chmod 0755 "$out"
-  chrpath -r "../lib:lib" "$out"
+  chrpath -r "../lib:lib" "$out" || true
 }
 echo "gettings ember dependencies recursively"
 list_deps "$REL/bin/ember.bin" | while read line; do copy_sharedlib "$line"; done
