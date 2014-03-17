@@ -1,6 +1,7 @@
 #!/bin/bash
 
-#This script will create a portable App for Mac OS X.
+# This script will create a portable App for Mac OS X.
+# It should be run through hammer.sh or from the hammer directory. 
 
 
 set -e

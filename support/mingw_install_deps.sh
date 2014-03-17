@@ -2,7 +2,7 @@
 
 set -e
 
-export PREFIX="$PWD/work/local"
+export PREFIX="$HAMMERDIR/work/local"
 export PATH="$PREFIX/bin:$PATH"
 export CPATH="$PREFIX/include:$CPATH"
 export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
@@ -33,12 +33,12 @@ if [ "$LDFLAGS" != "" ] ; then
 	unset LDFLAGS
 fi
 
-LOGDIR=$PWD/work/logs/deps
-BUILDDEPS=$PWD/work/build/deps
+LOGDIR=$HAMMERDIR/work/logs/deps
+BUILDDEPS=$HAMMERDIR/work/build/deps
 PACKAGEDIR=$BUILDDEPS/packages
 DLDIR=$BUILDDEPS/downloads
 LOCKDIR=$BUILDDEPS/locks
-SUPPORTDIR=$PWD/support
+SUPPORTDIR=$HAMMERDIR/support
 
 mkdir -p $LOGDIR
 mkdir -p $BUILDDEPS
