@@ -487,6 +487,15 @@ elif [ "$1" = "checkout" ] ; then
     echo "  Done."
   fi
 
+  if [ "$2" = "metaserver-ng" ] ; then
+    # Metaserver
+    echo "  Metaserver-ng..."
+    mkdir -p $SOURCE/servers
+    cd $SOURCE/servers
+    checkoutwf "metaserver-ng"
+    echo "  Done."
+  fi
+
   if [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
     if [[ x$MSYSTEM != x"MINGW32" ]] ; then
       echo "  FireBreath..."
@@ -590,6 +599,18 @@ elif [ "$1" = "build" ] ; then
     echo "  Cyphesis..."
     buildwf "servers/cyphesis"
     cyphesis_post_install
+    echo "  Done."
+  fi
+
+  if [ "$2" = "metaserver-ng" ] ; then
+
+    # metaserver-ng
+    # change sysconfdir in order to conform with the manner
+    # of WF builds
+    echo "  metaserver-ng..."
+    CONFIGURE_EXTRA_FLAGS="--sysconfdir=$PREFIX/etc/metaserver-ng";
+    buildwf "servers/metaserver-ng"
+    CONFIGURE_EXTRA_FLAGS="";
     echo "  Done."
   fi
 
