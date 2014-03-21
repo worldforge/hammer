@@ -280,6 +280,9 @@ function install_deps_Ogre()
     cd $BUILDDIR
     echo "  Configuring..."
     OGRE_EXTRA_FLAGS=""
+    echo `pwd`
+    echo `ls`
+    echo `ls ..`
     cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="/usr/lib" -DOGRE_BUILD_SAMPLES="OFF" $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
       echo "  Building..."
