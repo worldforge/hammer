@@ -5,3 +5,6 @@ Execute hammer.sh for help.
 
 All build artifacts are placed in the "work" directory.
 
+Note: If you are building an AppImage, these scripts assumes that the 
+AppImageKit source directory is installed in the same parent directory 
+that the hammer directory is installed in.
