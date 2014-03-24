@@ -287,7 +287,7 @@ function install_deps_Ogre()
     OGRE_EXTRA_FLAGS=""
     # Note: The -DOIS_INCLUDE_DIR flag is only set because of sample-related build failures
     #       which appear to be caused by Ogre 1.9.0. When fixed, this flag should be removed.
-    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="/usr/lib" -DOGRE_BUILD_SAMPLES="OFF" $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
+    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="/usr/lib" -DOGRE_BUILD_SAMPLES="OFF" -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
       echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
