@@ -23,8 +23,10 @@ MERCATOR_VER=0.3.3
 export HAMMERDIR=$PWD
 export WORKDIR=$HAMMERDIR/work
 export PREFIX=$WORKDIR/local
-export SOURCE=$WORKDIR/build/worldforge
-export DEPS_SOURCE=$WORKDIR/build/deps
+export SOURCE=$WORKDIR/source/worldforge
+export DEPS_SOURCE=$WORKDIR/source/deps
+export BUILD=$WORKDIR/build/worldforge
+export DEPS_BUILD=$WORKDIR/build/deps
 export MAKEOPTS="-j3"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PKG_CONFIG_PATH
 export BUILDDIR=`getconf LONG_BIT`
@@ -43,6 +45,8 @@ export CMAKE_PREFIX_PATH=$PREFIX
 mkdir -p $PREFIX
 mkdir -p $DEPS_SOURCE
 mkdir -p $SOURCE
+mkdir -p $DEPS_BUILD
+mkdir -p $BUILD
 
 # Log Directory
 LOGDIR=$WORKDIR/logs
@@ -97,11 +101,11 @@ function buildwf()
       NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
     fi
 
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
+    mkdir -p $BUILD/$1/$BUILDDIR
+    cd $BUILD/$1/$BUILDDIR
     if [ ! -f "Makefile" ] ; then
       echo "  Running configure..."
-      ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
+      $SOURCE/$1/configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
     fi
 
     echo "  Building..."
@@ -277,14 +281,13 @@ function install_deps_Ogre()
     else
       OGRE_SOURCE=$DEPS_SOURCE/$OGRE_VER/`ls $DEPS_SOURCE/$OGRE_VER`
     fi
-    cd $OGRE_SOURCE
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
+    mkdir -p $DEPS_BUILD/$OGRE_VER/$BUILDDIR
+    cd $DEPS_BUILD/$OGRE_VER/$BUILDDIR
     echo "  Configuring..."
     OGRE_EXTRA_FLAGS=""
     # Note: The -DOIS_INCLUDE_DIR flag is only set because of sample-related build failures
     #       which appear to be caused by Ogre 1.9.0. When fixed, this flag should be removed.
-    cmake .. -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="/usr/lib" -DOGRE_BUILD_SAMPLES="OFF" $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
+    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="/usr/lib" -DOGRE_BUILD_SAMPLES="OFF" $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
       echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
@@ -320,11 +323,11 @@ function install_deps_freealut()
     echo "  Running autogen..."
     autoreconf --install --force --warnings=all
 
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
+    mkdir -p $DEPS_BUILD/freealut-${FREEALUT_VER}-src/$BUILDDIR
+    cd $DEPS_BUILD/freealut-${FREEALUT_VER}-src/$BUILDDIR
 
     echo "  Running configure..."
-    ../configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS \
+    $DEPS_SOURCE/freealut-${FREEALUT_VER}-src/configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS \
     CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
 
     echo "  Building..."
@@ -390,11 +393,10 @@ function install_deps_CEGUI()
         sed -i "" -e '1i\#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
       fi
     fi
-    cd $DEPS_SOURCE/$CEGUI_VER
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
+    mkdir -p $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
+    cd $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
     echo "  Configuring..."
-    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_EXTRA_FLAGS ..  > $LOGDIR/deps/CEGUI/$CONFIGLOG 
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/$CEGUI_VER  > $LOGDIR/deps/CEGUI/$CONFIGLOG 
     echo "  Building..."
     make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
@@ -422,7 +424,7 @@ function ember_fetch_media()
   # Fetch Ember Media
     if command -v rsync &> /dev/null; then
       echo "Fetching media..."
-      cd $SOURCE/clients/ember/$BUILDDIR
+      cd $BUILD/clients/ember/$BUILDDIR
       $MEDIA_PREFETCH
       make $MEDIAVERSION &> $LOGDIR/clients/ember/media.log
       if [ $? != 0 ] ; then
@@ -448,7 +450,7 @@ elif [ "$1" = "help" ] ; then
     show_help "main"
   fi
 
-  mkdir -p $PREFIX $SOURCE $DEPS_SOURCE
+  mkdir -p $PREFIX $SOURCE $DEPS_SOURCE $BUILD $DEPS_BUILD
 
 # Dependencies install
 elif [ "$1" = "install-deps" ] ; then
@@ -698,8 +700,8 @@ elif [ "$1" = "build" ] ; then
     echo "  WebEmber plugin..."
     if [[ x$MSYSTEM = x"MINGW32" ]] ; then
       # Firebreath is not supporting mingw32 yet, we will use msvc prebuilt for webember.
-      mkdir -p $SOURCE/clients/ember/$BUILDDIR
-      cd $SOURCE/clients/ember/$BUILDDIR
+      mkdir -p $BUILD/clients/ember/$BUILDDIR
+      cd $BUILD/clients/ember/$BUILDDIR
       curl -C - -OL http://sajty.elementfx.com/npWebEmber.tar.gz
       tar -xzf npWebEmber.tar.gz
       cp npWebEmber.dll $PREFIX/bin/npWebEmber.dll
@@ -707,10 +709,10 @@ elif [ "$1" = "build" ] ; then
       #To uninstall: regsvr32 -u $PREFIX/bin/npWebEmber.dll
     else
       mkdir -p $LOGDIR/webember_plugin
-      mkdir -p $SOURCE/clients/webember/FireBreath/$BUILDDIR
-      cd $SOURCE/clients/webember/FireBreath/$BUILDDIR
+      mkdir -p $BUILD/clients/webember/FireBreath/$BUILDDIR
+      cd $BUILD/clients/webember/FireBreath/$BUILDDIR
 
-      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/webember/plugin $CMAKE_EXTRA_FLAGS .. > $LOGDIR/webember_plugin/cmake.log
+      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/webember/plugin $CMAKE_EXTRA_FLAGS $SOURCE/clients/webember/FireBreath > $LOGDIR/webember_plugin/cmake.log
       if  [[ $OSTYPE == *darwin* ]] ; then
         echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/webember_plugin/$MAKELOG
@@ -739,11 +741,11 @@ elif [ "$1" = "clean" ] ; then
 
   # Delete build directory
   if [ "$2" = "cegui" ] ; then
-    rm -rf $DEPS_SOURCE/$CEGUI_VER/$BUILDDIR
+    rm -rf $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
   elif [ "$2" = "ogre" ] ; then
-    rm -rf $DEPS_SOURCE/$OGRE_VER/ogre/$BUILDDIR
+    rm -rf $DEPS_BUILD/$OGRE_VER/ogre/$BUILDDIR
   else
-    rm -rf $SOURCE/$2/$BUILDDIR
+    rm -rf $BUILD/$2/$BUILDDIR
   fi
 
 elif [ "$1" = "release_ember" ] ; then
