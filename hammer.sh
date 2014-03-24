@@ -820,7 +820,9 @@ elif [ "$1" = "release_ember" ] ; then
     cd $SOURCE/clients
     checkoutwf "ember"
     cd $SOURCE/clients/ember
-    git checkout "release-$2"
+    if [ x"$2" != x"dev" ] ; then
+      git checkout "release-$2"
+    fi
     echo "  Done."
   echo "Checkout complete."
 
