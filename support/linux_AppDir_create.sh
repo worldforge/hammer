@@ -20,7 +20,7 @@ cd $APP_DIR_ROOT
 curl -OL https://raw.github.com/worldforge/ember/master/ember.desktop
 curl -OL https://raw.github.com/worldforge/ember/master/media/ember.png
 cp -a "ember.png" ".DirIcon"
-cp $HAMMERDIR/../AppImageKit/AppRun .
+cp $DEPS_BUILD/AppImageKit/AppRun .
 
 
 ####Adapted from linux_release_bundle.sh####

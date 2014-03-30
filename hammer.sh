@@ -170,11 +170,12 @@ function show_help()
     echo "Usage: hammer.sh install-deps <dependency to install>"
     echo "Dependencies Available:"
     echo "  all      -  install all dependencies listed below"
-    echo "  cegui    -  a free library providing windowing and widgets for "
+    echo "  cegui    -  a free library providing windowing and widgets for"
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
+    echo "              Hint: build ogre first then cegui"
     echo "  cg       -  interactive effects toolkit"
-    echo "Hint: build ogre first then cegui"
+    echo "  appimage -  application packaging system"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
     echo "If you want Hammer to stash away any local changes, use the"
@@ -408,6 +409,41 @@ function install_deps_CEGUI()
     echo "  Done."
 }
 
+function install_deps_AppImageKit()
+{
+  # AppImageKit
+    echo "  Installing core AppImageKit functionality..."
+    mkdir -p $LOGDIR/deps/AppImageKit    # create AppImageKit log directory
+    cd $DEPS_SOURCE
+    if [ ! -d "AppImageKit" ] ; then
+      echo "  Downloading..."
+      mkdir AppImageKit && cd AppImageKit
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/CMakeLists.txt
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppRun.c
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/fuseiso.c
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/isofs.c
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/isofs.h
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/md5.c
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/md5.h
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/runtime.c
+      mkdir linux && cd linux
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/linux/iso_fs.h
+      curl -OL https://raw.github.com/probonopd/AppImageKit/master/linux/rock.h
+    fi
+    mkdir -p $DEPS_BUILD/AppImageKit
+    cd $DEPS_BUILD/AppImageKit
+    curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppImageAssistant.AppDir/package
+    curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppImageAssistant.AppDir/xdgappdir.py
+    echo "  Configuring..."
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/AppImageKit &> $LOGDIR/deps/AppImageKit/$CONFIGLOG 
+    echo "  Building..."
+    make $MAKEOPTS AppRun &> $LOGDIR/deps/AppImageKit/${MAKELOG}_AppRun
+    make $MAKEOPTS runtime &> $LOGDIR/deps/AppImageKit/${MAKELOG}_runtime
+    echo "  Installing..."
+    echo "Installed." > $LOGDIR/deps/AppImageKit/$INSTALLLOG
+    echo "  Done."
+}
+
 function ember_fetch_media()
 {
   if [ $1 = "dev" ] ; then
@@ -492,6 +528,11 @@ elif [ "$1" = "install-deps" ] ; then
   # CEGUI
   if [ "$2" = "all" ] || [ "$2" = "cegui" ] ; then
     install_deps_CEGUI
+  fi
+
+  # AppImageKit
+  if [ "$2" = "appimage" ] ; then
+    install_deps_AppImageKit
   fi
 
   echo "Install of 3rd party dependencies is complete."
@@ -864,21 +905,21 @@ elif [ "$1" = "release_ember" ] ; then
     # making an AppImage/AppBundle
     if [[ $OSTYPE == *darwin* ]] ; then
       echo "Creating AppBundle."
-      . $HAMMERDIR/support/AppBundler.sh
+      source $HAMMERDIR/support/AppBundler.sh
       echo "AppBundle creation complete."
     else
       echo "Creating AppImage."
-      mkdir -p $LOGDIR/AppImage/
-      . $HAMMERDIR/support/linux_AppDir_create.sh 2>&1 | tee $LOGDIR/AppImage/AppDir.log
+      install_deps_AppImageKit
+      source $HAMMERDIR/support/linux_AppDir_create.sh &> $LOGDIR/deps/AppImageKit/AppDir.log
       echo "AppImage will be created from the AppDir at $APP_DIR_ROOT and placed into $WORKDIR."
-      python $HAMMERDIR/../AppImageKit/AppImageAssistant.AppDir/package $APP_DIR_ROOT $WORKDIR/ember-${2}-x86_$BUILDDIR create new 2>&1 | tee $LOGDIR/AppImage/AppImage.log
+      python $DEPS_BUILD/AppImageKit/package $APP_DIR_ROOT $WORKDIR/ember-${2}-x86_$BUILDDIR create new &> $LOGDIR/deps/AppImageKit/AppImage.log
       echo "AppImage creation complete."
     fi
   else 
     # making a standard directory
     echo "Creating release directory."
     cd $HAMMERDIR
-    . $HAMMERDIR/support/linux_release_bundle.sh
+    source $HAMMERDIR/support/linux_release_bundle.sh
     echo "Release directory created."
   fi
 
