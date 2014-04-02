@@ -393,6 +393,11 @@ function install_deps_CEGUI()
         sed -i "" -e '1i\#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
       fi
     fi
+    #Fix an issue with CEGUI 0.8.3 and earlier and Lua 5.2. Ignore if error when patching.
+    #Remove this once a newer fixed version of CEGUI is released.
+    cd $DEPS_SOURCE/$CEGUI_VER
+    patch -p1 --forward < ${SUPPORTDIR}/CEGUI_Lua51.patch || true
+    
     mkdir -p $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
     cd $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
     echo "  Configuring..."
