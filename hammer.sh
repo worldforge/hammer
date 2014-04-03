@@ -121,18 +121,18 @@ function checkoutwf()
     USER="$2"
   fi
   if [ x"$3" = x"" ]; then
-    BRANCH="master"
+    BRANCH="origin/master"
   else
     BRANCH="$3"
   fi
   if [ ! -d $1 ]; then
-    git clone git://github.com/$USER/$1.git -b $BRANCH
+    git clone git://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
   else
     cd $1
     if [ x$HAMMERALWAYSSTASH = xyes ]; then
       git stash save "Hammer stash"
     fi
-    git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase origin/$BRANCH && cd ..
+    git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
   fi
 }
 
@@ -813,61 +813,56 @@ elif [ "$1" = "release_ember" ] ; then
   fi
   install_deps_CEGUI
   echo "Install of 3rd party dependencies is complete."
+  
+  if [ x"$2" != x"dev" ] ; then
+    EMBER_VER="release-$2"
+  else
+    EMBER_VER="origin/master"
+    VARCONF_VER="origin/master"
+    ATLASCPP_VER="origin/master"
+    SKSTREAM_VER="origin/master"
+    WFMATH_VER="origin/master"
+    ERIS_VER="origin/master"
+    WFUT_VER="origin/master"
+    MERCATOR_VER="origin/master"
+  fi
 
   # Source checkout
   echo "Checking out sources..."
     mkdir -p $SOURCE/libs
     cd $SOURCE/libs
     echo "  Varconf..."
-    checkoutwf "varconf"
-    cd $SOURCE/libs/varconf
-    git checkout $VARCONF_VER
+    checkoutwf "varconf" "worldforge" $VARCONF_VER
     echo "  Done."
     cd $SOURCE/libs
     echo "  Atlas-C++..."
-    checkoutwf "atlas-cpp"
-    cd $SOURCE/libs/atlas-cpp
-    git checkout $ATLASCPP_VER
+    checkoutwf "atlas-cpp" "worldforge" $ATLASCPP_VER
     echo "  Done."
 # Needs to be removed for Ember version 0.8.0 and above
     cd $SOURCE/libs
     echo "  Skstream..."
-    checkoutwf "skstream"
-    cd $SOURCE/libs/skstream
-    git checkout $SKSTREAM_VER
+    checkoutwf "skstream" "worldforge" $SKSTREAM_VER
     echo "  Done."
     cd $SOURCE/libs
     echo "  Wfmath..."
-    checkoutwf "wfmath"
-    cd $SOURCE/libs/wfmath
-    git checkout $WFMATH_VER
+    checkoutwf "wfmath" "worldforge" $WFMATH_VER
     echo "  Done."
     cd $SOURCE/libs
     echo "  Eris..."
-    checkoutwf "eris"
-    cd $SOURCE/libs/eris
-    git checkout $ERIS_VER
+    checkoutwf "eris" "worldforge" $ERIS_VER
     echo "  Done."
     cd $SOURCE/libs
     echo "  Libwfut..."
-    checkoutwf "libwfut"
-    cd $SOURCE/libs/libwfut
-    git checkout $WFUT_VER
+    checkoutwf "libwfut" "worldforge" $WFUT_VER
     echo "  Done."
     cd $SOURCE/libs
     echo "  Mercator..."
-    checkoutwf "mercator"
-    cd $SOURCE/libs/mercator
-    git checkout $MERCATOR_VER
+    checkoutwf "mercator" "worldforge" $MERCATOR_VER
     echo "  Done."
     echo "  Ember client..."
     mkdir -p $SOURCE/clients
     cd $SOURCE/clients
-    checkoutwf "ember"
-    cd $SOURCE/clients/ember
-    if [ x"$2" != x"dev" ] ; then
-      git checkout "release-$2"
-    fi
+    checkoutwf "ember" "worldforge" $EMBER_VER
     echo "  Done."
   echo "Checkout complete."
 
