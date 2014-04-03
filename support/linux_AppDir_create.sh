@@ -20,7 +20,7 @@ cd $APP_DIR_ROOT
 curl -OL https://raw.github.com/worldforge/ember/master/ember.desktop
 curl -OL https://raw.github.com/worldforge/ember/master/media/ember.png
 cp -a "ember.png" ".DirIcon"
-cp $HAMMERDIR/../AppImageKit/AppRun .
+cp $DEPS_BUILD/AppImageKit/AppRun .
 
 
 ####Adapted from linux_release_bundle.sh####
@@ -146,6 +146,9 @@ fi
 
 # Manually add and remove libraries which don't behave appropriately.
 
+# Some libraries may not be present. If they are not present, continue processing.
+set +e
+
 rm $APP_DIR/lib/ld-linux*
 rm $APP_DIR/lib/libc.so*
 rm $APP_DIR/lib/libdl.so*
@@ -157,6 +160,9 @@ rm $APP_DIR/lib/libresolv.so*
 rm $APP_DIR/lib/librt.so*
 rm $APP_DIR/lib/librtmp.so*
 rm $APP_DIR/lib/libX11.so*
+
+# Resume exit-on-fail behavior.
+set -e
 
 cp -d $PREFIX/lib/libCEGUI* $APP_DIR/lib
 cp -r $PREFIX/lib/cegui* $APP_DIR/lib
