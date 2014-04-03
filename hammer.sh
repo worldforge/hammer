@@ -96,11 +96,10 @@ function buildwf()
     mkdir -p $LOGDIR/$PRJNAME
 
     cd $SOURCE/$1
-    if [ ! -f "configure" ] ; then
-      echo "  Running autogen..."
-      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
-    fi
-
+    #Always run autogen since the version checked out can have changed between runs.
+    echo "  Running autogen..."
+    NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
+ 
     mkdir -p $BUILD/$1/$BUILDDIR
     cd $BUILD/$1/$BUILDDIR
     if [ ! -f "Makefile" ] ; then
