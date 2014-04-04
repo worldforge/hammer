@@ -911,7 +911,12 @@ elif [ "$1" = "release_ember" ] ; then
       install_deps_AppImageKit
       source $HAMMERDIR/support/linux_AppDir_create.sh &> $LOGDIR/deps/AppImageKit/AppDir.log
       echo "AppImage will be created from the AppDir at $APP_DIR_ROOT and placed into $WORKDIR."
-      python $DEPS_BUILD/AppImageKit/package $APP_DIR_ROOT $WORKDIR/ember-${2}-x86_$BUILDDIR create new &> $LOGDIR/deps/AppImageKit/AppImage.log
+      PACKAGE_FILE=$WORKDIR/ember-${2}-x86_$BUILDDIR
+      if [ -e "$PACKAGE_FILE" ] ; then
+        echo "Removing existing artifact at '$PACKAGE_FILE'."
+        rm "$PACKAGE_FILE" 
+      fi
+      python $DEPS_BUILD/AppImageKit/package $APP_DIR_ROOT $PACKAGE_FILE create new &> $LOGDIR/deps/AppImageKit/AppImage.log
       echo "AppImage creation complete."
     fi
   else 
