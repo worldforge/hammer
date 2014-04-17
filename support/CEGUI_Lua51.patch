@@ -1,12 +1,14 @@
 diff -r a1e9fef42883 cmake/FindLua51.cmake
 --- a/cmake/FindLua51.cmake	Sat Dec 07 09:00:06 2013 +0000
-+++ b/cmake/FindLua51.cmake	Wed Apr 02 14:12:42 2014 +0200
-@@ -4,13 +4,13 @@
++++ b/cmake/FindLua51.cmake	Thu Apr 17 19:18:40 2014 +0200
+@@ -3,14 +3,14 @@
+ ################################################################################
  include(FindPackageHandleStandardArgs)
  
- find_path(LUA_H_PATH NAMES lua.h PATH_SUFFIXES lua5.1 lua51 lua)
+-find_path(LUA_H_PATH NAMES lua.h PATH_SUFFIXES lua5.1 lua51 lua)
 -find_library(LUA_LIB NAMES lua5.1 lua51 lua PATH_SUFFIXES dynamic)
 -find_library(LUA_LIB_DBG NAMES lua5.1_d lua51_d lua_d PATH_SUFFIXES dynamic)
++find_path(LUA_H_PATH NAMES lua.h PATH_SUFFIXES lua5.1 lua51 lua-5.1 lua)
 +find_library(LUA_LIB NAMES lua5.1 lua51 lua-5.1 lua PATH_SUFFIXES dynamic)
 +find_library(LUA_LIB_DBG NAMES lua5.1_d lua51_d lua-5.1_d lua_d PATH_SUFFIXES dynamic)
  mark_as_advanced(LUA_H_PATH LUA_LIB LUA_LIB_DBG)
