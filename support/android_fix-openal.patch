@@ -1,0 +1,28 @@
+From 467cc0295532a15dc7d7c01820e7fab860554a37 Mon Sep 17 00:00:00 2001
+From: sajty <sajty@sajty-UBI.(none)>
+Date: Wed, 4 Jun 2014 02:28:18 +0200
+Subject: [PATCH] Fix Android support.
+
+---
+ CMakeLists.txt |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 81c0980..8bb19cc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -737,9 +737,9 @@ IF(ALSOFT_BACKEND_OPENSL)
+         CHECK_SHARED_FUNCTION_EXISTS(slCreateEngine "SLES/OpenSLES.h" OpenSLES "" HAVE_LIBOPENSLES)
+         IF(HAVE_LIBOPENSLES)
+             SET(HAVE_OPENSL 1)
+-            SET(ALC_OBJS  ${ALC_OBJS} Alc/backends/opensl.c)
++            SET(ALC_OBJS  ${ALC_OBJS} Alc/backends/opensl.c Alc/backends/audiotrack.c Alc/backends/android.c)
+             SET(BACKENDS  "${BACKENDS} OpenSL,")
+-            SET(EXTRA_LIBS OpenSLES ${EXTRA_LIBS})
++            SET(EXTRA_LIBS OpenSLES log ${EXTRA_LIBS})
+         ENDIF()
+     ENDIF()
+ ENDIF()
+-- 
+1.7.9.5
+
