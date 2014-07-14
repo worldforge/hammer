@@ -1,0 +1,10 @@
+prefix=TPL_PREFIX
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: lua
+Description: 
+Version: 5.1.0
+Libs: -L${libdir} -llua
+Cflags: -I${includedir}
