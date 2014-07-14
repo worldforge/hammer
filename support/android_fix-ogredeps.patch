@@ -1,0 +1,24 @@
+# HG changeset patch
+# User Peter Szücs <peter.szucs.dev@gmail.com>
+# Date 1401884736 -7200
+#      Wed Jun 04 14:25:36 2014 +0200
+# Node ID 67e37b7533e219ad15f66d92997112e90ea35bd8
+# Parent  27b96a459cd6bd74172a0bf493d0d5e934b9bee6
+If using system zlib, then don't use local zlib headers.
+
+diff -r 27b96a459cd6 -r 67e37b7533e2 src/zziplib/CMakeLists.txt
+--- a/src/zziplib/CMakeLists.txt	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/zziplib/CMakeLists.txt	Wed Jun 04 14:25:36 2014 +0200
+@@ -38,8 +38,10 @@
+   zzip/zzip.h
+ )
+ 
+-# need zlib includes
+-include_directories(${OGREDEPS_SOURCE_DIR}/src/zlib)
++if (OGREDEPS_BUILD_ZLIB)
++  # need zlib includes
++  include_directories(${OGREDEPS_SOURCE_DIR}/src/zlib)
++endif ()
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ if (WIN32)
