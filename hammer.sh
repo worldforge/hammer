@@ -390,7 +390,7 @@ function install_deps_ogre()
       OGRE_SOURCE=$DEPS_SOURCE/$OGRE_VER/`ls $DEPS_SOURCE/$OGRE_VER`
       if [[ $OSTYPE == *darwin* ]] ; then
         cd $OGRE_SOURCE
-        echo "  Patching...".
+        echo "  Patching..."
         patch -p1 < $SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch
       fi
     else
@@ -874,7 +874,11 @@ elif [ "$1" = "build" ] ; then
     export BUILDDIR=`getconf LONG_BIT`
     echo "  Done."
   fi
-
+  if [ $TARGET_OS = "android" ] && [ "$2" = "ember_apk" ] ; then
+    echo "  Bundling Ember into ember.apk..."
+    source $SUPPORTDIR/AppBundler.sh
+    echo "  Done."
+  fi
   echo "Build complete."
 
 elif [ "$1" = "clean" ] ; then
