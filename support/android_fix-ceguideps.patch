@@ -1,0 +1,118 @@
+# HG changeset patch
+# User Peter Szücs <peter.szucs.dev@gmail.com>
+# Date 1401820620 -7200
+#      Tue Jun 03 20:37:00 2014 +0200
+# Node ID b2b51ae07dce8b31e712d69b8b263465b98a5b96
+# Parent  721921d9b10ac44faa54c8ba044dc9483937b5bc
+Add Android support.
+
+diff -r 721921d9b10a -r b2b51ae07dce CMakeLists.txt
+--- a/CMakeLists.txt	Wed May 14 01:44:55 2014 +0300
++++ b/CMakeLists.txt	Tue Jun 03 20:37:00 2014 +0200
+@@ -1,14 +1,6 @@
+ cmake_minimum_required(VERSION 2.8)
+ include(CMakeDependentOption)
+ 
+-if (NOT APPLE AND NOT WIN32)
+-message(FATAL_ERROR
+-"This dependency pack is intended for use on Apple OS X and MS Windows only. "
+-"For other systems, such as GNU/Linux, please consult your package manager or "
+-"distribution maintainer to discover how to install the libraries you wish to "
+-"use with CEGUI.  Thanks!")
+-endif()
+-
+ if (APPLE)
+     set( CMAKE_OSX_ARCHITECTURES x86_64 CACHE STRING "Build architectures for Mac OS X" )
+     set( CMAKE_BUILD_TYPE Release CACHE STRING "Sets the configuration to build (Release, Debug, etc...)")
+@@ -21,10 +13,7 @@
+ cmake_dependent_option( CEGUI_MSVC_STATIC_RUNTIME "Specifies whether to the static runtime (/MT and /MTd) or the DLL runtime (/MD and /MDd)." FALSE "MSVC" FALSE )
+ mark_as_advanced(CEGUI_MSVC_STATIC_RUNTIME)
+ 
+-if (APPLE)
+-    set(CEGUI_APPLE_DYLIB_INSTALL_PATH "@executable_path/../Frameworks" CACHE STRING "Specifies the install path for generated dylibs." )
+-    mark_as_advanced(CEGUI_APPLE_DYLIB_INSTALL_PATH)
+-endif()
++
+ 
+ if (CEGUI_MSVC_STATIC_RUNTIME)
+     foreach(_BUILD_CONFIG DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+@@ -33,10 +22,16 @@
+         endforeach()
+     endforeach()
+ endif()
++if (APPLE)
++    set(CEGUI_APPLE_DYLIB_INSTALL_PATH "@executable_path/../Frameworks" CACHE STRING "Specifies the install path for generated dylibs." )
++    mark_as_advanced(CEGUI_APPLE_DYLIB_INSTALL_PATH)
++elseif(MSVC)
++    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
++else()
++    set( CMAKE_SHARED_LINKER_FLAGS "-lm ${CMAKE_SHARED_LINKER_FLAGS}" )
++    set( CMAKE_EXE_LINKER_FLAGS    "-lm ${CMAKE_EXE_LINKER_FLAGS}" )
++endif()
+ 
+-if (MSVC)
+-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+-endif()
+ 
+ 
+ macro(cegui_add_library _NAME _SOURCES_VAR _HEADERS_VAR)
+diff -r 721921d9b10a -r b2b51ae07dce src/lua-5.1.4/src/llex.c
+--- a/src/lua-5.1.4/src/llex.c	Wed May 14 01:44:55 2014 +0300
++++ b/src/lua-5.1.4/src/llex.c	Tue Jun 03 20:37:00 2014 +0200
+@@ -176,9 +176,13 @@
+ 
+ static void trydecpoint (LexState *ls, SemInfo *seminfo) {
+   /* format error: try to update decimal point separator */
++  char old = ls->decpoint;
++#if defined(__ANDROID__)
++  ls->decpoint = '.';
++#else
+   struct lconv *cv = localeconv();
+-  char old = ls->decpoint;
+   ls->decpoint = (cv ? cv->decimal_point[0] : '.');
++#endif
+   buffreplace(ls, old, ls->decpoint);  /* try updated decimal separator */
+   if (!luaO_str2d(luaZ_buffer(ls->buff), &seminfo->r)) {
+     /* format error with correct decimal point: no more options */
+diff -r 721921d9b10a -r b2b51ae07dce src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt
+--- a/src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt	Wed May 14 01:44:55 2014 +0300
++++ b/src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt	Tue Jun 03 20:37:00 2014 +0200
+@@ -1,10 +1,5 @@
+ set(DEPNAME pcre)
+ 
+-file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "../pcre_*.c")
+-set(HEADERS pcre.h)
+-
+-include_directories(../ ${CMAKE_BINARY_DIR}/dependencies/include)
+-
+ if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../pcre.h")
+     execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../pcre.h.generic"
+                                                      "${CMAKE_CURRENT_SOURCE_DIR}/../pcre.h")
+@@ -14,19 +9,16 @@
+                                                      "${CMAKE_CURRENT_SOURCE_DIR}/../config.h")
+ endif()
+ 
+-add_executable(dftables ${CMAKE_CURRENT_SOURCE_DIR}/../dftables.c)
+-set_target_properties(dftables PROPERTIES
+-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.."
+-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}/.."
+-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/.."
+-    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_CURRENT_BINARY_DIR}/.."
+-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_CURRENT_BINARY_DIR}/.."
+-    COMPILE_DEFINITIONS "HAVE_CONFIG_H;HAVE_STDINT_H=0;HAVE_INTTYPES_H=0")
++if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../pcre_chartables.c")
++    execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../pcre_chartables.c.dist"
++                                                     "${CMAKE_CURRENT_SOURCE_DIR}/../pcre_chartables.c")
++endif()
+ 
+-add_custom_command(OUTPUT ../pcre_chartables.c
+-                   COMMAND dftables "${CMAKE_CURRENT_BINARY_DIR}/../pcre_chartables.c")
++file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "../pcre_*.c")
++set(HEADERS pcre.h)
+ 
+-list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/../pcre_chartables.c")
++include_directories(../ ${CMAKE_BINARY_DIR}/dependencies/include)
++
+ cegui_add_library(${DEPNAME} SOURCES NONE)
+ 
+ set_target_properties(${DEPNAME} PROPERTIES
