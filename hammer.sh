@@ -2,165 +2,31 @@
 
 set -e
 
-# Define component versions
-CEGUI_VER=cegui-0.8.3
-CEGUI_DOWNLOAD=cegui-0.8.3.tar.gz
-OGRE_VER=ogre_1_9_0
-OGRE_DOWNLOAD=v1-9-0.tar.bz2
-CG_VER=3.1
-CG_FULLVER=${CG_VER}.0013
-CG_DOWNLOAD=Cg-3.1_April2012
-FREEALUT_VER=1.1.0
-TOLUA_VER="tolua++-1.0.93"
-VARCONF_VER=1.0.1
-ATLASCPP_VER=0.6.3
-SKSTREAM_VER=0.3.9
-WFMATH_VER=1.0.2
-ERIS_VER=1.3.23
-WFUT_VER=libwfut-0.2.3
-MERCATOR_VER=0.3.3
-
-export HAMMERDIR=$PWD
-export WORKDIR=$HAMMERDIR/work
-export PREFIX=$WORKDIR/local
-export SOURCE=$WORKDIR/source/worldforge
-export DEPS_SOURCE=$WORKDIR/source/deps
-export BUILD=$WORKDIR/build/worldforge
-export DEPS_BUILD=$WORKDIR/build/deps
-export MAKEOPTS="-j3"
-export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PKG_CONFIG_PATH
-export BUILDDIR=`getconf LONG_BIT`
-export SUPPORTDIR=$HAMMERDIR/support
-#needed to find tolua++ program if installed in prefix
-export PATH="$PATH:$PREFIX/bin"
-export CPATH="$PREFIX/include:$CPATH"
-export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
-export LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
-export LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
-
-# This is set so CEGUI can find its dependencies in the local prefix
-export CMAKE_PREFIX_PATH=$PREFIX
-
-# setup directories
-mkdir -p $PREFIX
-mkdir -p $DEPS_SOURCE
-mkdir -p $SOURCE
-mkdir -p $DEPS_BUILD
-mkdir -p $BUILD
-
-# Log Directory
-LOGDIR=$WORKDIR/logs
-mkdir -p $LOGDIR
-
-# Output redirect logs
-AUTOLOG=autogen.log     # Autogen output
-CONFIGLOG=config.log    # Configure output
-MAKELOG=build.log      # Make output
-INSTALLLOG=install.log # Install output
-
-CONFIGURE_EXTRA_FLAGS=""
-
-if [[ $OSTYPE == *darwin* ]] ; then
-  #the default architecture is universal build: i864;x86_64
-  #To save space and time, we will only build x86_64
-  CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS -GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
-
-  #on mac libtool is called glibtool.
-  #Automake should set this, but it has messed up the order of variable definitions.
-  export MAKEOPTS="$MAKEOPTS LIBTOOL=glibtool"
-
-  export CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
-  export CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -DWITHOUT_SCRAP -I$PREFIX/include -I/opt/local/include $CFLAGS"
-  export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
-
-  #without CPATH cegui is not finding freeimage.
-  export CPATH="/opt/local/include:$CPATH"
-
-elif [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
-  export CONFIGURE_EXTRA_FLAGS="--enable-shared --disable-static"
-  export CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
-  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
-  #for msys/mingw we need to specify the include directory
-  export CXXFLAGS="-I$PREFIX/include $CXXFLAGS"
-fi
-
-
-function buildwf()
-{
-    if [ x"$2" = x"" ]; then
-      PRJNAME="$1"
-    else
-      PRJNAME="$2"
-    fi
-
-    mkdir -p $LOGDIR/$PRJNAME
-
-    cd $SOURCE/$1
-    #Always run autogen since the version checked out can have changed between runs.
-    echo "  Running autogen..."
-    NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
- 
-    mkdir -p $BUILD/$1/$BUILDDIR
-    cd $BUILD/$1/$BUILDDIR
-    if [ ! -f "Makefile" ] ; then
-      echo "  Running configure..."
-      $SOURCE/$1/configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
-    fi
-
-    echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/$PRJNAME/$MAKELOG
-    echo "  Installing..."
-    make install > $LOGDIR/$PRJNAME/$INSTALLLOG
-}
-
-function checkoutwf()
-{
-  if [ x"$2" = x"" ]; then
-    USER="worldforge"
-  else
-    USER="$2"
-  fi
-  if [ x"$3" = x"" ]; then
-    BRANCH="origin/master"
-  else
-    BRANCH="$3"
-  fi
-  if [ ! -d $1 ]; then
-    git clone git://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
-  else
-    cd $1
-    if [ x$HAMMERALWAYSSTASH = xyes ]; then
-      git stash save "Hammer stash"
-    fi
-    git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
-  fi
-}
-
-function cyphesis_post_install()
-{
-  cd $PREFIX/bin
-
-  # Rename real cyphesis binary to cyphesis.bin
-  mv cyphesis cyphesis.bin
-
-  # Install our cyphesis.in script as cyphesis
-  cp $SUPPORTDIR/cyphesis.in cyphesis
-  chmod +x cyphesis
-}
-
 function show_help()
 {
   if [ $1 = "main" ] ; then
     echo "Script for automating the process of installing dependencies"
     echo "and compiling Worldforge in a self contained environment."
     echo ""
-    echo "Usage: hammer.sh <command> <arguments>"
+    echo "Usage: hammer.sh [<options>] <command> <target>"
     echo "Commands:"
-    echo "  install-deps  -  install all 3rd party dependencies"
-    echo "  checkout      -  fetch worldforge source (libraries, clients)"
-    echo "  build         -  build the sources and install in environment"
-    echo "  clean         -  delete build directory so a fresh build can be performed"
-    echo "  release_ember -  change ember to a specific release"
+    echo "  install-deps   -  install all 3rd party dependencies"
+    echo "  checkout       -  fetch worldforge source (libraries, clients)"
+    echo "  build          -  build the sources and install in environment"
+    echo "  clean          -  delete build directory so a fresh build can be performed"
+    echo "  release_ember  -  change ember to a specific release"
+    echo ""
+    echo "Options:"
+    echo "  debug          -  Build for debuging instead of max performance"
+    echo "  cross-compile  -  Compile to different platform: --cross_compile=android"
+    echo "                    Can be android (=ARMv7), android-ARMv7 or android-x86"
+    echo "  make_flags     -  Variable passed to every make call: --make_flags=\"-j4\""
+    echo "  configure_flags-  Variable passed to every configure call"
+    echo "  cmake_flags    -  Variable passed to every cmake call"
+    echo "  compile_flags  -  Variable passed to the compiler"
+    echo "  link_flags     -  Variable passed to the linker"
+    echo "  force-autogen  -  Force autogen when it is already autogenerated"
+    echo "  force-configure-  Force configure when it is already configured"
     echo ""
     echo "For more help, type: hammer.sh help <command>"
   elif [ $1 = "install-deps" ] ; then
@@ -169,12 +35,12 @@ function show_help()
     echo "Usage: hammer.sh install-deps <dependency to install>"
     echo "Dependencies Available:"
     echo "  all      -  install all dependencies listed below"
-    echo "  cegui    -  a free library providing windowing and widgets for"
+    echo "  cegui    -  a free library providing windowing and widgets for "
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
-    echo "              Hint: build ogre first then cegui"
     echo "  cg       -  interactive effects toolkit"
-    echo "  appimage -  application packaging system"
+    ,
+    echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
     echo "If you want Hammer to stash away any local changes, use the"
@@ -191,14 +57,14 @@ function show_help()
   elif [ $1 = "build" ] ; then
     echo "Build the sources and install in environment."
     echo ""
-    echo "Usage: hammer.sh build <target> \"<makeopts>\""
+    echo "Usage: hammer.sh build <target>"
     echo "Available targets:"
     echo "  all      - build everything"
     echo "  libs     - build libraries only"
     echo "  ember    - build ember only"
     echo "  webember - build webember only"
     echo "  cyphesis - build cyphesis server only"
-    echo "makeopts [optional] - options to pass into make"
+    echo "  worlds   - build worlds only"
     echo ""
     echo "Hint: after a checkout use 'all'. To rebuild after changing code"
     echo "only in Ember, use 'ember'. Will build much quicker!"
@@ -223,9 +89,259 @@ function show_help()
   fi
 }
 
-function install_deps_Cg()
+if [ $# -eq 0 ] ; then
+  show_help "main"
+fi
+
+for envvar in CROSS_COMPILE DEBUG_BUILD MAKE_FLAGS CONFIGURE_FLAGS CMAKE_FLAGS COMPILE_FLAGS LINK_FLAGS FORCE_AUTOGEN FORCE_CONFIGURE TARGET_ARCH TARGET_OS HOST_ARCH HOST_OS HAMMERDIR WORKDIR SUPPORTDIR
+do
+  if [ -n "${!envvar+x}" ] ; then
+    echo "Warning: Environment variable '$envvar' is set, but it will be ignored!"
+  fi
+done
+
+
+#default flags, which can be changed with hammer.sh flags
+#Change these for custom builds.
+export CROSS_COMPILE=0 # Can be 0 (native build) or 1 (cross build).
+export DEBUG_BUILD=0 # Can be 0 (release build) or 1 (debug build). Only used if COMPILE_FLAGS is empty!
+
+export MAKE_FLAGS="-j5"
+export CONFIGURE_FLAGS=""
+export CMAKE_FLAGS=""
+export COMPILE_FLAGS=""
+export LINK_FLAGS=""
+export FORCE_AUTOGEN=0 # Can be 0 or 1.
+export FORCE_CONFIGURE=0 # Can be 0 or 1.
+
+# NOTE: These are only valid if CROSS_COMPILE=1
+export TARGET_ARCH="ARMv7" # Can be ARMv7 or x86. (ARMv6, ARMv8, ARM_NEON, MIPS may be added later)
+export TARGET_OS="android" # Can be android.
+export HOST_ARCH="`uname -p`" # Can be x86_64 or x86.
+if [[ $HOST_ARCH = i[3456]86 ]] ; then
+  export HOST_ARCH=x86
+fi
+export HOST_OS="`uname -o`" # Can be GNU/Linux.
+
+# Directory hierarchy base
+export HAMMERDIR=$PWD # It should contain hammer.sh file only.
+export WORKDIR=$HAMMERDIR/work # It should contain anything generated.
+export SUPPORTDIR=$HAMMERDIR/support # It should contain any other script.
+
+
+EMBER_VER="origin/master"
+VARCONF_VER="origin/master"
+ATLAS_CPP_VER="origin/master"
+SKSTREAM_VER="origin/master"
+WFMATH_VER="origin/master"
+ERIS_VER="origin/master"
+WFUT_VER="origin/master"
+MERCATOR_VER="origin/master"
+MEDIA_VER="dev"
+
+while :
+do
+  case $1 in
+    help | -h | --help | -\?)
+      if [ $# -eq 2 ] ; then
+        show_help $2
+      else
+        show_help "main"
+      fi
+      exit 0
+      ;;
+    -t=* | --cross_compile=* | --cross-compile=*) # --cross-compile=android
+      export CROSS_COMPILE=1
+      TARGET_NAME=${1#*=}
+      if [ "$TARGET_NAME" = "android" ] || [ "$TARGET_NAME" = "android-ARMv7" ]; then
+        export TARGET_OS="android"
+        export TARGET_ARCH="ARMv7"
+      elif [ "$TARGET_NAME" = "android-x86" ]; then
+        export TARGET_OS="android"
+        export TARGET_ARCH="x86"
+      else
+        echo "Unknown target '$TARGET_NAME'!"
+        exit 1
+      fi
+      shift
+      ;;
+    --debug)
+      export DEBUG=1
+      shift
+      ;;
+    --make_flags=* | --make-flags=*) # --make_flags="-j4"
+      export MAKE_FLAGS=${1#*=}
+      shift
+      ;;
+    --configure_flags=* | --configure-flags=*) # --configure_flags="--static"
+      export CONFIGURE_FLAGS=${1#*=}
+      shift
+      ;;
+    --cmake_flags=* | --cmake-flags=*) # --cmake_flags="-DOGRE_UNITY_BUILD=true"
+      export CMAKE_FLAGS=${1#*=}
+      shift
+      ;;
+    --compile_flags=* | --compile-flags=*) # --compile_flags="-O0 -g"
+      export COMPILE_FLAGS=${1#*=}
+      shift
+      ;;
+    --link_flags=* | --compile-flags=*) # --link_flags="-L/usr/lib -lfoo"
+      export LINK_FLAGS=${1#*=}
+      shift
+      ;;
+    -a | --force-autogen | --force_autogen)
+      export FORCE_AUTOGEN=1
+      shift
+      ;;
+    -c | --force-configure | --force_configure)
+      export FORCE_CONFIGURE=1
+      shift
+      ;;
+    --use-release-ember=*)
+      EMBER_VER="release-${1#*=}"
+      shift
+      ;;
+    --use-release-media=*)
+      MEDIA_VER="${1#*=}"
+      shift
+      ;;
+    --use-release-libs)
+      VARCONF_VER=1.0.1
+      ATLAS_CPP_VER=0.6.3
+      SKSTREAM_VER=0.3.9
+      WFMATH_VER=1.0.2
+      ERIS_VER=1.3.23
+      WFUT_VER=libwfut-0.2.3
+      MERCATOR_VER=0.3.3
+      shift
+      ;;
+    -*)
+      printf >&2 'Unknown option: %s\n' "$1"
+      exit 1
+      ;;
+    *)  # end of options.
+      break
+      ;;
+  esac
+done
+
+#+++++++++++++++++++++
+#+ Setup environment +
+#+++++++++++++++++++++
+
+# It will use the settings from above to set up the environment.
+# You can use pop_env to get back to system environment.
+#$SUPPORTDIR/setup_env.sh push_env #Use this to debug setup_env.sh
+eval `$SUPPORTDIR/setup_env.sh push_env`
+
+echo "Building for $BUILDDIR!"
+
+# Define component versions
+CEGUI_VER=cegui-0.8.3
+CEGUI_DOWNLOAD=cegui-0.8.3.tar.gz
+OGRE_VER=ogre_1_9_0
+OGRE_DOWNLOAD=v1-9-0.tar.bz2
+CG_VER=3.1
+CG_FULLVER=${CG_VER}.0013
+CG_DOWNLOAD=Cg-3.1_April2012
+FREEALUT_VER=1.1.0
+TOLUA_VER="tolua++-1.0.93"
+VARCONF_VER=1.0.1
+ATLASCPP_VER=0.6.3
+SKSTREAM_VER=0.3.9
+WFMATH_VER=1.0.2
+ERIS_VER=1.3.23
+WFUT_VER=libwfut-0.2.3
+MERCATOR_VER=0.3.3
+
+# setup directories
+mkdir -p $PREFIX
+mkdir -p $DEPS_SOURCE
+mkdir -p $SOURCE
+mkdir -p $DEPS_BUILD
+mkdir -p $BUILD
+mkdir -p $LOGDIR
+
+# Output redirect logs
+AUTOLOG=autogen.log     # Autogen output
+CONFIGLOG=config.log    # Configure output
+MAKELOG=build.log       # Make output
+INSTALLLOG=install.log  # Install output
+
+function buildwf()
 {
-  # Cg Toolkit
+    if [ x"$2" = x"" ]; then
+      PRJNAME="$1"
+    else
+      PRJNAME="$2"
+    fi
+
+    mkdir -p $LOGDIR/$PRJNAME
+
+    cd $SOURCE/$1
+    if [ $FORCE_AUTOGEN -eq 1 ] || [ ! -f "configure" ] ; then
+      echo "  Running autogen..."
+      NOCONFIGURE=1 ./autogen.sh > $LOGDIR/$PRJNAME/$AUTOLOG
+    fi
+
+    mkdir -p $BUILD/$1/$BUILDDIR
+    cd $BUILD/$1/$BUILDDIR
+    if [ $FORCE_CONFIGURE -eq 1 ] || [ ! -f "Makefile" ] ; then
+      echo "  Running configure..."
+      $SOURCE/$1/configure $CONFIGURE_FLAGS > $LOGDIR/$PRJNAME/$CONFIGLOG
+    fi
+
+    echo "  Building..."
+    make $MAKE_FLAGS > $LOGDIR/$PRJNAME/$MAKELOG
+    echo "  Installing..."
+    make install > $LOGDIR/$PRJNAME/$INSTALLLOG
+}
+
+function checkoutwf()
+{
+  if [ x"$2" = x"" ]; then
+    USER="worldforge"
+  else
+    USER="$2"
+  fi
+  if [ x"$3" = x"" ]; then
+    # atlas-cpp ==> ATLAS_CPP
+    BRANCH="`echo $1 | tr '[:lower:]' '[:upper:]' | tr '-' '_'`_VER"
+    # ATLAS_CPP ==> origin/master (indirectly get the value of a variable)
+    BRANCH="${!BRANCH}"
+  else
+    BRANCH="$3"
+  fi
+  echo "Getting $1 $BRANCH"
+  if [ ! -d $1 ]; then
+    git clone git://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
+  else
+    cd $1
+    if [ x$HAMMERALWAYSSTASH = xyes ]; then
+      git stash save "Hammer stash"
+    fi
+    git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
+  fi
+}
+
+function cyphesis_post_install()
+{
+  cd $PREFIX/bin
+
+  # Rename real cyphesis binary to cyphesis.bin
+  mv cyphesis cyphesis.bin
+
+  # Install our cyphesis.in script as cyphesis
+  cp $SUPPORTDIR/cyphesis.in cyphesis
+  chmod +x cyphesis
+}
+
+
+
+function install_deps_cg()
+{
+    # TODO: This seems broken. Missing beginning of function.
+    # Cg Toolkit
     echo "  Installing Cg Toolkit..."
     if [[ $OSTYPE == *darwin* ]] ; then
       CG_DOWNLOAD+=".dmg"
@@ -259,9 +375,9 @@ function install_deps_Cg()
     echo "  Done."
 }
 
-function install_deps_Ogre()
+function install_deps_ogre()
 {
-  # Ogre3D
+    # Ogre3D
     echo "  Installing Ogre..."
     mkdir -p $LOGDIR/deps/ogre
     cd $DEPS_SOURCE
@@ -274,8 +390,7 @@ function install_deps_Ogre()
       OGRE_SOURCE=$DEPS_SOURCE/$OGRE_VER/`ls $DEPS_SOURCE/$OGRE_VER`
       if [[ $OSTYPE == *darwin* ]] ; then
         cd $OGRE_SOURCE
-        echo "  Patching..."
-        ls .
+        echo "  Patching...".
         patch -p1 < $SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch
       fi
     else
@@ -287,7 +402,9 @@ function install_deps_Ogre()
     OGRE_EXTRA_FLAGS=""
     # Note: The -DOIS_INCLUDE_DIR flag is only set because of sample-related build failures
     #       which appear to be caused by Ogre 1.9.0. When fixed, this flag should be removed.
-    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="/usr/lib" -DOGRE_BUILD_SAMPLES="OFF" -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_EXTRA_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
+    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="" -DOGRE_BUILD_SAMPLES="OFF" \
+    -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" \
+    -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
       echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/deps/ogre/$MAKELOG
@@ -299,7 +416,7 @@ function install_deps_Ogre()
         echo "  Done."
     else
         echo "  Building..."
-        make $MAKEOPTS > $LOGDIR/deps/ogre/$MAKELOG
+        make $MAKE_FLAGS > $LOGDIR/deps/ogre/$MAKELOG
         echo "  Installing..."
         make install > $LOGDIR/deps/ogre/$INSTALLLOG
         echo "  Done."
@@ -308,7 +425,7 @@ function install_deps_Ogre()
 
 function install_deps_freealut()
 {
-  # freealut
+    # freealut
     echo "  Installing freealut..."
     mkdir -p $LOGDIR/deps/freealut
     cd $DEPS_SOURCE
@@ -327,18 +444,18 @@ function install_deps_freealut()
     cd $DEPS_BUILD/freealut-${FREEALUT_VER}-src/$BUILDDIR
 
     echo "  Running configure..."
-    $DEPS_SOURCE/freealut-${FREEALUT_VER}-src/configure --prefix=$PREFIX $CONFIGURE_EXTRA_FLAGS \
-    CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
+    $DEPS_SOURCE/freealut-${FREEALUT_VER}-src/configure $CONFIGURE_FLAGS \
+    export CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
 
     echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/deps/freealut/$MAKELOG
+    make $MAKE_FLAGS > $LOGDIR/deps/freealut/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/deps/freealut/$INSTALLLOG
 }
 
 function install_deps_tolua++()
 {
-  # tolua++
+    # tolua++
     #the "all" keyword will only work on mac, but "tolua++" will work on linux and mac, if you set LUA_CFLAGS and LUA_LDFLAGS.
     NORMAL_LUA_VERSION="`pkg-config --modversion lua`"
     if [[ ! $NORMAL_LUA_VERSION == 5.1* ]]; then
@@ -376,16 +493,16 @@ function install_deps_tolua++()
     cd ../../..
 }
 
-function install_deps_CEGUI()
+function install_deps_cegui()
 {
-  # CEGUI
+    # CEGUI
     echo "  Installing CEGUI..."
     mkdir -p $LOGDIR/deps/CEGUI    # create CEGUI log directory
     cd $DEPS_SOURCE
     if [ ! -d $CEGUI_VER ] ; then
       echo "  Downloading..."
       curl -C - -OL http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD
-      tar -xzf $CEGUI_DOWNLOAD
+      tar -xjf $CEGUI_DOWNLOAD
       if [[ $OSTYPE == *darwin* ]] ; then
         echo "  Patching..."
         cd $DEPS_SOURCE/$CEGUI_VER
@@ -401,18 +518,26 @@ function install_deps_CEGUI()
     mkdir -p $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
     cd $DEPS_BUILD/$CEGUI_VER/$BUILDDIR
     echo "  Configuring..."
-    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/$CEGUI_VER  > $LOGDIR/deps/CEGUI/$CONFIGLOG 
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_FLAGS $DEPS_SOURCE/$CEGUI_VER  > $LOGDIR/deps/CEGUI/$CONFIGLOG 
     echo "  Building..."
-    make $MAKEOPTS > $LOGDIR/deps/CEGUI/$MAKELOG
+    make $MAKE_FLAGS > $LOGDIR/deps/CEGUI/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/deps/CEGUI/$INSTALLLOG
     if [[ $OSTYPE == *darwin* ]] ; then
       #on mac we use -DCEGUI_STATIC, which will disable the plugin interface and we need to link the libraries manually.
-      sed -i "" -e "s/-lCEGUIBase/-lCEGUIBase -lCEGUIFalagardWRBase -lCEGUIFreeImageImageCodec -lCEGUITinyXMLParser/g" $PREFIX/lib/pkgconfig/CEGUI.pc
+      sed -i "" -e "s/-lCEGUIBase/-lCEfrGUIBase -lCEGUIFalagardWRBase -lCEGUIFreeImageImageCodec -lCEGUITinyXMLParser/g" $PREFIX/lib/pkgconfig/CEGUI.pc
     fi
     echo "  Done."
 }
-
+function install_deps_all()
+{
+    if [[ $OSTYPE == *darwin* ]] ; then
+      install_deps_freealut
+      install_deps_tolua++
+    fi
+    install_deps_ogre
+    install_deps_cegui
+}
 function install_deps_AppImageKit()
 {
   # AppImageKit
@@ -450,13 +575,13 @@ function install_deps_AppImageKit()
 
 function ember_fetch_media()
 {
-  if [ $1 = "dev" ] ; then
+  if [ $MEDIA_VER = "dev" ] ; then
     MEDIAURL="http://amber.worldforge.org/media/media-dev/"
     MEDIAVERSION="devmedia"
     MEDIA_PREFETCH="set +e"
     MEDIA_POSTFETCH="set -e"
   else
-    MEDIAURL="http://downloads.sourceforge.net/worldforge/ember-media-${1}.tar.bz2"
+    MEDIAURL="http://downloads.sourceforge.net/worldforge/ember-media-${MEDIA_VER}.tar.bz2"
     MEDIAVERSION="releasemedia"
     MEDIA_PREFETCH=""
     MEDIA_POSTFETCH=""
@@ -478,24 +603,16 @@ function ember_fetch_media()
     fi
 }
 
-# Show main help page if no arguments given
-if [ $# -eq 0 ] ; then
-  show_help "main"
-
-# If help command given, show help page
-elif [ "$1" = "help" ] ; then
-  if [ $# -eq 2 ] ; then
-    show_help $2
-  else
-    show_help "main"
-  fi
-
-  mkdir -p $PREFIX $SOURCE $DEPS_SOURCE $BUILD $DEPS_BUILD
+mkdir -p $PREFIX $SOURCE $DEPS_SOURCE $BUILD $DEPS_BUILD
 
 # Dependencies install
-elif [ "$1" = "install-deps" ] ; then
+if [ "$1" = "install-deps" ] ; then
   if [ x$MSYSTEM = x"MINGW32" ] ; then
-    $HAMMERDIR/support/mingw_install_deps.sh
+    $SUPPORTDIR/mingw_install_deps.sh $2
+    exit 0
+  fi
+  if [ "$CROSS_COMPILE" = "1" ] && [[ x"$TARGET_OS" = x"android" ]] ; then
+    $SUPPORTDIR/android_install_deps.sh $2
     exit 0
   fi
   if [ $# -ne 2 ] ; then
@@ -509,31 +626,14 @@ elif [ "$1" = "install-deps" ] ; then
   # Create deps log directory
   mkdir -p $LOGDIR/deps
 
-  # Cg Toolkit
-  if [ "$2" = "all" ] || [ "$2" = "cg" ] ; then
-    install_deps_Cg
+  if [ "$2" = "all" ] || [ "$2" = "ogre" ] || [ "$2" = "cegui" ] ||
+     [ "$2" = "cg" ] || [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ; then
+    install_deps_$2
+  else
+    printf >&2 'Unknown target: %s\n' "$2"
+    exit 1
   fi
-
-  # Ogre3D
-  if [ "$2" = "all" ] || [ "$2" = "ogre" ] ; then
-    install_deps_Ogre
-  fi
-
-  # freealut
-  if [ "$2" = "all" ] && [[ $OSTYPE == *darwin* ]] || [ "$2" = "freealut" ] ; then
-    install_deps_freealut
-  fi
-
-  # tolua++
-  if [ "$2" = "all" ] && [[ $OSTYPE == *darwin* ]] || [ "$2" = "tolua++" ] ; then
-    install_deps_tolua++
-  fi
-
-  # CEGUI
-  if [ "$2" = "all" ] || [ "$2" = "cegui" ] ; then
-    install_deps_CEGUI
-  fi
-
+  
   # AppImageKit
   if [ "$2" = "appimage" ] ; then
     install_deps_AppImageKit
@@ -647,7 +747,7 @@ elif [ "$1" = "build" ] ; then
 
   # Check for make options
   if [ $# -ge 3 ] ; then
-    MAKEOPTS=$3
+    export MAKE_FLAGS="$MAKE_FLAGS $3"
   fi
 
   echo "Building sources..."
@@ -696,7 +796,6 @@ elif [ "$1" = "build" ] ; then
   fi
 
   if [ "$2" = "ember" ] || [ "$2" = "all" ] ; then
-
     # Ember client
     echo "  Ember client..."
     buildwf "clients/ember"
@@ -722,16 +821,17 @@ elif [ "$1" = "build" ] ; then
     # change sysconfdir in order to conform with the manner
     # of WF builds
     echo "  metaserver-ng..."
-    CONFIGURE_EXTRA_FLAGS="--sysconfdir=$PREFIX/etc/metaserver-ng";
+    CONFIGURE_FLAGS_SAVED="$CONFIGURE_FLAGS"
+    export CONFIGURE_FLAGS="$CONFIGURE_FLAGS --sysconfdir=$PREFIX/etc/metaserver-ng"
     buildwf "servers/metaserver-ng"
-    CONFIGURE_EXTRA_FLAGS="";
+    export CONFIGURE_FLAGS="$CONFIGURE_FLAGS_SAVED"
     echo "  Done."
   fi
 
   if [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
 
     echo "  WebEmber..."
-    CONFIGURE_EXTRA_FLAGS="$CONFIGURE_EXTRA_FLAGS --enable-webember"
+    export CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-webember"
     #we need to change the BUILDDIR to separate the ember and webember build directories.
     #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
     export BUILDDIR=web${BUILDDIR}
@@ -757,7 +857,7 @@ elif [ "$1" = "build" ] ; then
       mkdir -p $BUILD/clients/webember/FireBreath/$BUILDDIR
       cd $BUILD/clients/webember/FireBreath/$BUILDDIR
 
-      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/webember/plugin $CMAKE_EXTRA_FLAGS $SOURCE/clients/webember/FireBreath > $LOGDIR/webember_plugin/cmake.log
+      cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DFB_PROJECTS_DIR=$SOURCE/clients/webember/webember/plugin $CMAKE_FLAGS $SOURCE/clients/webember/FireBreath > $LOGDIR/webember_plugin/cmake.log
       if  [[ $OSTYPE == *darwin* ]] ; then
         echo "  Building..."
         xcodebuild -configuration RelWithDebInfo > $LOGDIR/webember_plugin/$MAKELOG
@@ -765,7 +865,7 @@ elif [ "$1" = "build" ] ; then
         cp -r projects/WebEmber/RelWithDebInfo/webember.plugin $PREFIX/lib
       else
         echo "  Building..."
-        make $MAKEOPTS > $LOGDIR/webember_plugin/build.log
+        make $MAKE_FLAGS > $LOGDIR/webember_plugin/build.log
         echo "  Installing..."
         mkdir -p ~/.mozilla/plugins
         cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
