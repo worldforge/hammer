@@ -903,104 +903,50 @@ elif [ "$1" = "release_ember" ] ; then
     export CXXFLAGS="$CXXFLAGS -O3 -g0 -s"
     export CFLAGS="$CFLAGS -O3 -g0 -s"
   fi
-  export APP_DIR_ROOT="$WORKDIR/Ember.AppDir"
-
+  
+  # Remove hammer environment
+  eval `$SUPPORTDIR/setup_env.sh pop_env`
+  CURDIR="$PWD"
+  HAMMER="$0"
+  
   # Install external dependencies
   echo "Installing 3rd party dependencies..."
-  # Create deps log directory
-  mkdir -p $LOGDIR/deps
-  install_deps_Cg
-  install_deps_Ogre
-  if [[ $OSTYPE == *darwin* ]] ; then
-    install_deps_freealut
-    install_deps_tolua++
-  fi
-  install_deps_CEGUI
+  $HAMMER --compile_flags="$CXXFLAGS" install-deps all
   echo "Install of 3rd party dependencies is complete."
   
-  if [ x"$2" != x"dev" ] ; then
-    EMBER_VER="release-$2"
-  else
-    EMBER_VER="origin/master"
-    VARCONF_VER="origin/master"
-    ATLASCPP_VER="origin/master"
-    SKSTREAM_VER="origin/master"
-    WFMATH_VER="origin/master"
-    ERIS_VER="origin/master"
-    WFUT_VER="origin/master"
-    MERCATOR_VER="origin/master"
-  fi
+  HAMMER_EXTRA_FLAGS=""
 
   # Source checkout
   echo "Checking out sources..."
-    mkdir -p $SOURCE/libs
-    cd $SOURCE/libs
-    echo "  Varconf..."
-    checkoutwf "varconf" "worldforge" $VARCONF_VER
-    echo "  Done."
-    cd $SOURCE/libs
-    echo "  Atlas-C++..."
-    checkoutwf "atlas-cpp" "worldforge" $ATLASCPP_VER
-    echo "  Done."
-# Needs to be removed for Ember version 0.8.0 and above
-    cd $SOURCE/libs
-    echo "  Skstream..."
-    checkoutwf "skstream" "worldforge" $SKSTREAM_VER
-    echo "  Done."
-    cd $SOURCE/libs
-    echo "  Wfmath..."
-    checkoutwf "wfmath" "worldforge" $WFMATH_VER
-    echo "  Done."
-    cd $SOURCE/libs
-    echo "  Eris..."
-    checkoutwf "eris" "worldforge" $ERIS_VER
-    echo "  Done."
-    cd $SOURCE/libs
-    echo "  Libwfut..."
-    checkoutwf "libwfut" "worldforge" $WFUT_VER
-    echo "  Done."
-    cd $SOURCE/libs
-    echo "  Mercator..."
-    checkoutwf "mercator" "worldforge" $MERCATOR_VER
-    echo "  Done."
-    echo "  Ember client..."
-    mkdir -p $SOURCE/clients
-    cd $SOURCE/clients
-    checkoutwf "ember" "worldforge" $EMBER_VER
-    echo "  Done."
+    $HAMMER --use-release-libs checkout libs
+    
+    if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
+      cd $SOURCE/libs
+      # skstream is deprecated, but we need it to build older ember releases!
+      checkoutwf "skstream" "worldforge" $SKSTREAM_VER
+      
+      HAMMER_EXTRA_FLAGS="--use-release-ember=$2"
+      cd $CURDIR
+    fi
+    
+    
+    $HAMMER $HAMMER_EXTRA_FLAGS checkout ember
   echo "Checkout complete."
 
   # Build source
   echo "Building sources..."
-    # Build libraries
-    echo "  Varconf..."
-    buildwf "libs/varconf"
-    echo "  Done."
-# Needs to be removed for Ember version 0.8.0 and above
-    echo "  Skstream..."
-    buildwf "libs/skstream"
-    echo "  Done."
-    echo "  Wfmath..."
-    buildwf "libs/wfmath"
-    echo "  Done."
-    echo "  Atlas-C++..."
-    buildwf "libs/atlas-cpp"
-    echo "  Done."
-    echo "  Mercator..."
-    buildwf "libs/mercator"
-    echo "  Done."
-    echo "  Eris..."
-    buildwf "libs/eris"
-    echo "  Done."
-    echo "  Libwfut..."
-    buildwf "libs/libwfut"
-    echo "  Done."
-    # Build Ember client
-    echo "  Ember client..."
-    buildwf "clients/ember"
-    echo "  Done."
-    # Fetch Ember media
-    ember_fetch_media $2
+    $HAMMER --compile_flags="$CXXFLAGS" build libs
+    
+    if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
+      
+      # skstream is deprecated, but we need it to build older ember releases!
+      buildwf "libs/skstream"
+      
+      HAMMER_EXTRA_FLAGS="--release-media=$2"
+      cd $CURDIR
+    fi
+    
+    $HAMMER $HAMMER_EXTRA_FLAGS --compile_flags="$CXXFLAGS" build ember
   echo "Build complete."
 
   # Check for Ember release target option
@@ -1011,6 +957,7 @@ elif [ "$1" = "release_ember" ] ; then
       source $HAMMERDIR/support/AppBundler.sh
       echo "AppBundle creation complete."
     else
+      export APP_DIR_ROOT="$WORKDIR/Ember.AppDir"
       echo "Creating AppImage."
       install_deps_AppImageKit
       source $HAMMERDIR/support/linux_AppDir_create.sh &> $LOGDIR/deps/AppImageKit/AppDir.log
