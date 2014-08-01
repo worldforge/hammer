@@ -165,8 +165,8 @@ do
       fi
       shift
       ;;
-    --debug)
-      export DEBUG=1
+    -d | --debug)
+      export DEBUG_BUILD=1
       shift
       ;;
     --make_flags=* | --make-flags=*) # --make_flags="-j4"
@@ -233,7 +233,6 @@ done
 # You can use pop_env to get back to system environment.
 #$SUPPORTDIR/setup_env.sh push_env #Use this to debug setup_env.sh
 eval `$SUPPORTDIR/setup_env.sh push_env`
-
 echo "Building for $BUILDDIR!"
 
 # Define component versions
