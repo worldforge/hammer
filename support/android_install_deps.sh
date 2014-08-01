@@ -16,7 +16,7 @@ function updateAutotoolsToolchainDetection() {
   CONFIG_VER="config"
   CONFIG_SOURCEDIR=$DEPS_SOURCE/$CONFIG_VER
   CONFIG_INSTALLDIR=$1
-  
+  PWD_SAVE="$PWD"
   cd $DEPS_SOURCE
   if [ ! -d $CONFIG_SOURCEDIR ]; then
     git clone git://git.sv.gnu.org/config.git
@@ -26,6 +26,7 @@ function updateAutotoolsToolchainDetection() {
   cd $CONFIG_SOURCEDIR
   find $CONFIG_INSTALLDIR -type f -iname 'config.guess' -exec cp -T -f ./config.guess {} \;
   find $CONFIG_INSTALLDIR -type f -iname 'config.sub' -exec cp -T -f ./config.sub {} \;
+  cd $PWD_SAVE
 }
 
 function getAndroidCMakeToolchain()
