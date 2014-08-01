@@ -1,14 +1,159 @@
 # HG changeset patch
-# User Peter SzÃ¼cs <peter.szucs.dev@gmail.com>
-# Date 1401884736 -7200
-#      Wed Jun 04 14:25:36 2014 +0200
-# Node ID 67e37b7533e219ad15f66d92997112e90ea35bd8
+# User Peter Szücs <peter.szucs.dev@gmail.com>
+# Date 1406892891 -7200
+#      Fri Aug 01 13:34:51 2014 +0200
+# Node ID fd1215f492d81c2ade1c2ffa70818ba169f032ef
 # Parent  27b96a459cd6bd74172a0bf493d0d5e934b9bee6
-If using system zlib, then don't use local zlib headers.
+Fix Android for Standalone toolchain.
 
-diff -r 27b96a459cd6 -r 67e37b7533e2 src/zziplib/CMakeLists.txt
+I have also changed freetype and freeimage to use system zlib.
+The system zlib doesn't provide zutil.h, so we need to copy that header.
+
+diff -r 27b96a459cd6 -r fd1215f492d8 src/FreeImage/CMakeLists.txt
+--- a/src/FreeImage/CMakeLists.txt	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/FreeImage/CMakeLists.txt	Fri Aug 01 13:34:51 2014 +0200
+@@ -485,32 +485,6 @@
+ 	Source/Quantizers.h
+ 	Source/ToneMapping.h
+ 	Source/Utilities.h
+-	Source/ZLib/adler32.c
+-	Source/ZLib/compress.c
+-	Source/ZLib/crc32.c
+-	Source/ZLib/crc32.h
+-	Source/ZLib/deflate.c
+-	Source/ZLib/deflate.h
+-    Source/ZLib/gzclose.c
+-    Source/ZLib/gzguts.h
+-    Source/ZLib/gzlib.c
+-    Source/ZLib/gzread.c
+-    Source/ZLib/gzwrite.c
+-	Source/ZLib/infback.c
+-	Source/ZLib/inffast.c
+-	Source/ZLib/inffast.h
+-	Source/ZLib/inffixed.h
+-	Source/ZLib/inflate.c
+-	Source/ZLib/inflate.h
+-	Source/ZLib/inftrees.c
+-	Source/ZLib/inftrees.h
+-	Source/ZLib/trees.c
+-	Source/ZLib/trees.h
+-	Source/ZLib/uncompr.c
+-	Source/ZLib/zconf.h
+-	Source/ZLib/zlib.h
+-	Source/ZLib/zutil.c
+-	Source/ZLib/zutil.h
+ )
+ 
+ # need include directories for FreeImage and all the sub libs
+@@ -528,7 +502,6 @@
+ include_directories(Source/OpenEXR/IlmImf)
+ include_directories(Source/OpenEXR/IlmThread)
+ include_directories(Source/OpenEXR/Imath)
+-include_directories(Source/ZLib)
+ 
+ add_definitions(-DOPJ_STATIC -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -DNO_LCMS)
+ add_library(FreeImage STATIC ${FreeImage_SOURCES})
+diff -r 27b96a459cd6 -r fd1215f492d8 src/FreeImage/Source/FreeImage/PluginPNG.cpp
+--- a/src/FreeImage/Source/FreeImage/PluginPNG.cpp	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/FreeImage/Source/FreeImage/PluginPNG.cpp	Fri Aug 01 13:34:51 2014 +0200
+@@ -37,7 +37,7 @@
+ 
+ // ----------------------------------------------------------
+ 
+-#include "../ZLib/zlib.h"
++#include <zlib.h>
+ #include "../LibPNG/png.h"
+ 
+ // ----------------------------------------------------------
+diff -r 27b96a459cd6 -r fd1215f492d8 src/FreeImage/Source/FreeImage/ZLibInterface.cpp
+--- a/src/FreeImage/Source/FreeImage/ZLibInterface.cpp	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/FreeImage/Source/FreeImage/ZLibInterface.cpp	Fri Aug 01 13:34:51 2014 +0200
+@@ -19,10 +19,10 @@
+ // Use at your own risk!
+ // ==========================================================
+ 
+-#include "../ZLib/zlib.h"
++#include <zlib.h>
+ #include "FreeImage.h"
+ #include "Utilities.h"
+-#include "../ZLib/zutil.h"	/* must be the last header because of error C3163 in VS2008 (_vsnprintf defined in stdio.h) */
++#include <zutil.h>	/* must be the last header because of error C3163 in VS2008 (_vsnprintf defined in stdio.h) */
+ 
+ /**
+ Compresses a source buffer into a target buffer, using the ZLib library. 
+diff -r 27b96a459cd6 -r fd1215f492d8 src/FreeImage/Source/LibTIFF4/tif_pixarlog.c
+--- a/src/FreeImage/Source/LibTIFF4/tif_pixarlog.c	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/FreeImage/Source/LibTIFF4/tif_pixarlog.c	Fri Aug 01 13:34:51 2014 +0200
+@@ -90,7 +90,7 @@
+  */
+ 
+ #include "tif_predict.h"
+-#include "../ZLib/zlib.h"
++#include <zlib.h>
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
+diff -r 27b96a459cd6 -r fd1215f492d8 src/FreeImage/Source/LibTIFF4/tif_zip.c
+--- a/src/FreeImage/Source/LibTIFF4/tif_zip.c	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/FreeImage/Source/LibTIFF4/tif_zip.c	Fri Aug 01 13:34:51 2014 +0200
+@@ -47,7 +47,7 @@
+  * last found at ftp://ftp.uu.net/pub/archiving/zip/zlib/zlib-0.99.tar.gz.
+  */
+ #include "tif_predict.h"
+-#include "../ZLib/zlib.h"
++#include <zlib.h>
+ 
+ #include <stdio.h>
+ 
+diff -r 27b96a459cd6 -r fd1215f492d8 src/freetype/include/freetype/config/ftoption.h
+--- a/src/freetype/include/freetype/config/ftoption.h	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/freetype/include/freetype/config/ftoption.h	Fri Aug 01 13:34:51 2014 +0200
+@@ -163,7 +163,7 @@
+   /*   Define this macro if you want to enable this `feature'.  See also   */
+   /*   the macro FT_CONFIG_OPTION_SYSTEM_ZLIB below.                       */
+   /*                                                                       */
+-#define FT_CONFIG_OPTION_USE_ZLIB
++/* #define FT_CONFIG_OPTION_USE_ZLIB */
+ 
+ 
+   /*************************************************************************/
+diff -r 27b96a459cd6 -r fd1215f492d8 src/zlib/zutil.h
+--- a/src/zlib/zutil.h	Tue Apr 29 19:38:55 2014 -0700
++++ b/src/zlib/zutil.h	Fri Aug 01 13:34:51 2014 +0200
+@@ -44,7 +44,7 @@
+ typedef ush FAR ushf;
+ typedef unsigned long  ulg;
+ 
+-extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
++//extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
+ /* (size given to avoid silly warnings with Visual C++) */
+ 
+ #define ERR_MSG(err) z_errmsg[Z_NEED_DICT-(err)]
+@@ -170,8 +170,8 @@
+ /* provide prototypes for these when building zlib without LFS */
+ #if !defined(_WIN32) && \
+     (!defined(_LARGEFILE64_SOURCE) || _LFS64_LARGEFILE-0 == 0)
+-    ZEXTERN uLong ZEXPORT adler32_combine64 OF((uLong, uLong, z_off_t));
+-    ZEXTERN uLong ZEXPORT crc32_combine64 OF((uLong, uLong, z_off_t));
++    //ZEXTERN uLong ZEXPORT adler32_combine64 OF((uLong, uLong, z_off_t));
++    //ZEXTERN uLong ZEXPORT crc32_combine64 OF((uLong, uLong, z_off_t));
+ #endif
+ 
+         /* common defaults */
+@@ -218,8 +218,8 @@
+ /* Diagnostic functions */
+ #ifdef DEBUG
+ #  include <stdio.h>
+-   extern int ZLIB_INTERNAL z_verbose;
+-   extern void ZLIB_INTERNAL z_error OF((char *m));
++#  define z_verbose 1
++#  define z_error(msg)
+ #  define Assert(cond,msg) {if(!(cond)) z_error(msg);}
+ #  define Trace(x) {if (z_verbose>=0) fprintf x ;}
+ #  define Tracev(x) {if (z_verbose>0) fprintf x ;}
+diff -r 27b96a459cd6 -r fd1215f492d8 src/zziplib/CMakeLists.txt
 --- a/src/zziplib/CMakeLists.txt	Tue Apr 29 19:38:55 2014 -0700
-+++ b/src/zziplib/CMakeLists.txt	Wed Jun 04 14:25:36 2014 +0200
++++ b/src/zziplib/CMakeLists.txt	Fri Aug 01 13:34:51 2014 +0200
 @@ -38,8 +38,10 @@
    zzip/zzip.h
  )
