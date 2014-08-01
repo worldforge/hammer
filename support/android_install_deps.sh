@@ -170,7 +170,8 @@ function install_deps_ceguideps()
   cp -r -f $CEGUIDEPS_BUILDDIR/dependencies/lib/static/* $PREFIX/lib
   cp -r -f $CEGUIDEPS_BUILDDIR/dependencies/include/* $PREFIX/include
   cp -r -f $SUPPORTDIR/lua5.1.pc $PREFIX/lib/pkgconfig
-  sed -i -e "s/TPL_PREFIX/$PREFIX/g" $PREFIX/lib/pkgconfig/lua5.1.pc
+  PREFIX_ESCAPED=$(printf '%s\n' "$PREFIX" | sed 's/[\&/]/\\&/g')
+  sed -i -e "s/TPL_PREFIX/$PREFIX_ESCAPED/g" $PREFIX/lib/pkgconfig/lua5.1.pc
   export LDFLAGS="$LDFLAGS_SAVE"
 }
 
