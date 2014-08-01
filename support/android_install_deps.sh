@@ -159,8 +159,8 @@ function install_deps_ceguideps()
   cd $CEGUIDEPS_BUILDDIR
   cmake $CMAKE_CROSS_COMPILE $CMAKE_FLAGS -DCEGUI_BUILD_FREEIMAGE=false -DCEGUI_BUILD_FREETYPE2=false \
     -DCEGUI_BUILD_GLEW=false -DCEGUI_BUILD_GLFW=false -DCEGUI_BUILD_GLM=false -DCEGUI_BUILD_SILLY=false \
-    -DCEGUI_BUILD_TOLUAPP=true -DCEGUI_BUILD_LUA=true -DCEGUI_BUILD_PCRE=true -DCEGUI_BUILD_EXPAT=true \
-    -DCMAKE_EXE_LINKER_FLAGS="-static" $CEGUIDEPS_SOURCEDIR
+    -DCEGUI_BUILD_TOLUAPP=true -DCEGUI_BUILD_LUA=true -DCEGUI_BUILD_PCRE=true -DCEGUI_BUILD_EXPAT=false \
+    -DCEGUI_BUILD_TINYXML=true -DCMAKE_EXE_LINKER_FLAGS="-static" $CEGUIDEPS_SOURCEDIR
 
   #It seems that tolua++ and lua are built in parallel, but that will fail. So $MAKE_FLAGS will be ignored
   make
