@@ -233,8 +233,9 @@ function install_deps_ogredeps()
   cd $DEPS_SOURCE
   
   if [ ! -d $OGREDEPS_SOURCEDIR ]; then
-    hg clone https://bitbucket.org/cabalistic/ogredeps -r 27b96a4
+    hg clone https://bitbucket.org/cabalistic/ogredeps
     cd $OGREDEPS_SOURCEDIR
+    hg update -r 27b96a4
     patch -N -p1 -r - < $SUPPORTDIR/android_fix-ogredeps.patch
   fi
 
@@ -281,8 +282,9 @@ function install_deps_ogre()
   cd $DEPS_SOURCE
   
   if [ ! -d $OGRE_SOURCEDIR ]; then
-    hg clone https://bitbucket.org/sinbad/ogre -r 77f3a5a
+    hg clone https://bitbucket.org/sinbad/ogre
     cd $OGRE_SOURCEDIR
+    hg update -r 7c77686
     patch -N -p1 -r - < $SUPPORTDIR/android_fix-ogre.patch
   fi
 
