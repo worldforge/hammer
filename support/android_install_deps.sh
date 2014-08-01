@@ -50,20 +50,23 @@ function install_deps_toolchain()
 
   # Android SDK
   if [ ! -d $ANDROID_SDK ]; then
-    wget -c http://dl.google.com/android/android-sdk_r22.6.2-linux.tgz
-    tar -xzf android-sdk_r22.6.2-linux.tgz
+    wget -c http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz
+    tar -xzf android-sdk_r23.0.2-linux.tgz
     
     # The user needs to accept a license, so we inject "y" as input. I'm not sure, whether this is legal.
-    echo y | $ANDROID_SDK/tools/android update sdk -u --filter platform-tools,android-15
-    echo y | $ANDROID_SDK/tools/android update sdk -u --filter tools,platform-tools,build-tools-19.1.0
+    echo y | $ANDROID_SDK/tools/android update sdk -u -a --filter tools
+    echo y | $ANDROID_SDK/tools/android update sdk -u -a --filter platform-tools
+    echo y | $ANDROID_SDK/tools/android update sdk -u -a --filter build-tools-20.0.0
+    echo y | $ANDROID_SDK/tools/android update sdk -u -a --filter android-15
+    echo y | $ANDROID_SDK/tools/android update sdk -u -a --filter extra-android-support
   fi
   
   
   # Android NDK
   if [ ! -d $ANDROID_NDK ]; then
-      wget -c http://dl.google.com/android/ndk/android-ndk-r9d-linux-$HOST_ARCH.tar.bz2
-      tar -xjf android-ndk-r9d-linux-$HOST_ARCH.tar.bz2
-      mv android-ndk-r9d android-ndk-r9d-$HOST_ARCH
+      wget -c http://dl.google.com/android/ndk/android-ndk32-r10-linux-$HOST_ARCH.tar.bz2
+      tar -xjf android-ndk32-r10-linux-$HOST_ARCH.tar.bz2
+      mv android-ndk-r10 android-ndk-r10-$HOST_ARCH
   fi
   if [ x"$TARGET_ARCH" = x"x86" ]; then
     TCNAME=x86
