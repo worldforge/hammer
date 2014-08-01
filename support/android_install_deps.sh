@@ -337,29 +337,31 @@ function install_deps_libiconv()
 
 function install_deps_cegui()
 {
-  CEGUI_VER="cegui-0.8.4"
+  CEGUI_VER="cegui"
   CEGUI_BUILDDIR=$DEPS_BUILD/$CEGUI_VER/$BUILDDIR
   CEGUI_SOURCEDIR=$DEPS_SOURCE/$CEGUI_VER
   
   cd $DEPS_SOURCE
   
   if [ ! -d $CEGUI_SOURCEDIR ]; then
-    #git clone https://github.com/ironsteel/cegui.git -b android-port
-    #cd $CEGUI_SOURCEDIR
-    #git reset --hard 577edcf46b
+    hg clone https://bitbucket.org/cegui/cegui
+    cd $CEGUI_SOURCEDIR
+    # This commit is the 0.8.4 tag. It is easier to patch/update the repo then the source tarball.
+    hg update -r 5861231
+    #patch -N -p1 -r - < $SUPPORTDIR/android_fix-cegui.patch
     
     wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_VER.tar.bz2
     tar -xjf $CEGUI_VER.tar.bz2
-    #patch -N -p1 -r - < $SUPPORTDIR/android_fix-cegui.patch
+    patch -N -p1 -r - < $SUPPORTDIR/android_fix-cegui.patch
   fi
   
   mkdir -p $CEGUI_BUILDDIR
   cd $CEGUI_BUILDDIR
-  #export LIBS="-Wl,--start-group -lboost_date_time -lboost_system -lboost_thread -lboost_chrono -lzzip -lFreeImage -lfreetype -llua -liconv -Wl,--end-group -lz -landroid -lc -lm -ldl -llog"
-  cmake $CMAKE_CROSS_COMPILE $CMAKE_FLAGS $CEGUI_SOURCEDIR -DOGRE_LIB=$PREFIX/lib/libOgreMainStatic.a \
-  -DCEGUI_BUILD_XMLPARSER_TINYXML=false -DCEGUI_SAMPLES_ENABLED=false -DCEGUI_BUILD_PYTHON_MODULES=false \
+
+  cmake -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_BUILD_DEBUG $CMAKE_CROSS_COMPILE $CMAKE_FLAGS $CEGUI_SOURCEDIR -DOGRE_LIB=$PREFIX/lib/libOgreMainStatic.a \
   -DBoost_LIBRARY_DIRS=$PREFIX/lib -DCEGUI_BUILD_STATIC_CONFIGURATION=true -DCEGUI_BUILD_LUA_GENERATOR=false \
-  -DOGRE_LIBRARIES="" -DCEGUI_BUILD_STATIC_FACTORY_MODULE=true -DCEGUI_BUILD_SHARED_LIBS_WITH_STATIC_DEPENDENCIES=true
+  -DOGRE_LIBRARIES="" -DCEGUI_BUILD_STATIC_FACTORY_MODULE=true -DCEGUI_BUILD_SHARED_LIBS_WITH_STATIC_DEPENDENCIES=true \
+  -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_FLAGS $DEPS_SOURCE/$CEGUI_VER 
   #cmake-gui .
   make $MAKE_FLAGS
   make install
