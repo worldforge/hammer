@@ -294,6 +294,10 @@ function buildwf()
     make $MAKE_FLAGS > $LOGDIR/$PRJNAME/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/$PRJNAME/$INSTALLLOG
+    
+    # Sometimes libtool installs some of our libs as relative, but with absolute path.
+    # If a path in *.la file starts with =, then it is relative. Make them absolute.
+    find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i 's,=/,/,g'
 }
 
 function checkoutwf()
@@ -339,7 +343,6 @@ function cyphesis_post_install()
 
 function install_deps_cg()
 {
-    # TODO: This seems broken. Missing beginning of function.
     # Cg Toolkit
     echo "  Installing Cg Toolkit..."
     if [[ $OSTYPE == *darwin* ]] ; then
