@@ -93,17 +93,9 @@ if [ $# -eq 0 ] ; then
   show_help "main"
 fi
 
-for envvar in CROSS_COMPILE DEBUG_BUILD MAKE_FLAGS CONFIGURE_FLAGS CMAKE_FLAGS COMPILE_FLAGS LINK_FLAGS FORCE_AUTOGEN FORCE_CONFIGURE TARGET_ARCH TARGET_OS HOST_ARCH HOST_OS HAMMERDIR WORKDIR SUPPORTDIR
-do
-  if [ -n "${!envvar+x}" ] ; then
-    echo "Warning: Environment variable '$envvar' is set, but it will be ignored!"
-  fi
-done
-
 
 #default flags, which can be changed with hammer.sh flags
 #Change these for custom builds.
-export CROSS_COMPILE=0 # Can be 0 (native build) or 1 (cross build).
 export DEBUG_BUILD=0 # Can be 0 (release build) or 1 (debug build). Only used if COMPILE_FLAGS is empty!
 
 export MAKE_FLAGS="-j5"
@@ -114,9 +106,10 @@ export LINK_FLAGS=""
 export FORCE_AUTOGEN=0 # Can be 0 or 1.
 export FORCE_CONFIGURE=0 # Can be 0 or 1.
 
-# NOTE: These are only valid if CROSS_COMPILE=1
+export TARGET_OS="native" # Can be android.
+
+# NOTE: These are only valid for non-native builds
 export TARGET_ARCH="ARMv7" # Can be ARMv7 or x86. (ARMv6, ARMv8, ARM_NEON, MIPS may be added later)
-export TARGET_OS="android" # Can be android.
 export HOST_ARCH="`uname -p`" # Can be x86_64 or x86.
 if [[ $HOST_ARCH = i[3456]86 ]] ; then
   export HOST_ARCH=x86
@@ -151,7 +144,6 @@ do
       exit 0
       ;;
     -t=* | --cross_compile=* | --cross-compile=*) # --cross-compile=android
-      export CROSS_COMPILE=1
       TARGET_NAME=${1#*=}
       if [ "$TARGET_NAME" = "android" ] || [ "$TARGET_NAME" = "android-ARMv7" ]; then
         export TARGET_OS="android"
@@ -613,7 +605,7 @@ if [ "$1" = "install-deps" ] ; then
     $SUPPORTDIR/mingw_install_deps.sh $2
     exit 0
   fi
-  if [ "$CROSS_COMPILE" = "1" ] && [[ x"$TARGET_OS" = x"android" ]] ; then
+  if [[ x"$TARGET_OS" = x"android" ]] ; then
     $SUPPORTDIR/android_install_deps.sh $2
     exit 0
   fi

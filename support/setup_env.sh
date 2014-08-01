@@ -3,12 +3,12 @@
 set -e
 
 # Input environment variables for this script.
-export INPUT_VARIABLES="CROSS_COMPILE DEBUG_BUILD MAKE_FLAGS CONFIGURE_FLAGS CMAKE_FLAGS COMPILE_FLAGS LINK_FLAGS FORCE_AUTOGEN FORCE_CONFIGURE TARGET_ARCH TARGET_OS HOST_ARCH HOST_OS HAMMERDIR WORKDIR SUPPORTDIR"
+export INPUT_VARIABLES="DEBUG_BUILD MAKE_FLAGS CONFIGURE_FLAGS CMAKE_FLAGS COMPILE_FLAGS LINK_FLAGS FORCE_AUTOGEN FORCE_CONFIGURE TARGET_ARCH TARGET_OS HOST_ARCH HOST_OS HAMMERDIR WORKDIR SUPPORTDIR"
 
 # Output environment variables for thi script.
-export OUTPUT_VARIABLES="SOURCE BUILD BUILDDIR WORKDIR PREFIX DEPS_SOURCE DEPS_BUILD LOGDIR PKG_CONFIG_PATH PATH CPATH LIBRARY_PATH LD_LIBRARY_PATH"
-export OUTPUT_VARIABLES="$OUTPUT_VARIABLES CFLAGS CXXFLAGS CPPFLAGS LDFLAGS CONFIGURE_FLAGS CMAKE_PREFIX_PATH TOOLCHAIN HOSTTOOLS ACLOCAL_ARGS"
-export OUTPUT_VARIABLES="$OUTPUT_VARIABLES ANDROID_SDK ANDROID_NDK ANDROID_STANDALONE_TOOLCHAIN CROSS_COMPILER SYSROOT CONFIGURE_CROSS_COMPILE  CMAKE_CROSS_COMPILE PKG_CONFIG_LIBDIR CC CXX CPP"
+export OUTPUT_VARIABLES="SOURCE BUILD BUILDDIR WORKDIR PREFIX DEPS_SOURCE DEPS_BUILD LOGDIR PKG_CONFIG_PATH PATH CPATH LIBRARY_PATH LD_LIBRARY_PATH CMAKE_FLAGS"
+export OUTPUT_VARIABLES="$OUTPUT_VARIABLES CFLAGS CXXFLAGS CPPFLAGS LDFLAGS CONFIGURE_FLAGS CMAKE_PREFIX_PATH TOOLCHAIN HOSTTOOLS ACLOCAL_ARGS DEBUG_STR CMAKE_BUILD_DEBUG"
+export OUTPUT_VARIABLES="$OUTPUT_VARIABLES ANDROID_SDK ANDROID_NDK ANDROID_STANDALONE_TOOLCHAIN CROSS_COMPILER SYSROOT CONFIGURE_CROSS_COMPILE CMAKE_CROSS_COMPILE PKG_CONFIG_LIBDIR CC CXX CPP"
 
 function show_help()
 {
@@ -108,11 +108,11 @@ done
 pexport SOURCE=$WORKDIR/source/worldforge
 pexport BUILD=$WORKDIR/build/worldforge
 
-if [ "$CROSS_COMPILE" = "1" ] ; then
+if [ "$TARGET_OS" != "native" ] ; then
   if [ "$DEBUG_BUILD" = "1" ] ; then
-    DEBUG_STR="debug"
+    pexport DEBUG_STR="debug"
   else
-    DEBUG_STR="release"
+    pexport DEBUG_STR="release"
   fi
   # Required for worldforge sources. Each platform builds different dependencies and different patches.
   pexport BUILDDIR="${TARGET_OS}-${TARGET_ARCH}-${DEBUG_STR}"
@@ -122,10 +122,10 @@ if [ "$CROSS_COMPILE" = "1" ] ; then
   pexport WORKDIR="$WORKDIR/$BUILDDIR"
   
   # Ignore user specified compiler and linker flags, if cross-compiling.
-  export CFLAGS=""
-  export CXXFLAGS=""
-  export CPPFLAGS=""
-  export LDFLAGS=""
+  pexport CFLAGS=" "
+  pexport CXXFLAGS=" "
+  pexport CPPFLAGS=" "
+  pexport LDFLAGS=" "
 else
   pexport BUILDDIR="native-`getconf LONG_BIT`"
   # Needed to find tolua++ program if installed in prefix.
@@ -136,8 +136,10 @@ pexport PREFIX=$WORKDIR/local
 pexport DEPS_SOURCE=$WORKDIR/source
 pexport DEPS_BUILD=$WORKDIR/build
 pexport LOGDIR=$WORKDIR/logs
-pexport PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PKG_CONFIG_PATH
+pexport PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PKG_CONFIG_LIBDIR
 pexport ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
+# fixes libtool: link: warning: library * was moved.
+#pexport DESTDIR="$PREFIX/lib"
 
 pexport CPATH="$PREFIX/include:$CPATH"
 pexport LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
@@ -147,9 +149,11 @@ if [ x"$COMPILE_FLAGS" != x"" ] ; then
   pexport CFLAGS="$COMPILE_FLAGS $CFLAGS"
 else
   if [ "$DEBUG_BUILD" = "1" ] ; then
+    pexport CMAKE_BUILD_DEBUG="-DCMAKE_BUILD_TYPE=Debug"
     pexport CFLAGS="-O0 -g -DDEBUG -D_DEBUG $CFLAGS"
   else
-    pexport CFLAGS="-O2 -DNDEBUG $CFLAGS"
+    pexport CMAKE_BUILD_DEBUG="-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+    pexport CFLAGS="-O2 -g -DNDEBUG $CFLAGS"
   fi
 fi
 pexport LDFLAGS="-L$PREFIX/lib $LDFLAGS $LINK_FLAGS"
@@ -158,7 +162,7 @@ pexport CONFIGURE_FLAGS="--prefix=$PREFIX $CONFIGURE_FLAGS"
 # This is set so CEGUI can find its dependencies in the local prefix.
 pexport CMAKE_PREFIX_PATH=$PREFIX
 
-if [ "$CROSS_COMPILE" = "1" ] && [[ "$TARGET_OS" = "android" ]] ; then
+if [[ "$TARGET_OS" = "android" ]] ; then
   if [[ x"$HOST_OS" != x"GNU/Linux" ]] ; then
     echo >&2 "Host OS $HOST_OS is unsupported! Only GNU/Linux is supported!"
     exit 1
@@ -181,7 +185,7 @@ if [ "$CROSS_COMPILE" = "1" ] && [[ "$TARGET_OS" = "android" ]] ; then
 
   # These are used by cmake to identify android kits
   pexport ANDROID_SDK=$DEPS_SOURCE/android-sdk-linux
-  pexport ANDROID_NDK=$DEPS_SOURCE/android-ndk-r9d-$HOST_ARCH
+  pexport ANDROID_NDK=$DEPS_SOURCE/android-ndk-r10-$HOST_ARCH
   pexport ANDROID_STANDALONE_TOOLCHAIN=$TOOLCHAIN
 
   # These are used by autoconfig for cross-compiling
@@ -306,13 +310,15 @@ if [ "$CROSS_COMPILE" = "1" ] && [[ "$TARGET_OS" = "android" ]] ; then
   pexport CMAKE_CROSS_COMPILE="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_C_COMPILER=$TOOLCHAIN/$CROSS_COMPILER/bin/gcc -DCMAKE_MAKE_PROGRAM=make -DANDROID=true"
   pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DCMAKE_FIND_ROOT_PATH=$CMAKE_ROOT_PATH -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY"
   pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_INSTALL_PREFIX=$PREFIX"
+  pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DPKG_CONFIG_EXECUTABLE=pkg-config"
+  
   #pexport CMAKE_CROSS_COMPILE="-DCMAKE_TOOLCHAIN_FILE=$(getAndroidCMakeToolchain) -DCMAKE_FIND_ROOT_PATH=$CMAKE_ROOT_PATH -DCMAKE_INSTALL_PREFIX=$PREFIX"
   
   pexport CONFIGURE_CROSS_COMPILE="--host=$CROSS_COMPILER --prefix=$PREFIX --with-sysroot=$SYSROOT"
   pexport CONFIGURE_FLAGS="$CONFIGURE_CROSS_COMPILE --enable-static --disable-shared --disable-rpath"
   #pexport LIBS="-lboost_thread -lboost_system -lboost_atomic"
 
-elif [ "$CROSS_COMPILE" = "0" ] && [[ $OSTYPE == *darwin* ]] ; then
+elif [ "$TARGET_OS" = "native" ] && [[ $OSTYPE == *darwin* ]] ; then
   #the default architecture is universal build: i864;x86_64
   #To save space and time, we will only build x86_64
   pexport CMAKE_FLAGS="$CMAKE_FLAGS -GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
@@ -327,7 +333,7 @@ elif [ "$CROSS_COMPILE" = "0" ] && [[ $OSTYPE == *darwin* ]] ; then
 
   #without CPATH cegui is not finding freeimage.
   pexport CPATH="/opt/local/include:$CPATH"
-elif [ "$CROSS_COMPILE" = "0" ] && [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
+elif [ "$TARGET_OS" = "native" ] && [[ x$MSYSTEM = x"MINGW32" && $1 != "install-deps" ]] ; then
   pexport CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-shared --disable-static"
   pexport CXXFLAGS="-O2 -msse2 -mthreads -DBOOST_THREAD_USE_LIB -DCEGUILUA_EXPORTS $CXXFLAGS"
   pexport PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
