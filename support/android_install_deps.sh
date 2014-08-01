@@ -204,7 +204,9 @@ function install_deps_sdl()
   # Android with standalone toolchain will be supported in SDL 2.0.4
   if [ ! -d $SDL_SOURCEDIR ]; then
     hg clone http://hg.libsdl.org/SDL -r ace0e63268f3
+    cd $SDL_SOURCEDIR
     updateAutotoolsToolchainDetection $SDL_SOURCEDIR
+    patch -N -p1 -r - < $SUPPORTDIR/android_fix-sdl.patch
   fi
   #echo | cpp -Wp,-v
   #exit 0
@@ -217,8 +219,8 @@ function install_deps_sdl()
   ./autogen.sh
   mkdir -p $SDL_BUILDDIR
   cd $SDL_BUILDDIR
-  $SDL_SOURCEDIR/configure $CONFIGURE_FLAGS --disable-haptic --disable-audio
-  #exit 0
+  $SDL_SOURCEDIR/configure $CONFIGURE_FLAGS --disable-haptic --disable-audio --disable-3dnow
+  
   make $MAKE_FLAGS
   make install
 }

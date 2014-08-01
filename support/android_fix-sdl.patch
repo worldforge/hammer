@@ -1,0 +1,28 @@
+# HG changeset patch
+# User Peter Szücs <peter.szucs.dev@gmail.com>
+# Date 1406839587 -7200
+#      Thu Jul 31 22:46:27 2014 +0200
+# Node ID 2e7f4969cc8cc6a5514e19d896a493b37565b1d1
+# Parent  ace0e63268f374998e33b3e3eb60be40d64cae77
+Fix Android detection for x86 targets.
+
+diff -r ace0e63268f3 -r 2e7f4969cc8c configure.in
+--- a/configure.in	Mon Jun 02 09:20:09 2014 -0700
++++ b/configure.in	Thu Jul 31 22:46:27 2014 +0200
+@@ -2659,14 +2659,14 @@
+                     $as_echo "#define SDL_VIDEO_DRIVER_RPI 1" >>confdefs.h
+                 fi
+                 ;;
+-            *-*-androideabi*)
++            *android*)
+                 # Android
+                 ARCH=android
+                 ANDROID_CFLAGS="-DGL_GLEXT_PROTOTYPES"
+                 CFLAGS="$CFLAGS $ANDROID_CFLAGS"
+                 SDL_CFLAGS="$SDL_CFLAGS $ANDROID_CFLAGS"
+                 EXTRA_CFLAGS="$EXTRA_CFLAGS $ANDROID_CFLAGS"
+-                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldl -lGLESv1_CM -lGLESv2 -llog -landroid"
++                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldl -lGLESv2 -llog -landroid"
+ 
+                 if test x$enable_video = xyes; then
+                     SOURCES="$SOURCES $srcdir/src/core/android/*.c $srcdir/src/video/android/*.c"
