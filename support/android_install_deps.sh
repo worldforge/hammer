@@ -98,83 +98,45 @@ function install_deps_toolchain()
 
 function install_deps_boost()
 {
-env
   #This function will build bjam with host compiler
-  BOOST_VER=1_55_0
-  BOOST_DIR=boost_$BOOST_VER
-  BOOST_BUILDDIR=$DEPS_BUILD/$BOOST_DIR/$BUILDDIR
-  BOOST_ANDROID_SOURCEDIR=$DEPS_SOURCE/Boost-for-Android
-  BOOST_SOURCEDIR=$BOOST_ANDROID_SOURCEDIR/$BOOST_DIR
-    
-  if [ ! -d $BOOST_ANDROID_SOURCEDIR ]; then
+  BOOST_VER="boost-1_56_0_b1"
+  #BOOST_DIR=boost-$BOOST_VER
+  #BOOST_BUILDDIR=$DEPS_BUILD/$BOOST_DIR/$BUILDDIR
+  #BOOST_ANDROID_SOURCEDIR=$DEPS_SOURCE/Boost-for-Android
+  BOOST_SOURCEDIR="$DEPS_SOURCE/$BOOST_VER"
+  BOOST_BUILDDIR="$DEPS_BUILD/$BOOST_VER/$BUILDDIR"
+  if [ ! -d $BOOST_SOURCEDIR ]; then
     cd $DEPS_SOURCE
-    git clone https://github.com/MysticTreeGames/Boost-for-Android
-    cd $BOOST_ANDROID_SOURCEDIR
-    git reset --hard 8075d96cc9
+
+    wget -c http://downloads.sourceforge.net/sourceforge/boost/$BOOST_VER.tar.bz2
+    tar -xjf $BOOST_VER.tar.bz2
   fi
   
-  cd $BOOST_ANDROID_SOURCEDIR
-  mkdir -p $BOOST_ANDROID_SOURCEDIR/logs
-  ./build-android.sh --boost=1.55.0 --toolchain=$CROSS_COMPILER-4.8 --download $ANDROID_NDK
+  mkdir -p $BOOST_BUILDDIR
   
   # pop cross-compiler and push native compiler environment
   eval `$SUPPORTDIR/setup_env.sh pop_env`
-  export CROSS_COMPILE=0 && eval `$SUPPORTDIR/setup_env.sh push_env`
+  export TARGET_OS="native" && eval `$SUPPORTDIR/setup_env.sh push_env`
   
-  #build bjam
-  cd $BOOST_SOURCEDIR
-  ./bootstrap.sh
+    #build bjam
+    cd $BOOST_SOURCEDIR
+    ./bootstrap.sh
   
   # pop native compiler and push back cross-compiler environment
   eval `$SUPPORTDIR/setup_env.sh pop_env`
-  export CROSS_COMPILE=1 && eval `$SUPPORTDIR/setup_env.sh push_env`
+  export TARGET_OS="android" && eval `$SUPPORTDIR/setup_env.sh push_env`
 
   mkdir -p $HOSTTOOLS/bin
   cp -f --dereference $BOOST_SOURCEDIR/bjam $HOSTTOOLS/bin/bjam
   
-  cd $BOOST_ANDROID_SOURCEDIR
-  
-  # Apply patches to boost
-  PATCH_BOOST_DIR=$BOOST_ANDROID_SOURCEDIR/patches/boost-${BOOST_VER}
-  
-  cp -f $SUPPORTDIR/android_user-config-boost-${BOOST_VER}.jam $BOOST_DIR/tools/build/v2/user-config.jam
-
-  for DIR in $PATCH_BOOST_DIR; do
-  
-    if [ ! -d "$DIR" ]; then
-      echo "Could not find directory '$DIR' while looking for patches"
-      exit 1
-    fi
-
-    PATCHES=`(cd $DIR && ls *.patch | sort) 2> /dev/null`
-
-    if [ -z "$PATCHES" ]; then
-      echo "No patches found in directory '$DIR'"
-      exit 1
-    fi
-
-    for PATCH in $PATCHES; do
-      PATCH=`echo $PATCH | sed -e s%^\./%%g`
-      SRC_DIR=$BOOST_SOURCEDIR
-      PATCHDIR=`dirname $PATCH`
-      PATCHNAME=`basename $PATCH`
-      echo "Applying $PATCHNAME into $SRC_DIR/$PATCHDIR"
-      cd $SRC_DIR
-      set +e
-      patch -N -p1 -b -r - < $DIR/$PATCH
-      set -e
-    done
-  done
-
+  #build boost
   cd $BOOST_SOURCEDIR
-  export AndroidNDKRoot="$ANDROID_NDK"
-  export NO_BZIP2=1
-
   cxxflags=""
-  #CXXFLAG="-I$SYSROOT/usr/include -I$PREFIX/include -I$TOOLCHAIN/include/ -I$TOOLCHAIN/include/c++/4.8"
   for flag in $CXXFLAGS; do cxxflags="$cxxflags cxxflags=$flag"; done
-  $HOSTTOOLS/bin/bjam -q -a toolset=gcc-androidR8e target-os=linux $cxxflags runtime-link=static link=static threading=multi --layout=system \
-         --with-thread --with-date_time --with-chrono --with-system --with-atomic --prefix=$PREFIX install
+  $HOSTTOOLS/bin/bjam -q -a target-os=android $cxxflags runtime-link=static link=static threading=multi --layout=system \
+         --with-thread --with-date_time --with-chrono --with-system --with-atomic \
+         --prefix=$PREFIX --build-dir=$BOOST_BUILDDIR --stage-dir=$BOOST_BUILDDIR/stage install
+  
 }
 function install_deps_ceguideps()
 {
