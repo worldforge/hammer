@@ -294,9 +294,9 @@ function install_deps_ogre()
   cp -u ${ANDROID_NDK}/sources/android/cpufeatures/*.c $OGRE_SOURCEDIR/OgreMain/src/Android
   cp -u ${ANDROID_NDK}/sources/android/cpufeatures/*.h $OGRE_SOURCEDIR/OgreMain/include
   
-  cmake $CMAKE_CROSS_COMPILE $CMAKE_FLAGS -DEGL_INCLUDE_DIR="" -DOPENGLES2_INCLUDE_DIR="" -DOGRE_LIB_SUFFIX=""\
-    -DOGRE_BUILD_SAMPLES=false -DOGRE_STATIC=true -DOGRE_BUILD_TOOLS=false -DOGRE_UNITY_BUILD=true -DZLIB_PREFIX_PATH="$SYSROOT/usr"\
-    -DANDROID_ABI=armeabi -DOGRE_DEPENDENCIES_DIR=$PREFIX $OGRE_SOURCEDIR
+  cmake $CMAKE_BUILD_DEBUG $CMAKE_CROSS_COMPILE $CMAKE_FLAGS -DEGL_INCLUDE_DIR="" -DOIS_INCLUDE_DIR="" -DOPENGLES2_INCLUDE_DIR="" -DOGRE_LIB_SUFFIX="" \
+    -DOGRE_BUILD_SAMPLES=false -DOGRE_STATIC=true -DOGRE_BUILD_TOOLS=false -DOGRE_UNITY_BUILD=true -DOGRE_BUILD_PCZ=false -DOGRE_BUILD_BSP=false \
+    -DOGRE_BUILD_OCTREE=false -DZLIB_PREFIX_PATH="$SYSROOT/usr" -DANDROID_ABI=armeabi -DOGRE_DEPENDENCIES_DIR=$PREFIX $OGRE_SOURCEDIR
  
   make $MAKE_FLAGS
   make install
@@ -316,11 +316,6 @@ function install_deps_ogre()
   cd $OGREINCDIR
   OGREINC=-I\${includedir}/OGRE/RenderSystems/$(ls -1 -d */  | tr "\\n" ":" | sed 's=\(.*\)/:=\1=' | sed "s=/:= -I\${includedir}/OGRE/RenderSystems/=g")
   sed -i "s=Cflags:=Cflags: $OGREINC=g" $PREFIX/lib/pkgconfig/OGRE.pc
-  
-  #OGREPLUGINDIR=$PREFIX/lib/OGRE
-  #cd $OGREPLUGINDIR
-  #OGREPLUGIN=-I\${includedir}/OGRE/RenderSystems/$(ls -1 -d */  | tr "\\n" ":" | sed 's=\(.*\)/:=\1=' | sed "s=/:= -I\${includedir}/OGRE/RenderSystems/=g")
-  #sed -i "s=Cflags:=Cflags: $OGREINC=g" $PREFIX/lib/pkgconfig/OGRE.pc
 }
 function install_deps_libiconv()
 {
