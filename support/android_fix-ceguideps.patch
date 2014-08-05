@@ -1,14 +1,14 @@
 # HG changeset patch
-# User Peter Szücs <peter.szucs.dev@gmail.com>
-# Date 1401820620 -7200
-#      Tue Jun 03 20:37:00 2014 +0200
-# Node ID b2b51ae07dce8b31e712d69b8b263465b98a5b96
+# User Peter Sz?cs <peter.szucs.dev@gmail.com>
+# Date 1406994276 -7200
+#      Sat Aug 02 17:44:36 2014 +0200
+# Node ID 6adc7647ee25d12ebd606520a8af8c5589abbba6
 # Parent  721921d9b10ac44faa54c8ba044dc9483937b5bc
-Add Android support.
+Add Android support
 
-diff -r 721921d9b10a -r b2b51ae07dce CMakeLists.txt
+diff -r 721921d9b10a -r 6adc7647ee25 CMakeLists.txt
 --- a/CMakeLists.txt	Wed May 14 01:44:55 2014 +0300
-+++ b/CMakeLists.txt	Tue Jun 03 20:37:00 2014 +0200
++++ b/CMakeLists.txt	Sat Aug 02 17:44:36 2014 +0200
 @@ -1,14 +1,6 @@
  cmake_minimum_required(VERSION 2.8)
  include(CMakeDependentOption)
@@ -56,9 +56,20 @@ diff -r 721921d9b10a -r b2b51ae07dce CMakeLists.txt
  
  
  macro(cegui_add_library _NAME _SOURCES_VAR _HEADERS_VAR)
-diff -r 721921d9b10a -r b2b51ae07dce src/lua-5.1.4/src/llex.c
+@@ -162,10 +157,6 @@
+ 	set(CEGUI_BUILD_LIBTIFF TRUE)
+ endif()
+ 
+-if (CEGUI_BUILD_PCRE OR CEGUI_BUILD_LIBPNG OR CEGUI_BUILD_LIBTIFF OR CEGUI_BUILD_MINIZIP)
+-    set(CEGUI_BUILD_ZLIB TRUE)
+-endif()
+-
+ if (CEGUI_BUILD_TOLUAPP)
+ 	set(CEGUI_BUILD_LUA TRUE)
+ endif()
+diff -r 721921d9b10a -r 6adc7647ee25 src/lua-5.1.4/src/llex.c
 --- a/src/lua-5.1.4/src/llex.c	Wed May 14 01:44:55 2014 +0300
-+++ b/src/lua-5.1.4/src/llex.c	Tue Jun 03 20:37:00 2014 +0200
++++ b/src/lua-5.1.4/src/llex.c	Sat Aug 02 17:44:36 2014 +0200
 @@ -176,9 +176,13 @@
  
  static void trydecpoint (LexState *ls, SemInfo *seminfo) {
@@ -74,9 +85,9 @@ diff -r 721921d9b10a -r b2b51ae07dce src/lua-5.1.4/src/llex.c
    buffreplace(ls, old, ls->decpoint);  /* try updated decimal separator */
    if (!luaO_str2d(luaZ_buffer(ls->buff), &seminfo->r)) {
      /* format error with correct decimal point: no more options */
-diff -r 721921d9b10a -r b2b51ae07dce src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt
+diff -r 721921d9b10a -r 6adc7647ee25 src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt
 --- a/src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt	Wed May 14 01:44:55 2014 +0300
-+++ b/src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt	Tue Jun 03 20:37:00 2014 +0200
++++ b/src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt	Sat Aug 02 17:44:36 2014 +0200
 @@ -1,10 +1,5 @@
  set(DEPNAME pcre)
  
@@ -116,3 +127,15 @@ diff -r 721921d9b10a -r b2b51ae07dce src/pcre-8.12/CEGUI-BUILD/CMakeLists.txt
  cegui_add_library(${DEPNAME} SOURCES NONE)
  
  set_target_properties(${DEPNAME} PROPERTIES
+diff -r 721921d9b10a -r 6adc7647ee25 src/tinyxml-2.6.2/tinyxml.h
+--- a/src/tinyxml-2.6.2/tinyxml.h	Wed May 14 01:44:55 2014 +0300
++++ b/src/tinyxml-2.6.2/tinyxml.h	Sat Aug 02 17:44:36 2014 +0200
+@@ -30,7 +30,7 @@
+ 
+ #ifndef TINYXML_INCLUDED
+ #define TINYXML_INCLUDED
+-
++#define TIXML_USE_STL 1
+ #ifndef TINYXMLAPI
+ #   ifdef WIN32
+ #       ifdef TINYXML_STATIC
