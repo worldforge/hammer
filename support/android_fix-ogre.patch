@@ -1,15 +1,15 @@
 # HG changeset patch
-# User Peter Szücs <peter.szucs.dev@gmail.com>
-# Date 1406883415 -7200
-#      Fri Aug 01 10:56:55 2014 +0200
+# User Peter Sz?cs <peter.szucs.dev@gmail.com>
+# Date 1407004971 -7200
+#      Sat Aug 02 20:42:51 2014 +0200
 # Branch v1-9
-# Node ID 2b38c1d049506784e1232255bc2f1e70f5c953f1
+# Node ID 9ea1f6b7600653b2139022a6febd3352452a9b8c
 # Parent  7c776867621e1e41f1be5e49ecc01e8849a80ad2
-Fix Ogre for Android Standalone toolchain.
+Add support for Android Standalone toolchain.
 
-diff -r 7c776867621e -r 2b38c1d04950 CMake/ConfigureBuild.cmake
+diff -r 7c776867621e -r 9ea1f6b76006 CMake/ConfigureBuild.cmake
 --- a/CMake/ConfigureBuild.cmake	Fri Jun 20 00:39:55 2014 +0200
-+++ b/CMake/ConfigureBuild.cmake	Fri Aug 01 10:56:55 2014 +0200
++++ b/CMake/ConfigureBuild.cmake	Sat Aug 02 20:42:51 2014 +0200
 @@ -183,7 +183,7 @@
  
  
@@ -19,7 +19,19 @@ diff -r 7c776867621e -r 2b38c1d04950 CMake/ConfigureBuild.cmake
    set(OGRE_LIB_SUFFIX "")
    set(OGRE_PLUGIN_PREFIX "")
    set(OGRE_PLUGIN_EXT ".so")
-@@ -206,10 +206,12 @@
+@@ -193,10 +193,7 @@
+     set(OGRE_PLUGIN_PREFIX "lib")
+     set(OGRE_PLUGIN_EXT ".a")
+   endif ()
+-  if (OGRE_BUILD_TYPE STREQUAL "debug")
+-    set(OGRE_LIB_SUFFIX "${OGRE_LIB_SUFFIX}_d")
+-  endif ()
+-
++  
+   set(OGRE_ADDITIONAL_LIBS "")
+   set(OGRE_CFLAGS "")
+   set(OGRE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
+@@ -206,11 +203,18 @@
    endif ()
    if (OGRE_STATIC)
      if (OGRE_CONFIG_THREADS)
@@ -29,26 +41,34 @@ diff -r 7c776867621e -r 2b38c1d04950 CMake/ConfigureBuild.cmake
      # there is no pkgconfig file for freeimage, so we need to add that lib manually
 -    set(OGRE_ADDITIONAL_LIBS "${OGRE_ADDITIONAL_LIBS} -lfreeimage")
 +    set(OGRE_ADDITIONAL_LIBS "${OGRE_ADDITIONAL_LIBS} -lFreeImage")
-+    # there is no pkgconfig file for freetype, so we need to add that lib manually
++    # there is no pkg-config file for freetype or zzip, so we need to add the libs manually
 +    set(OGRE_ADDITIONAL_LIBS "${OGRE_ADDITIONAL_LIBS} -lfreetype")
++    set(OGRE_ADDITIONAL_LIBS "${OGRE_ADDITIONAL_LIBS} -lzzip -lz")
      configure_file(${OGRE_TEMPLATES_DIR}/OGREStatic.pc.in ${OGRE_BINARY_DIR}/pkgconfig/OGRE.pc @ONLY)
++    if (ANDROID)
++      #Add android platform
++      set(OGRE_ADDITIONAL_LIBS "${OGRE_ADDITIONAL_LIBS} -llog -landroid")
++    endif()
    else ()
      configure_file(${OGRE_TEMPLATES_DIR}/OGRE.pc.in ${OGRE_BINARY_DIR}/pkgconfig/OGRE.pc @ONLY)
-diff -r 7c776867621e -r 2b38c1d04950 CMake/Templates/OGRE.pc.in
---- a/CMake/Templates/OGRE.pc.in	Fri Jun 20 00:39:55 2014 +0200
-+++ b/CMake/Templates/OGRE.pc.in	Fri Aug 01 10:56:55 2014 +0200
-@@ -8,5 +8,5 @@
- Description: Object-Oriented Graphics Rendering Engine
- Version: @OGRE_VERSION@
- URL: http://www.ogre3d.org
--Libs: -L${libdir} -lOgreMain@OGRE_LIB_SUFFIX@ @OGRE_ADDITIONAL_LIBS@
--Cflags: -I${includedir} -I${includedir}/OGRE @OGRE_CFLAGS@
-+Libs: -L${libdir} -L${plugindir} -lPlugin_ParticleFX@OGRE_LIB_SUFFIX@ -lRenderSystem_GLES2@OGRE_LIB_SUFFIX@ -lOgreMain@OGRE_LIB_SUFFIX@ @OGRE_ADDITIONAL_LIBS@ -lboost_thread -lboost_system -lboost_atomic -lFreeImage -lfreetype -lzzip
-+Cflags: -I${includedir} -I${includedir}/OGRE @OGRE_CFLAGS@
-\ No newline at end of file
-diff -r 7c776867621e -r 2b38c1d04950 CMake/Templates/OGREStatic.pc.in
+   endif ()
+diff -r 7c776867621e -r 9ea1f6b76006 CMake/InstallResources.cmake
+--- a/CMake/InstallResources.cmake	Fri Jun 20 00:39:55 2014 +0200
++++ b/CMake/InstallResources.cmake	Sat Aug 02 20:42:51 2014 +0200
+@@ -236,9 +236,7 @@
+   configure_file(${OGRE_TEMPLATES_DIR}/tests.cfg.in ${OGRE_BINARY_DIR}/bin/minsizerel/tests.cfg)
+ else() # other OS only need one cfg file
+   string(TOLOWER "${CMAKE_BUILD_TYPE}" OGRE_BUILD_TYPE)
+-  if (OGRE_BUILD_TYPE STREQUAL "debug" AND NOT APPLE)
+-    set(OGRE_CFG_SUFFIX "_d")
+-  endif ()
++  
+   # create resources.cfg
+   configure_file(${OGRE_TEMPLATES_DIR}/resources${OGRE_CFG_SUFFIX}.cfg.in ${OGRE_BINARY_DIR}/bin/resources${OGRE_CFG_SUFFIX}.cfg)
+   # create plugins.cfg
+diff -r 7c776867621e -r 9ea1f6b76006 CMake/Templates/OGREStatic.pc.in
 --- a/CMake/Templates/OGREStatic.pc.in	Fri Jun 20 00:39:55 2014 +0200
-+++ b/CMake/Templates/OGREStatic.pc.in	Fri Aug 01 10:56:55 2014 +0200
++++ b/CMake/Templates/OGREStatic.pc.in	Sat Aug 02 20:42:51 2014 +0200
 @@ -8,6 +8,6 @@
  Description: Object-Oriented Graphics Rendering Engine
  Version: @OGRE_VERSION@
@@ -56,12 +76,24 @@ diff -r 7c776867621e -r 2b38c1d04950 CMake/Templates/OGREStatic.pc.in
 -Requires: freetype2, zziplib, x11, xt, xaw7, gl
 -Libs: -L${libdir} -L${plugindir} -lOgreMain@OGRE_LIB_SUFFIX@ @OGRE_ADDITIONAL_LIBS@
 +Requires: 
-+Libs: -L${libdir} -L${plugindir} -lOgreMain@OGRE_LIB_SUFFIX@
++Libs: -L${libdir} -L${plugindir} -lPlugin_ParticleFX@OGRE_LIB_SUFFIX@ -lRenderSystem_GLES2@OGRE_LIB_SUFFIX@ -lOgreMain@OGRE_LIB_SUFFIX@ @OGRE_ADDITIONAL_LIBS@ 
  Cflags: -I${includedir} -I${includedir}/OGRE @OGRE_CFLAGS@
-diff -r 7c776867621e -r 2b38c1d04950 CMakeLists.txt
+diff -r 7c776867621e -r 9ea1f6b76006 CMakeLists.txt
 --- a/CMakeLists.txt	Fri Jun 20 00:39:55 2014 +0200
-+++ b/CMakeLists.txt	Fri Aug 01 10:56:55 2014 +0200
-@@ -514,7 +514,7 @@
++++ b/CMakeLists.txt	Sat Aug 02 20:42:51 2014 +0200
+@@ -88,11 +88,6 @@
+   set(OGRE_PLATFORM_X64 FALSE)
+ endif ()
+ 
+-if (NOT APPLE)
+-  # Create debug libraries with _d postfix
+-  set(CMAKE_DEBUG_POSTFIX "_d")
+-endif ()
+-
+ # Set compiler specific build flags
+ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+   check_cxx_compiler_flag(-msse OGRE_GCC_HAS_SSE)
+@@ -514,7 +509,7 @@
  
  #Add android JNI binding
  if(ANDROID)
@@ -70,9 +102,9 @@ diff -r 7c776867621e -r 2b38c1d04950 CMakeLists.txt
  endif()
  
  # Setup command-line tools
-diff -r 7c776867621e -r 2b38c1d04950 OgreMain/CMakeLists.txt
+diff -r 7c776867621e -r 9ea1f6b76006 OgreMain/CMakeLists.txt
 --- a/OgreMain/CMakeLists.txt	Fri Jun 20 00:39:55 2014 +0200
-+++ b/OgreMain/CMakeLists.txt	Fri Aug 01 10:56:55 2014 +0200
++++ b/OgreMain/CMakeLists.txt	Sat Aug 02 20:42:51 2014 +0200
 @@ -146,7 +146,7 @@
  elseif(ANDROID)
    file(GLOB PLATFORM_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/Android/*.h")

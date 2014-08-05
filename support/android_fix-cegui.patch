@@ -1,0 +1,112 @@
+# HG changeset patch
+# User Peter Sz?cs <peter.szucs.dev@gmail.com>
+# Date 1407083129 -7200
+#      Sun Aug 03 18:25:29 2014 +0200
+# Branch v0-8
+# Node ID 3e60ba180e64c5b08f101443f1d473f1245be24d
+# Parent  5861231e83355f1230a5d3a8e60a18d8dff3b843
+Add Android support
+
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/CEGUI-LUA.pc.in
+--- a/cegui/CEGUI-LUA.pc.in	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/CEGUI-LUA.pc.in	Sun Aug 03 18:25:29 2014 +0200
+@@ -9,4 +9,4 @@
+ Description: Lua based script module for CEGUI.
+ Version: @CEGUI_VERSION@
+ Requires: CEGUI-@CEGUI_VERSION_MAJOR@ = @CEGUI_VERSION@
+-Libs: -l@CEGUI_LUA_SCRIPTMODULE_LIBNAME@
++Libs: -l@CEGUI_LUA_SCRIPTMODULE_LIBNAME@_Static -ltoluapp -llua
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/CEGUI-OGRE.pc.in
+--- a/cegui/CEGUI-OGRE.pc.in	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/CEGUI-OGRE.pc.in	Sun Aug 03 18:25:29 2014 +0200
+@@ -9,4 +9,4 @@
+ Description: Ogre based renderer module for CEGUI.
+ Version: @CEGUI_VERSION@
+ Requires: OGRE >= 1.6.0,CEGUI-@CEGUI_VERSION_MAJOR@ = @CEGUI_VERSION@
+-Libs: -l@CEGUI_OGRE_RENDERER_LIBNAME@
++Libs: -l@CEGUI_OGRE_RENDERER_LIBNAME@_Static 
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/CEGUI.pc.in
+--- a/cegui/CEGUI.pc.in	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/CEGUI.pc.in	Sun Aug 03 18:25:29 2014 +0200
+@@ -8,5 +8,5 @@
+ Name: CEGUI-@CEGUI_VERSION_MAJOR@
+ Description: The free GUI library for games and multi-media development.
+ Version: @CEGUI_VERSION@
+-Libs: -L${libdir} -l@CEGUI_BASE_LIBNAME@
++Libs: -L${libdir} -l@CEGUI_BASE_LIBNAME@_Static  -l@CEGUI_TINYXML_PARSER_LIBNAME@_Static -l@CEGUI_FREEIMAGE_IMAGECODEC_LIBNAME@_Static -l@CEGUI_CORE_WR_LIBNAME@_Static -lpcre -liconv -ltinyxml
+ Cflags: -I${includedir} -I${prefix}/@CEGUI_INCLUDE_INSTALL_DIR@
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/src/CommonDialogs/CMakeLists.txt
+--- a/cegui/src/CommonDialogs/CMakeLists.txt	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/src/CommonDialogs/CMakeLists.txt	Sun Aug 03 18:25:29 2014 +0200
+@@ -11,7 +11,7 @@
+ # we do not use the common header install function since we need to install to
+ # multiple sub-dirs.
+ cegui_add_library_impl(${CEGUI_TARGET_NAME} FALSE CORE_SOURCE_FILES CORE_HEADER_FILES TRUE FALSE)
+-cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME})
++cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME} CEGUIBase-0_Static)
+ 
+ install(FILES ${MODULE_HEADER_FILES} DESTINATION ${CEGUI_INCLUDE_INSTALL_DIR}/CEGUI/CommonDialogs)
+ install(FILES ${COLOUR_PICKER_HEADER_FILES} DESTINATION ${CEGUI_INCLUDE_INSTALL_DIR}/CEGUI/CommonDialogs/ColourPicker)
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/src/Exceptions.cpp
+--- a/cegui/src/Exceptions.cpp	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/src/Exceptions.cpp	Sun Aug 03 18:25:29 2014 +0200
+@@ -38,7 +38,9 @@
+ #if defined(_MSC_VER)
+ #include <dbghelp.h>
+ #elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
++#ifndef ANDROID
+ #include <execinfo.h>
++#endif
+ #include <dlfcn.h>
+ #include <cxxabi.h>
+ #include <cstdlib>
+@@ -53,7 +55,7 @@
+ //----------------------------------------------------------------------------//
+ static void dumpBacktrace(size_t frames)
+ {
+-#if defined(_DEBUG) || defined(DEBUG)
++#if !defined(__ANDROID__) && (defined(_DEBUG) || defined(DEBUG))
+ #if defined(_MSC_VER)
+     SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_INCLUDE_32BIT_MODULES);
+ 
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/src/ImageCodecModules/FreeImage/CMakeLists.txt
+--- a/cegui/src/ImageCodecModules/FreeImage/CMakeLists.txt	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/src/ImageCodecModules/FreeImage/CMakeLists.txt	Sun Aug 03 18:25:29 2014 +0200
+@@ -4,5 +4,5 @@
+ cegui_add_loadable_module(${CEGUI_TARGET_NAME} CORE_SOURCE_FILES CORE_HEADER_FILES)
+ cegui_add_dependency(${CEGUI_TARGET_NAME} FREEIMAGE)
+ 
+-cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME})
++cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME} z)
+ 
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/src/RendererModules/Ogre/CMakeLists.txt
+--- a/cegui/src/RendererModules/Ogre/CMakeLists.txt	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/src/RendererModules/Ogre/CMakeLists.txt	Sun Aug 03 18:25:29 2014 +0200
+@@ -6,6 +6,4 @@
+ cegui_gather_files()
+ cegui_add_library(${CEGUI_TARGET_NAME} CORE_SOURCE_FILES CORE_HEADER_FILES)
+ cegui_add_dependency(${CEGUI_TARGET_NAME} OGRE)
+-
+-cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME})
+-
++cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME} CEGUIBase-0_Static FreeImage freetype zzip z log android )
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/src/ScriptModules/Lua/CMakeLists.txt
+--- a/cegui/src/ScriptModules/Lua/CMakeLists.txt	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/src/ScriptModules/Lua/CMakeLists.txt	Sun Aug 03 18:25:29 2014 +0200
+@@ -5,5 +5,5 @@
+ cegui_add_dependency(${CEGUI_TARGET_NAME} TOLUAPP)
+ cegui_add_dependency(${CEGUI_TARGET_NAME} LUA51)
+ 
+-cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME})
++cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME} CEGUIBase-0_Static lua )
+ 
+diff -r 5861231e8335 -r 3e60ba180e64 cegui/src/WindowRendererSets/Core/CMakeLists.txt
+--- a/cegui/src/WindowRendererSets/Core/CMakeLists.txt	Mon Jul 07 10:14:18 2014 +0100
++++ b/cegui/src/WindowRendererSets/Core/CMakeLists.txt	Sun Aug 03 18:25:29 2014 +0200
+@@ -3,5 +3,5 @@
+ cegui_gather_files()
+ cegui_add_loadable_module(${CEGUI_TARGET_NAME} CORE_SOURCE_FILES CORE_HEADER_FILES)
+ 
+-cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME})
++cegui_target_link_libraries(${CEGUI_TARGET_NAME} ${CEGUI_BASE_LIBNAME} CEGUIBase-0_Static )
+ 
