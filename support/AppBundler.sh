@@ -74,10 +74,10 @@ function removeDuplicateLinkFlags()
   
   if [ x"$TARGET_ARCH" = x"x86" ] ; then
     ABI="x86"
-    STL_PATH=$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/$ABI
+    STL_PATH=$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/$NDK_TOOLCHAIN_VERSION/libs/$ABI
   elif  [ x"$TARGET_ARCH" = x"ARMv7" ] ; then
     ABI="armeabi-v7a"
-    STL_PATH=$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/4.8/libs/$ABI/thumb
+    STL_PATH=$ANDROID_NDK/sources/cxx-stl/gnu-libstdc++/$NDK_TOOLCHAIN_VERSION/libs/$ABI/thumb
   else
     echo "Undefined ABI for target architecture ${TARGET_ARCH}!"
     exit 1
@@ -151,6 +151,8 @@ function removeDuplicateLinkFlags()
     cd $PROJECT_DIR
     ant debug
   fi
+  # Debug it like this:
+  #python ~/dev/hammer/ndk/ndk-gdb.py --start --project=/home/sajty/dev/hammer/work/build/worldforge/clients/ember_apk/android-ARMv7-debug --force --verbose --gnumake-flag NDK_TOOLCHAIN_VERSION=4.8
 
   exit 0
 fi

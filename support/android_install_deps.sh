@@ -74,8 +74,8 @@ function install_deps_toolchain()
     TCNAME=arm-linux-androideabi
   fi
   # Standalone posix toolchain
-  $ANDROID_NDK/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK --platform=android-15 \
-  --toolchain=$TCNAME-4.8 --system=linux-$HOST_ARCH --stl=gnustl --install-dir=$TOOLCHAIN
+  $ANDROID_NDK/build/tools/make-standalone-toolchain.sh --ndk-dir=$ANDROID_NDK --platform=android-19 \
+  --toolchain=$TCNAME-$NDK_TOOLCHAIN_VERSION --system=linux-$HOST_ARCH --stl=gnustl --install-dir=$TOOLCHAIN
   
   # Create libpthread.a and libz.a dummy, because many libraries are hardcoding -lpthread or -lz, but on Android pthread works out of box.
   touch dummy.c
