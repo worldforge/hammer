@@ -82,14 +82,15 @@ function install_deps_toolchain()
   $TOOLCHAIN/bin/$CROSS_COMPILER-gcc -o dummy.o -c dummy.c
   $TOOLCHAIN/bin/$CROSS_COMPILER-ar cru $SYSROOT/usr/lib/libpthread.a dummy.o
   $TOOLCHAIN/bin/$CROSS_COMPILER-ranlib $SYSROOT/usr/lib/libpthread.a
-  $TOOLCHAIN/bin/$CROSS_COMPILER-ar cru $SYSROOT/usr/lib/libz.a dummy.o
-  $TOOLCHAIN/bin/$CROSS_COMPILER-ranlib $SYSROOT/usr/lib/libz.a
+  if [ ! -f $SYSROOT/usr/lib/libz.a ] ; then
+    # On ARM it is embedded into bionic C runtime, while on x86 it doesn't. So for targets which don't have libz.a, we will make a dummy.
+    $TOOLCHAIN/bin/$CROSS_COMPILER-ar cru $SYSROOT/usr/lib/libz.a dummy.o
+    $TOOLCHAIN/bin/$CROSS_COMPILER-ranlib $SYSROOT/usr/lib/libz.a
+  fi
   rm dummy.c
   rm dummy.o
-  
   # Some dependencies use -lzlib to link zlib.
-  cd $SYSROOT/usr/lib
-  ln -s -f libz.a libzlib.a
+  ln -s -f $SYSROOT/usr/lib/libz.a $SYSROOT/usr/lib/libzlib.a
   
   #Remove the headers for GLESv1 so that SDL will use GLESv2 only.
   rm -r $SYSROOT/usr/include/GLES
@@ -119,11 +120,11 @@ function install_deps_boost()
   # pop cross-compiler and push native compiler environment
   eval `$SUPPORTDIR/setup_env.sh pop_env`
   export TARGET_OS="native" && eval `$SUPPORTDIR/setup_env.sh push_env`
-  
+  #{
     #build bjam
     cd $BOOST_SOURCEDIR
     ./bootstrap.sh
-  
+  #}
   # pop native compiler and push back cross-compiler environment
   eval `$SUPPORTDIR/setup_env.sh pop_env`
   export TARGET_OS="android" && eval `$SUPPORTDIR/setup_env.sh push_env`
@@ -148,9 +149,12 @@ function install_deps_ceguideps()
   
   if [ ! -d $CEGUIDEPS_SOURCEDIR ]; then
     cd $DEPS_SOURCE
-    hg clone https://bitbucket.org/cegui/cegui-dependencies -r 721921d
+    hg clone https://bitbucket.org/cegui/cegui-dependencies
     cd $CEGUIDEPS_SOURCEDIR
+    hg update -r 721921d
     patch -N -p1 -r - < $SUPPORTDIR/android_fix-ceguideps.patch
+    # Make sure we have -lzlib.
+    ln -s -f $SYSROOT/usr/lib/libz.a $SYSROOT/usr/lib/libzlib.a
   fi
   
   #-static will break the build
@@ -159,10 +163,11 @@ function install_deps_ceguideps()
   
   mkdir -p $CEGUIDEPS_BUILDDIR
   cd $CEGUIDEPS_BUILDDIR
+  
   cmake $CMAKE_CROSS_COMPILE $CMAKE_FLAGS -DCEGUI_BUILD_FREEIMAGE=false -DCEGUI_BUILD_FREETYPE2=false \
     -DCEGUI_BUILD_GLEW=false -DCEGUI_BUILD_GLFW=false -DCEGUI_BUILD_GLM=false -DCEGUI_BUILD_SILLY=false \
     -DCEGUI_BUILD_TOLUAPP=true -DCEGUI_BUILD_LUA=true -DCEGUI_BUILD_PCRE=true -DCEGUI_BUILD_EXPAT=false \
-    -DCEGUI_BUILD_TINYXML=true -DCMAKE_EXE_LINKER_FLAGS="-static" $CEGUIDEPS_SOURCEDIR
+    -DCEGUI_BUILD_TINYXML=true -DCEGUI_BUILD_ZLIB=false -DCMAKE_EXE_LINKER_FLAGS="-static" $CEGUIDEPS_SOURCEDIR
 
   #It seems that tolua++ and lua are built in parallel, but that will fail. So $MAKE_FLAGS will be ignored
   make
@@ -171,7 +176,8 @@ function install_deps_ceguideps()
   #It seems make install is not installing, so we will copy it manually.
   cp -r -f $CEGUIDEPS_BUILDDIR/dependencies/lib/static/* $PREFIX/lib
   cp -r -f $CEGUIDEPS_BUILDDIR/dependencies/include/* $PREFIX/include
-  cp -r -f $SUPPORTDIR/lua5.1.pc $PREFIX/lib/pkgconfig
+  mkdir -p $PREFIX/lib/pkgconfig
+  cp -r -f $SUPPORTDIR/lua5.1.pc $PREFIX/lib/pkgconfig/lua5.1.pc
   PREFIX_ESCAPED=$(printf '%s\n' "$PREFIX" | sed 's/[\&/]/\\&/g')
   sed -i -e "s/TPL_PREFIX/$PREFIX_ESCAPED/g" $PREFIX/lib/pkgconfig/lua5.1.pc
   export LDFLAGS="$LDFLAGS_SAVE"
@@ -239,8 +245,11 @@ function install_deps_ogredeps()
     cd $OGREDEPS_SOURCEDIR
     hg update -r 27b96a4
     patch -N -p1 -r - < $SUPPORTDIR/android_fix-ogredeps.patch
+    mv $OGREDEPS_SOURCEDIR/src/zlib $OGREDEPS_SOURCEDIR/src/zlib_
   fi
-
+  if [ ! -f $SYSROOT/usr/include/zutil.h ] ; then
+    cp $OGREDEPS_SOURCEDIR/src/zlib_/zutil.h $SYSROOT/usr/include/zutil.h
+  fi
   mkdir -p $OGREDEPS_BUILDDIR
   cd $OGREDEPS_BUILDDIR
   
@@ -296,9 +305,9 @@ function install_deps_ogre()
   cp -u ${ANDROID_NDK}/sources/android/cpufeatures/*.c $OGRE_SOURCEDIR/OgreMain/src/Android
   cp -u ${ANDROID_NDK}/sources/android/cpufeatures/*.h $OGRE_SOURCEDIR/OgreMain/include
   
-  cmake $CMAKE_BUILD_DEBUG $CMAKE_CROSS_COMPILE $CMAKE_FLAGS -DEGL_INCLUDE_DIR="" -DOIS_INCLUDE_DIR="" -DOPENGLES2_INCLUDE_DIR="" -DOGRE_LIB_SUFFIX="" \
+  cmake $CMAKE_BUILD_DEBUG $CMAKE_CROSS_COMPILE $CMAKE_FLAGS -DEGL_INCLUDE_DIR="" -DOIS_INCLUDE_DIR="" -DOPENGLES2_INCLUDE_DIR=""  -DCMAKE_DEBUG_POSTFIX="" -DOGRE_LIB_SUFFIX="" \
     -DOGRE_BUILD_SAMPLES=false -DOGRE_STATIC=true -DOGRE_BUILD_TOOLS=false -DOGRE_UNITY_BUILD=true -DOGRE_BUILD_PCZ=false -DOGRE_BUILD_BSP=false \
-    -DOGRE_BUILD_OCTREE=false -DZLIB_PREFIX_PATH="$SYSROOT/usr" -DANDROID_ABI=armeabi -DOGRE_DEPENDENCIES_DIR=$PREFIX $OGRE_SOURCEDIR
+    -DOGRE_BUILD_PLUGIN_OCTREE=false -DZLIB_PREFIX_PATH="$SYSROOT/usr" -DANDROID_ABI=armeabi -DOGRE_DEPENDENCIES_DIR=$PREFIX $OGRE_SOURCEDIR
  
   make $MAKE_FLAGS
   make install
@@ -352,8 +361,8 @@ function install_deps_cegui()
     hg update -r 5861231
     #patch -N -p1 -r - < $SUPPORTDIR/android_fix-cegui.patch
     
-    wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_VER.tar.bz2
-    tar -xjf $CEGUI_VER.tar.bz2
+    #wget -c http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_VER.tar.bz2
+    #tar -xjf $CEGUI_VER.tar.bz2
     patch -N -p1 -r - < $SUPPORTDIR/android_fix-cegui.patch
   fi
   
@@ -364,7 +373,7 @@ function install_deps_cegui()
   -DBoost_LIBRARY_DIRS=$PREFIX/lib -DCEGUI_BUILD_STATIC_CONFIGURATION=true -DCEGUI_BUILD_LUA_GENERATOR=false \
   -DOGRE_LIBRARIES="" -DCEGUI_BUILD_STATIC_FACTORY_MODULE=true -DCEGUI_BUILD_SHARED_LIBS_WITH_STATIC_DEPENDENCIES=true \
   -C ${SUPPORTDIR}/CEGUI_defaults.cmake $CMAKE_FLAGS $DEPS_SOURCE/$CEGUI_VER 
-  #cmake-gui .
+
   make $MAKE_FLAGS
   make install
   
@@ -456,8 +465,8 @@ function install_deps_all()
   install_deps_openal
   install_deps_freealut
   install_deps_sdl
-  install_deps_ceguideps
   install_deps_ogredeps
+  install_deps_ceguideps
   install_deps_ogre
   install_deps_cegui
 }
