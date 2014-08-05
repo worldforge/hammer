@@ -1,0 +1,12 @@
+diff -Naur A/boost/asio/impl/serial_port_base.ipp B/boost/asio/impl/serial_port_base.ipp
+--- A/boost/asio/impl/serial_port_base.ipp	2014-06-30 06:13:03.000000000 +0200
++++ B/boost/asio/impl/serial_port_base.ipp	2014-08-01 12:22:24.782252438 +0200
+@@ -114,7 +114,7 @@
+     ec = boost::asio::error::invalid_argument;
+     return ec;
+   }
+-# if defined(_BSD_SOURCE)
++# if defined(_BSD_SOURCE) && !defined(__ANDROID__)
+   ::cfsetspeed(&storage, baud);
+ # else
+   ::cfsetispeed(&storage, baud);

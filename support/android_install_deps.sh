@@ -110,6 +110,8 @@ function install_deps_boost()
 
     wget -c http://downloads.sourceforge.net/sourceforge/boost/$BOOST_VER.tar.bz2
     tar -xjf $BOOST_VER.tar.bz2
+    cd $BOOST_SOURCEDIR
+    patch -N -p1 -r - < $SUPPORTDIR/android_fix-boost.patch
   fi
   
   mkdir -p $BOOST_BUILDDIR
