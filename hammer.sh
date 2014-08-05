@@ -268,7 +268,13 @@ function buildwf()
     fi
 
     mkdir -p $LOGDIR/$PRJNAME
-
+    
+    if [ ! -d $SOURCE/$1 ] ; then
+      echo "The source directory is missing!"
+      echo "Try: ./hammer.sh help checkout"
+      exit 1
+    fi
+    
     cd $SOURCE/$1
     if [ $FORCE_AUTOGEN -eq 1 ] || [ ! -f "configure" ] ; then
       echo "  Running autogen..."
