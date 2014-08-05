@@ -93,7 +93,6 @@ if [ $# -eq 0 ] ; then
   show_help "main"
 fi
 
-
 #default flags, which can be changed with hammer.sh flags
 #Change these for custom builds.
 export DEBUG_BUILD=0 # Can be 0 (release build) or 1 (debug build). Only used if COMPILE_FLAGS is empty!
@@ -106,7 +105,7 @@ export LINK_FLAGS=""
 export FORCE_AUTOGEN=0 # Can be 0 or 1.
 export FORCE_CONFIGURE=0 # Can be 0 or 1.
 
-export TARGET_OS="native" # Can be android.
+export TARGET_OS="native" # Can be native or android.
 
 # NOTE: These are only valid for non-native builds
 export TARGET_ARCH="ARMv7" # Can be ARMv7 or x86. (ARMv6, ARMv8, ARM_NEON, MIPS may be added later)
@@ -308,7 +307,7 @@ function checkoutwf()
   if [ x"$3" = x"" ]; then
     # atlas-cpp ==> ATLAS_CPP
     BRANCH="`echo $1 | tr '[:lower:]' '[:upper:]' | tr '-' '_'`_VER"
-    # ATLAS_CPP ==> origin/master (indirectly get the value of a variable)
+    # ATLAS_CPP ==> origin/master
     BRANCH="${!BRANCH}"
   else
     BRANCH="$3"
@@ -788,7 +787,6 @@ elif [ "$1" = "build" ] ; then
   fi
 
   if [ "$2" = "worlds" ] || [ "$2" = "all" ] ; then
-
     # Worlds
     echo "  Worlds..."
     buildwf "worlds"
@@ -800,14 +798,12 @@ elif [ "$1" = "build" ] ; then
     echo "  Ember client..."
     buildwf "clients/ember"
     echo "  Done."
-
+    
     # Ember media
     ember_fetch_media "dev"
-
   fi
 
   if [ "$2" = "cyphesis" ] || [ "$2" = "all" ] ; then
-
     # Cyphesis
     echo "  Cyphesis..."
     buildwf "servers/cyphesis"
