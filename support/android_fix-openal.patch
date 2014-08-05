@@ -1,12 +1,35 @@
-From 467cc0295532a15dc7d7c01820e7fab860554a37 Mon Sep 17 00:00:00 2001
-From: sajty <sajty@sajty-UBI.(none)>
-Date: Wed, 4 Jun 2014 02:28:18 +0200
-Subject: [PATCH] Fix Android support.
+From 38102f2b39d49e52c7a7c51c0fb340b3e70362d2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Peter=20Sz=C3=BCcs?= <peter.szucs.dev@gmail.com>
+Date: Sun, 3 Aug 2014 00:28:59 +0200
+Subject: [PATCH] Add support for Android Standalone toolchains.
 
 ---
- CMakeLists.txt |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Alc/backends/android.c | 4 ++--
+ CMakeLists.txt         | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
+diff --git a/Alc/backends/android.c b/Alc/backends/android.c
+index 2201612..842f60b 100644
+--- a/Alc/backends/android.c
++++ b/Alc/backends/android.c
+@@ -12,7 +12,7 @@ JavaVM *alcGetJavaVM(void) {
+ 	return javaVM;
+ }
+ 
+-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
++jint JNI_OnLoad_OpenAL(JavaVM *vm, void *reserved) {
+ 	// BackendFuncs func_list;
+ 	if (androidOpenALFuncs.alc_android_set_java_vm) {
+ 		androidOpenALFuncs.alc_android_set_java_vm(vm);
+@@ -21,7 +21,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+ 	return JNI_VERSION_1_4;
+ }
+ 
+-void JNI_OnUnload (JavaVM *vm, void *reserved)
++void JNI_OnUnload_OpenAL(JavaVM *vm, void *reserved)
+ {
+ 	if (androidOpenALFuncs.alc_android_set_java_vm) {
+ 		androidOpenALFuncs.alc_android_set_java_vm(NULL);
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 81c0980..8bb19cc 100644
 --- a/CMakeLists.txt
@@ -24,5 +47,5 @@ index 81c0980..8bb19cc 100644
      ENDIF()
  ENDIF()
 -- 
-1.7.9.5
+1.9.1
 
