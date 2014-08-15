@@ -94,6 +94,8 @@ function removeDuplicateLinkFlags()
   LINKFLAGS_ESCAPED=$(printf '%s\n' "$LINKFLAGS" | sed 's/[\&/]/\\&/g')
   SOURCE_ESCAPED=$(printf '%s\n' "$SOURCE" | sed 's/[\&/]/\\&/g')
   PREFIX_ESCAPED=$(printf '%s\n' "$PREFIX" | sed 's/[\&/]/\\&/g')
+  ANDROID_SDK_ESCAPED=$(printf '%s\n' "$ANDROID_SDK" | sed 's/[\&/]/\\&/g')
+  ANDROID_NDK_ESCAPED=$(printf '%s\n' "$ANDROID_NDK" | sed 's/[\&/]/\\&/g')
   
   EMBER_APP="$WORKDIR/ember.app"
   PROJECT_DIR="$BUILD/clients/ember_apk/$BUILDDIR"
@@ -106,16 +108,21 @@ function removeDuplicateLinkFlags()
   #if [ ! -d $PROJECT_DIR ]; then
     mkdir -p $PROJECT_DIR
     cp -r $PROJECT_SOURCE_DIR/* $PROJECT_DIR
-    cp $PROJECT_DIR/jni/Android.mk.in $PROJECT_DIR/jni/Android.mk
-    cp $PROJECT_DIR/jni/Application.mk.in $PROJECT_DIR/jni/Application.mk
-    sed -i '1i# This is a generated file! Please edit Android.mk.in, then run AppBundler to regenerate.' $PROJECT_DIR/jni/Android.mk
-    sed -i '1i# This is a generated file! Please edit Application.mk.in, then run AppBundler to regenerate.' $PROJECT_DIR/jni/Application.mk
+    mv -f $PROJECT_DIR/jni/Android.mk.in $PROJECT_DIR/jni/Android.mk
+    mv -f $PROJECT_DIR/jni/Application.mk.in $PROJECT_DIR/jni/Application.mk
+    sed -i '1i# This is a generated file! Please edit Android.mk.in, then run "./hammer.sh -t=android build ember_apk" to regenerate.' $PROJECT_DIR/jni/Android.mk
+    sed -i '1i# This is a generated file! Please edit Application.mk.in, then run "./hammer.sh -t=android build ember_apk" to regenerate.' $PROJECT_DIR/jni/Application.mk
     sed -i -e "s/%EXTRA_LIBS%/$LINKFLAGS_ESCAPED/g" -e "s/%SOURCE%/$SOURCE_ESCAPED/g" -e "s/%PREFIX%/$PREFIX_ESCAPED/g" -e "s/%SYSROOT%/$SYSROOT_ESCAPED/g" $PROJECT_DIR/jni/Android.mk
     sed -i -e "s/%ABI%/$ABI/g" $PROJECT_DIR/jni/Application.mk
+    
+    mv -f $PROJECT_DIR/debug.sh.in $PROJECT_DIR/debug.sh
+    sed -i '1i# This is a generated file! Please edit debug.sh.in, then run "./hammer.sh -d -t=android-x86 build ember_apk" to regenerate.' $PROJECT_DIR/debug.sh
+    sed -i -e "s/%ANDROID_SDK%/$ANDROID_SDK_ESCAPED/g" -e "s/%ANDROID_NDK%/$ANDROID_NDK_ESCAPED/g" -e "s/%ABI%/$ABI/g" $PROJECT_DIR/debug.sh
   #fi
   export EMBER_APP="$WORKDIR/ember.apk"
   
   if [ "1" = "1" ] ; then
+    # Cleanup environment, so that we don't influence linking.
     export PATH_SAVE="$PATH"
     export DEBUG_BUILD_SAVE="$DEBUG_BUILD"
     eval `$SUPPORTDIR/setup_env.sh pop_env`
@@ -150,10 +157,8 @@ function removeDuplicateLinkFlags()
     ndk-build NDK_DEBUG=1 -B
     cd $PROJECT_DIR
     ant debug
+    #./debug.sh
   fi
-  # Debug it like this:
-  #python ~/dev/hammer/ndk/ndk-gdb.py --start --project=/home/sajty/dev/hammer/work/build/worldforge/clients/ember_apk/android-ARMv7-debug --force --verbose --gnumake-flag NDK_TOOLCHAIN_VERSION=4.8
-
   exit 0
 fi
 
