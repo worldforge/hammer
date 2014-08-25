@@ -91,6 +91,7 @@ function show_help()
 
 if [ $# -eq 0 ] ; then
   show_help "main"
+  exit 1
 fi
 
 #default flags, which can be changed with hammer.sh flags
