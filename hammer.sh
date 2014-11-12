@@ -932,7 +932,7 @@ elif [ "$1" = "release_ember" ] ; then
       # skstream is deprecated, but we need it to build older ember releases!
       buildwf "libs/skstream"
       
-      HAMMER_EXTRA_FLAGS="--release-media=$2"
+      HAMMER_EXTRA_FLAGS="--use-release-media=$2"
       cd $CURDIR
     fi
     
