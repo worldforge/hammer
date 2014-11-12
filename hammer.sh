@@ -911,9 +911,12 @@ elif [ "$1" = "release_ember" ] ; then
     $HAMMER --use-release-libs checkout libs
     
     if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
-      cd $SOURCE/libs
-      # skstream is deprecated, but we need it to build older ember releases!
-      checkoutwf "skstream" "worldforge" $SKSTREAM_VER
+	  # Push native build environment to checkout skstream
+      eval `$SUPPORTDIR/setup_env.sh push_env`
+        cd $SOURCE/libs
+        # skstream is deprecated, but we need it to build older ember releases!
+        checkoutwf "skstream" "worldforge" $SKSTREAM_VER
+      eval `$SUPPORTDIR/setup_env.sh pop_env`
       
       HAMMER_EXTRA_FLAGS="--use-release-ember=$2"
       cd $CURDIR
@@ -930,7 +933,10 @@ elif [ "$1" = "release_ember" ] ; then
     if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
       
       # skstream is deprecated, but we need it to build older ember releases!
-      buildwf "libs/skstream"
+      # Push native build environment to build skstream
+	  eval `$SUPPORTDIR/setup_env.sh push_env`
+        buildwf "libs/skstream"
+      eval `$SUPPORTDIR/setup_env.sh pop_env`
       
       HAMMER_EXTRA_FLAGS="--use-release-media=$2"
       cd $CURDIR
