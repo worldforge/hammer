@@ -908,7 +908,6 @@ elif [ "$1" = "release_ember" ] ; then
 
   # Source checkout
   echo "Checking out sources..."
-    $HAMMER --use-release-libs checkout libs
     
     if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
 	  # Push native build environment to checkout skstream
@@ -918,11 +917,11 @@ elif [ "$1" = "release_ember" ] ; then
         checkoutwf "skstream" "worldforge" $SKSTREAM_VER
       eval `$SUPPORTDIR/setup_env.sh pop_env`
       
-      HAMMER_EXTRA_FLAGS="--use-release-ember=$2"
+      HAMMER_EXTRA_FLAGS="--use-release-libs --use-release-ember=$2"
       cd $CURDIR
     fi
     
-    
+    $HAMMER $HAMMER_EXTRA_FLAGS checkout libs
     $HAMMER $HAMMER_EXTRA_FLAGS checkout ember
   echo "Checkout complete."
 
