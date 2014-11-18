@@ -943,7 +943,8 @@ elif [ "$1" = "release_ember" ] ; then
     
     $HAMMER $HAMMER_EXTRA_FLAGS --compile_flags="$CXXFLAGS" build ember
   echo "Build complete."
-
+  
+  eval `$SUPPORTDIR/setup_env.sh push_env`
   # Check for Ember release target option
   if [ x"$3" = x"" ] || [ "$3" = "image" ] ; then
     # making an AppImage/AppBundle
@@ -972,7 +973,8 @@ elif [ "$1" = "release_ember" ] ; then
     source $HAMMERDIR/support/linux_release_bundle.sh
     echo "Release directory created."
   fi
-
+  eval `$SUPPORTDIR/setup_env.sh pop_env`
+  
 else
   echo "Invalid command!"
   show_help "main"
