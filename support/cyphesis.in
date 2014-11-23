@@ -52,8 +52,8 @@ echo "According to my calculations Cyphesis should be installed in $prefix"
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 
-LD_LIBRARY=$prefix/lib/cyphesis:$LD_LIBRARY
-LD_LIBRARY_PATH=$prefix/lib/cyphesis:$LD_LIBRARY_PATH
+LD_LIBRARY=$prefix/lib:$LD_LIBRARY
+LD_LIBRARY_PATH=$prefix/lib:$LD_LIBRARY_PATH
 export LD_LIBRARY
 export LD_LIBRARY_PATH
 
