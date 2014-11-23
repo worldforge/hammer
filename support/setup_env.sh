@@ -136,7 +136,7 @@ pexport PREFIX=$WORKDIR/local
 pexport DEPS_SOURCE=$WORKDIR/source
 pexport DEPS_BUILD=$WORKDIR/build
 pexport LOGDIR=$WORKDIR/logs
-pexport PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+pexport PKG_CONFIG_PATH="$PREFIX/lib64/pkgconfig:$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 pexport ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 # fixes libtool: link: warning: library * was moved.
 #pexport DESTDIR="$PREFIX/lib"
