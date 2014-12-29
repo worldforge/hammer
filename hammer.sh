@@ -340,10 +340,10 @@ function install_deps_cg()
       CG_DOWNLOAD+=".dmg"
       CG_LIB_LOCATION="Library/Frameworks/Cg.framework/Versions/1.0/Cg"
     elif [[ $OSTYPE == linux-gnu ]] ; then
-      if [[ $BUILDDIR == 64 ]] ; then
+      if [[ $BUILDDIR == native-64 ]] ; then
         CG_DOWNLOAD+="_x86_64.tgz"
         CG_LIB_LOCATION="usr/lib64/libCg.so"
-      elif [[ $BUILDDIR == 32 ]] ; then
+      elif [[ $BUILDDIR == native-32 ]] ; then
         CG_DOWNLOAD+="_x86.tgz"
         CG_LIB_LOCATION="usr/lib/libCg.so"
       fi
