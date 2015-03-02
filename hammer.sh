@@ -308,13 +308,13 @@ function checkoutwf()
   fi
   echo "Getting $1 $BRANCH"
   if [ ! -d $1 ]; then
-    git clone git://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
+    git clone https://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
   else
     cd $1
     if [ x$HAMMERALWAYSSTASH = xyes ]; then
       git stash save "Hammer stash"
     fi
-    git remote set-url origin git://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
+    git remote set-url origin https://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
   fi
 }
 
