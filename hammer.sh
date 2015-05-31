@@ -930,7 +930,6 @@ elif [ "$1" = "release_ember" ] ; then
   # Install external dependencies
   echo "Installing 3rd party dependencies..."
   $HAMMER --compile_flags="$CXXFLAGS" install-deps all
-  echo "Install of 3rd party dependencies is complete."
   
   HAMMER_EXTRA_FLAGS=""
 
@@ -952,7 +951,6 @@ elif [ "$1" = "release_ember" ] ; then
     
     $HAMMER $HAMMER_EXTRA_FLAGS checkout libs
     $HAMMER $HAMMER_EXTRA_FLAGS checkout ember
-  echo "Checkout complete."
 
   # Build source
   echo "Building sources..."
@@ -971,7 +969,6 @@ elif [ "$1" = "release_ember" ] ; then
     fi
     
     $HAMMER $HAMMER_EXTRA_FLAGS --compile_flags="$CXXFLAGS" build ember
-  echo "Build complete."
   
   eval `$SUPPORTDIR/setup_env.sh push_env`
   # Check for Ember release target option
