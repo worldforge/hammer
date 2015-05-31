@@ -940,6 +940,7 @@ elif [ "$1" = "release_ember" ] ; then
     if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
 	  # Push native build environment to checkout skstream
       eval `$SUPPORTDIR/setup_env.sh push_env`
+        mkdir -p $SOURCE/libs
         cd $SOURCE/libs
         # skstream is deprecated, but we need it to build older ember releases!
         checkoutwf "skstream" "worldforge" $SKSTREAM_VER
