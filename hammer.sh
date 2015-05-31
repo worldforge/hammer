@@ -39,6 +39,7 @@ function show_help()
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
     echo "  cg       -  interactive effects toolkit"
+    echo "  basedir  -  implementation of the XDG Base Directory specifications"
     ,
     echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
@@ -237,6 +238,7 @@ CG_FULLVER=${CG_VER}.0013
 CG_DOWNLOAD=Cg-3.1_April2012
 FREEALUT_VER=1.1.0
 TOLUA_VER="tolua++-1.0.93"
+BASEDIR_VER=1.2.0
 
 # setup directories
 mkdir -p $PREFIX
@@ -446,6 +448,34 @@ function install_deps_freealut()
     make install > $LOGDIR/deps/freealut/$INSTALLLOG
 }
 
+function install_deps_basedir()
+{
+    # libxdg-basedir
+    echo "  Installing libxdg-basedir..."
+    mkdir -p $LOGDIR/deps/libxdg-basedir
+    cd $DEPS_SOURCE
+
+    echo "  Downloading..."
+    curl -OL http://nevill.ch/libxdg-basedir/downloads/libxdg-basedir-$BASEDIR_VER.tar.gz
+    tar -xf libxdg-basedir-$BASEDIR_VER.tar.gz
+    cd libxdg-basedir-$BASEDIR_VER
+    echo "  Running autogen..."
+    #This library is currently not compatible with automake 1.12, the following line fixes this:
+    sed -i 's/AC_PROG_CC/m4_ifdef([AM_PROG_AR], [AM_PROG_AR])\nAC_PROG_CC/' configure.ac
+    autoreconf --install --force --warnings=all
+
+    mkdir -p $DEPS_BUILD/libxdg-basedir/$BUILDDIR
+    cd $DEPS_BUILD/libxdg-basedir/$BUILDDIR
+
+    echo "  Running configure..."
+    $DEPS_SOURCE/libxdg-basedir-$BASEDIR_VER/configure $CONFIGURE_FLAGS > $LOGDIR/deps/libxdg-basedir/$CONFIGLOG
+
+    echo "  Building..."
+    make $MAKE_FLAGS > $LOGDIR/deps/libxdg-basedir/$MAKELOG
+    echo "  Installing..."
+    make install > $LOGDIR/deps/libxdg-basedir/$INSTALLLOG
+}
+
 function install_deps_tolua++()
 {
     # tolua++
@@ -526,6 +556,7 @@ function install_deps_all()
     fi
     install_deps_ogre
     install_deps_cegui
+    install_deps_basedir
 }
 function install_deps_AppImageKit()
 {
@@ -616,7 +647,8 @@ if [ "$1" = "install-deps" ] ; then
   mkdir -p $LOGDIR/deps
 
   if [ "$2" = "all" ] || [ "$2" = "ogre" ] || [ "$2" = "cegui" ] ||
-     [ "$2" = "cg" ] || [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ; then
+     [ "$2" = "cg" ] || [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ||
+     [ "$2" = "basedir" ] ; then
     install_deps_$2
   else
     printf >&2 'Unknown target: %s\n' "$2"
