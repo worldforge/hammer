@@ -930,7 +930,7 @@ elif [ "$1" = "release_ember" ] ; then
   # Install external dependencies
   echo "Installing 3rd party dependencies..."
   $HAMMER --compile_flags="$CXXFLAGS" install-deps all
-  
+  $HAMMER --compile_flags="$CXXFLAGS" install-deps cg
   HAMMER_EXTRA_FLAGS=""
 
   # Source checkout
