@@ -123,14 +123,14 @@ export WORKDIR=$HAMMERDIR/work # It should contain anything generated.
 export SUPPORTDIR=$HAMMERDIR/support # It should contain any other script.
 
 
-EMBER_VER="origin/master"
-VARCONF_VER="origin/master"
-ATLAS_CPP_VER="origin/master"
-SKSTREAM_VER="origin/master"
-WFMATH_VER="origin/master"
-ERIS_VER="origin/master"
-WFUT_VER="origin/master"
-MERCATOR_VER="origin/master"
+EMBER_VER="master"
+VARCONF_VER="master"
+ATLAS_CPP_VER="master"
+SKSTREAM_VER="master"
+WFMATH_VER="master"
+ERIS_VER="master"
+LIBWFUT_VER="master"
+MERCATOR_VER="master"
 MEDIA_VER="dev"
 
 while :
@@ -204,7 +204,7 @@ do
       SKSTREAM_VER=0.3.9
       WFMATH_VER=1.0.2
       ERIS_VER=1.3.23
-      WFUT_VER=libwfut-0.2.3
+      LIBWFUT_VER=libwfut-0.2.3
       MERCATOR_VER=0.3.3
       shift
       ;;
@@ -303,20 +303,20 @@ function checkoutwf()
   if [ x"$3" = x"" ]; then
     # atlas-cpp ==> ATLAS_CPP
     BRANCH="`echo $1 | tr '[:lower:]' '[:upper:]' | tr '-' '_'`_VER"
-    # ATLAS_CPP ==> origin/master
+    # ATLAS_CPP ==> master
     BRANCH="${!BRANCH}"
   else
     BRANCH="$3"
   fi
   echo "Getting $1 $BRANCH"
   if [ ! -d $1 ]; then
-    git clone https://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
+    git clone https://github.com/$USER/$1.git -b $BRANCH
   else
     cd $1
     if [ x$HAMMERALWAYSSTASH = xyes ]; then
       git stash save "Hammer stash"
     fi
-    git remote set-url origin https://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
+    git remote set-url origin https://github.com/$USER/$1.git && git fetch && git rebase origin/$BRANCH && cd ..
   fi
 }
 
@@ -397,7 +397,7 @@ function install_deps_ogre()
     OGRE_EXTRA_FLAGS=""
     # Note: The -DOIS_INCLUDE_DIR flag is only set because of sample-related build failures
     #       which appear to be caused by Ogre 1.9.0. When fixed, this flag should be removed.
-    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="" -DOGRE_BUILD_SAMPLES="OFF" \
+    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES="ON" -DOIS_FOUND="OFF" \
     -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" \
     -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
@@ -822,7 +822,7 @@ elif [ "$1" = "build" ] ; then
     echo "  Done."
     
     # Ember media
-    ember_fetch_media "dev"
+    ember_fetch_media
   fi
 
   if [ "$2" = "cyphesis" ] || [ "$2" = "all" ] ; then
