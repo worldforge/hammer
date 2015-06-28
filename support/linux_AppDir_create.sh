@@ -7,7 +7,7 @@
 # Incorporates portions of linux_release_bundle.sh by the WorldForge project.
 # This script is designed to be run from hammer.sh, 
 # running it directly is NOT recommended.
-# Copyright: 2013-2014 Olek Wojnar
+# Copyright: 2013-2015 Olek Wojnar
 # License: GPL-2+
 
 APP_DIR="$APP_DIR_ROOT/usr"
@@ -19,7 +19,11 @@ mkdir -p $APP_DIR
 cd $APP_DIR_ROOT
 curl -OL https://raw.github.com/worldforge/ember/master/ember.desktop
 curl -OL https://raw.github.com/worldforge/ember/master/media/ember.png
-cp -a "ember.png" ".DirIcon"
+#The following line is taken care of by newer versions of AppImageKit
+#cp -a "ember.png" ".DirIcon"
+#The following two lines are required by newer versions of AppImageKit
+mkdir -p $APP_DIR/share/pixmaps
+cp -a "ember.png" $APP_DIR/share/pixmaps/
 cp $DEPS_BUILD/AppImageKit/AppRun .
 
 

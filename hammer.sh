@@ -584,7 +584,7 @@ function install_deps_AppImageKit()
     curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppImageAssistant.AppDir/package
     curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppImageAssistant.AppDir/xdgappdir.py
     echo "  Configuring..."
-    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/AppImageKit &> $LOGDIR/deps/AppImageKit/$CONFIGLOG 
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/AppImageKit &> $LOGDIR/deps/AppImageKit/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS AppRun &> $LOGDIR/deps/AppImageKit/${MAKELOG}_AppRun
     make $MAKEOPTS runtime &> $LOGDIR/deps/AppImageKit/${MAKELOG}_runtime
