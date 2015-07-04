@@ -143,7 +143,7 @@ done
 
 if [ "$LIBMISSING" -gt 0 ]; then
   echo "The above $LIBMISSING libraries could not be located in the ldd search path."
-  echo "Please manually copy them to the hammer/release/lib folder."
+  echo "Please manually copy them to the hammer/work/Ember.AppDir/usr/lib/ folder."
 else
   echo "None"
 fi
