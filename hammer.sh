@@ -575,6 +575,8 @@ function install_deps_AppImageKit()
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/md5.c
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/md5.h
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/runtime.c
+      #AppImageKit isn't smart enough to find debian library locations, let's help it.
+      sed -i 's|"/usr/lib64"|"/usr/lib" "/usr/lib64" "/usr/lib/i386-linux-gnu" "/usr/lib/x86_64-linux-gnu"|' CMakeLists.txt
       mkdir linux && cd linux
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/linux/iso_fs.h
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/linux/rock.h
