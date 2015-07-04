@@ -162,7 +162,8 @@ rm $APP_DIR/lib/libm.so*
 rm $APP_DIR/lib/libpthread.so*
 rm $APP_DIR/lib/libresolv.so*
 rm $APP_DIR/lib/librt.so*
-rm $APP_DIR/lib/librtmp.so*
+#Temporarily leaving this library in the image due to so.0 vs so.1 issues
+#rm $APP_DIR/lib/librtmp.so*
 rm $APP_DIR/lib/libX11.so*
 
 # Resume exit-on-fail behavior.
