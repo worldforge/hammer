@@ -63,15 +63,15 @@ if [ $# -eq 0 ] ; then
 if [ $debugging = 1 ] ; then
 	# Execute real cyphesis binary
 	echo "Starting Cyphesis in debugger...."
-	gdb --args $bindir/cyphesis.bin
+	gdb --args $bindir/cyphesis.bin --cyphesis:dynamicpaths=true
 else
 	# Execute real cyphesis binary
 	echo "Starting Cyphesis...."
-	$bindir/cyphesis.bin
+	$bindir/cyphesis.bin --cyphesis:dynamicpaths=true
 fi
 
 elif [ $1 = "loadrules" ] ; then
-  $bindir/cyloadrules
+  $bindir/cyloadrules --cyphesis:dynamicpaths=true
 
 else
   echo "Invalid command!"
