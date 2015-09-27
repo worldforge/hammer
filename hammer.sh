@@ -39,6 +39,7 @@ function show_help()
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
     echo "  cg       -  interactive effects toolkit"
+    echo "  basedir  -  implementation of the XDG Base Directory specifications"
     ,
     echo "Hint: build ogre first then cegui"
   elif [ $1 = "checkout" ] ; then
@@ -122,14 +123,14 @@ export WORKDIR=$HAMMERDIR/work # It should contain anything generated.
 export SUPPORTDIR=$HAMMERDIR/support # It should contain any other script.
 
 
-EMBER_VER="origin/master"
-VARCONF_VER="origin/master"
-ATLAS_CPP_VER="origin/master"
-SKSTREAM_VER="origin/master"
-WFMATH_VER="origin/master"
-ERIS_VER="origin/master"
-WFUT_VER="origin/master"
-MERCATOR_VER="origin/master"
+EMBER_VER="master"
+VARCONF_VER="master"
+ATLAS_CPP_VER="master"
+SKSTREAM_VER="master"
+WFMATH_VER="master"
+ERIS_VER="master"
+LIBWFUT_VER="master"
+MERCATOR_VER="master"
 MEDIA_VER="dev"
 
 while :
@@ -203,7 +204,7 @@ do
       SKSTREAM_VER=0.3.9
       WFMATH_VER=1.0.2
       ERIS_VER=1.3.23
-      WFUT_VER=libwfut-0.2.3
+      LIBWFUT_VER=libwfut-0.2.3
       MERCATOR_VER=0.3.3
       shift
       ;;
@@ -237,6 +238,7 @@ CG_FULLVER=${CG_VER}.0013
 CG_DOWNLOAD=Cg-3.1_April2012
 FREEALUT_VER=1.1.0
 TOLUA_VER="tolua++-1.0.93"
+BASEDIR_VER=1.2.0
 
 # setup directories
 mkdir -p $PREFIX
@@ -301,20 +303,20 @@ function checkoutwf()
   if [ x"$3" = x"" ]; then
     # atlas-cpp ==> ATLAS_CPP
     BRANCH="`echo $1 | tr '[:lower:]' '[:upper:]' | tr '-' '_'`_VER"
-    # ATLAS_CPP ==> origin/master
+    # ATLAS_CPP ==> master
     BRANCH="${!BRANCH}"
   else
     BRANCH="$3"
   fi
   echo "Getting $1 $BRANCH"
   if [ ! -d $1 ]; then
-    git clone https://github.com/$USER/$1.git && cd $1 && git rebase $BRANCH && cd ..
+    git clone https://github.com/$USER/$1.git -b $BRANCH
   else
     cd $1
     if [ x$HAMMERALWAYSSTASH = xyes ]; then
       git stash save "Hammer stash"
     fi
-    git remote set-url origin https://github.com/$USER/$1.git && git fetch && git rebase $BRANCH && cd ..
+    git remote set-url origin https://github.com/$USER/$1.git && git fetch && git rebase origin/$BRANCH && cd ..
   fi
 }
 
@@ -395,7 +397,7 @@ function install_deps_ogre()
     OGRE_EXTRA_FLAGS=""
     # Note: The -DOIS_INCLUDE_DIR flag is only set because of sample-related build failures
     #       which appear to be caused by Ogre 1.9.0. When fixed, this flag should be removed.
-    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOIS_INCLUDE_DIR="" -DOGRE_BUILD_SAMPLES="OFF" \
+    cmake $OGRE_SOURCE -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES="ON" -DOIS_FOUND="OFF" \
     -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" \
     -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_FLAGS > $LOGDIR/deps/ogre/$CONFIGLOG
     if [[ $OSTYPE == *darwin* ]] ; then
@@ -444,6 +446,34 @@ function install_deps_freealut()
     make $MAKE_FLAGS > $LOGDIR/deps/freealut/$MAKELOG
     echo "  Installing..."
     make install > $LOGDIR/deps/freealut/$INSTALLLOG
+}
+
+function install_deps_basedir()
+{
+    # libxdg-basedir
+    echo "  Installing libxdg-basedir..."
+    mkdir -p $LOGDIR/deps/libxdg-basedir
+    cd $DEPS_SOURCE
+
+    echo "  Downloading..."
+    curl -OL http://nevill.ch/libxdg-basedir/downloads/libxdg-basedir-$BASEDIR_VER.tar.gz
+    tar -xf libxdg-basedir-$BASEDIR_VER.tar.gz
+    cd libxdg-basedir-$BASEDIR_VER
+    echo "  Running autogen..."
+    #This library is currently not compatible with automake 1.12, the following line fixes this:
+    sed -i 's/AC_PROG_CC/m4_ifdef([AM_PROG_AR], [AM_PROG_AR])\nAC_PROG_CC/' configure.ac
+    autoreconf --install --force --warnings=all
+
+    mkdir -p $DEPS_BUILD/libxdg-basedir/$BUILDDIR
+    cd $DEPS_BUILD/libxdg-basedir/$BUILDDIR
+
+    echo "  Running configure..."
+    $DEPS_SOURCE/libxdg-basedir-$BASEDIR_VER/configure $CONFIGURE_FLAGS > $LOGDIR/deps/libxdg-basedir/$CONFIGLOG
+
+    echo "  Building..."
+    make $MAKE_FLAGS > $LOGDIR/deps/libxdg-basedir/$MAKELOG
+    echo "  Installing..."
+    make install > $LOGDIR/deps/libxdg-basedir/$INSTALLLOG
 }
 
 function install_deps_tolua++()
@@ -526,6 +556,7 @@ function install_deps_all()
     fi
     install_deps_ogre
     install_deps_cegui
+    install_deps_basedir
 }
 function install_deps_AppImageKit()
 {
@@ -544,6 +575,8 @@ function install_deps_AppImageKit()
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/md5.c
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/md5.h
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/runtime.c
+      #AppImageKit isn't smart enough to find debian library locations, let's help it.
+      sed -i 's|"/usr/lib64"|"/usr/lib" "/usr/lib64" "/usr/lib/i386-linux-gnu" "/usr/lib/x86_64-linux-gnu"|' CMakeLists.txt
       mkdir linux && cd linux
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/linux/iso_fs.h
       curl -OL https://raw.github.com/probonopd/AppImageKit/master/linux/rock.h
@@ -553,7 +586,7 @@ function install_deps_AppImageKit()
     curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppImageAssistant.AppDir/package
     curl -OL https://raw.github.com/probonopd/AppImageKit/master/AppImageAssistant.AppDir/xdgappdir.py
     echo "  Configuring..."
-    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/AppImageKit &> $LOGDIR/deps/AppImageKit/$CONFIGLOG 
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" $CMAKE_EXTRA_FLAGS $DEPS_SOURCE/AppImageKit &> $LOGDIR/deps/AppImageKit/$CONFIGLOG
     echo "  Building..."
     make $MAKEOPTS AppRun &> $LOGDIR/deps/AppImageKit/${MAKELOG}_AppRun
     make $MAKEOPTS runtime &> $LOGDIR/deps/AppImageKit/${MAKELOG}_runtime
@@ -616,7 +649,8 @@ if [ "$1" = "install-deps" ] ; then
   mkdir -p $LOGDIR/deps
 
   if [ "$2" = "all" ] || [ "$2" = "ogre" ] || [ "$2" = "cegui" ] ||
-     [ "$2" = "cg" ] || [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ; then
+     [ "$2" = "cg" ] || [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ||
+     [ "$2" = "basedir" ] ; then
     install_deps_$2
   else
     printf >&2 'Unknown target: %s\n' "$2"
@@ -790,7 +824,7 @@ elif [ "$1" = "build" ] ; then
     echo "  Done."
     
     # Ember media
-    ember_fetch_media "dev"
+    ember_fetch_media
   fi
 
   if [ "$2" = "cyphesis" ] || [ "$2" = "all" ] ; then
@@ -898,8 +932,7 @@ elif [ "$1" = "release_ember" ] ; then
   # Install external dependencies
   echo "Installing 3rd party dependencies..."
   $HAMMER --compile_flags="$CXXFLAGS" install-deps all
-  echo "Install of 3rd party dependencies is complete."
-  
+  $HAMMER --compile_flags="$CXXFLAGS" install-deps cg
   HAMMER_EXTRA_FLAGS=""
 
   # Source checkout
@@ -908,6 +941,7 @@ elif [ "$1" = "release_ember" ] ; then
     if [ x"$2" != x"" ] && [ x"$2" != x"dev" ] ; then
 	  # Push native build environment to checkout skstream
       eval `$SUPPORTDIR/setup_env.sh push_env`
+        mkdir -p $SOURCE/libs
         cd $SOURCE/libs
         # skstream is deprecated, but we need it to build older ember releases!
         checkoutwf "skstream" "worldforge" $SKSTREAM_VER
@@ -919,7 +953,6 @@ elif [ "$1" = "release_ember" ] ; then
     
     $HAMMER $HAMMER_EXTRA_FLAGS checkout libs
     $HAMMER $HAMMER_EXTRA_FLAGS checkout ember
-  echo "Checkout complete."
 
   # Build source
   echo "Building sources..."
@@ -938,7 +971,6 @@ elif [ "$1" = "release_ember" ] ; then
     fi
     
     $HAMMER $HAMMER_EXTRA_FLAGS --compile_flags="$CXXFLAGS" build ember
-  echo "Build complete."
   
   eval `$SUPPORTDIR/setup_env.sh push_env`
   # Check for Ember release target option

@@ -7,7 +7,7 @@
 # Incorporates portions of linux_release_bundle.sh by the WorldForge project.
 # This script is designed to be run from hammer.sh, 
 # running it directly is NOT recommended.
-# Copyright: 2013-2014 Olek Wojnar
+# Copyright: 2013-2015 Olek Wojnar
 # License: GPL-2+
 
 APP_DIR="$APP_DIR_ROOT/usr"
@@ -19,7 +19,11 @@ mkdir -p $APP_DIR
 cd $APP_DIR_ROOT
 curl -OL https://raw.github.com/worldforge/ember/master/ember.desktop
 curl -OL https://raw.github.com/worldforge/ember/master/media/ember.png
-cp -a "ember.png" ".DirIcon"
+#The following line is taken care of by newer versions of AppImageKit
+#cp -a "ember.png" ".DirIcon"
+#The following two lines are required by newer versions of AppImageKit
+mkdir -p $APP_DIR/share/pixmaps
+cp -a "ember.png" $APP_DIR/share/pixmaps/
 cp $DEPS_BUILD/AppImageKit/AppRun .
 
 
@@ -139,7 +143,7 @@ done
 
 if [ "$LIBMISSING" -gt 0 ]; then
   echo "The above $LIBMISSING libraries could not be located in the ldd search path."
-  echo "Please manually copy them to the hammer/release/lib folder."
+  echo "Please manually copy them to the hammer/work/Ember.AppDir/usr/lib/ folder."
 else
   echo "None"
 fi
@@ -158,7 +162,8 @@ rm $APP_DIR/lib/libm.so*
 rm $APP_DIR/lib/libpthread.so*
 rm $APP_DIR/lib/libresolv.so*
 rm $APP_DIR/lib/librt.so*
-rm $APP_DIR/lib/librtmp.so*
+#Temporarily leaving this library in the image due to so.0 vs so.1 issues
+#rm $APP_DIR/lib/librtmp.so*
 rm $APP_DIR/lib/libX11.so*
 
 # Resume exit-on-fail behavior.
