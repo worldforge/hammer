@@ -124,6 +124,7 @@ export SUPPORTDIR=$HAMMERDIR/support # It should contain any other script.
 
 
 EMBER_VER="master"
+WEBEMBER_VER="master"
 VARCONF_VER="master"
 ATLAS_CPP_VER="master"
 SKSTREAM_VER="master"
@@ -131,6 +132,9 @@ WFMATH_VER="master"
 ERIS_VER="master"
 LIBWFUT_VER="master"
 MERCATOR_VER="master"
+WORLDS_VER="master"
+CYPHESIS_VER="master"
+FIREBREATH_VER="master"
 MEDIA_VER="dev"
 
 while :
@@ -205,6 +209,8 @@ do
       WFMATH_VER=1.0.2
       ERIS_VER=1.3.23
       LIBWFUT_VER=libwfut-0.2.3
+      WORLDS_VER="master"
+      CYPHESIS_VER=0.6.2
       MERCATOR_VER=0.3.3
       shift
       ;;
