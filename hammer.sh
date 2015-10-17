@@ -394,6 +394,7 @@ function install_deps_ogre()
         echo "  Patching..."
         patch -p1 < $SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch
       fi
+      cd $OGRE_SOURCE
       patch -p1 < $SUPPORTDIR/ogre-1.9.0-03_move_stowed_template_func.patch
     else
       OGRE_SOURCE=$DEPS_SOURCE/$OGRE_VER/`ls $DEPS_SOURCE/$OGRE_VER`
