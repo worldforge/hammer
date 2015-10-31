@@ -23,14 +23,6 @@
 +				tri->vertex[i] = lookup[iPos[i]];
 +			}
 +			if (tri->isMalformed()) {
-+#if OGRE_DEBUG_MODE
-+				stringstream str;
-+				str << "In " << mMeshName << " malformed triangle found with ID: " << getTriangleID(tri) << ". " <<
-+				std::endl;
-+				printTriangle(tri, str);
-+				str << "It will be excluded from LOD level calculations.";
-+				LogManager::getSingleton().stream() << str.str();
-+#endif
 +				tri->isRemoved = true;
 +				mIndexBufferInfoList[tri->submeshID].indexCount -= 3;
 +				continue;
