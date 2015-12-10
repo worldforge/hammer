@@ -1,6 +1,6 @@
 --- a/OgreMain/include/OgreProgressiveMeshGenerator.h	2015-09-03 04:58:34.119585218 +0200
 +++ b/OgreMain/include/OgreProgressiveMeshGenerator.h	2015-09-03 04:58:39.342585320 +0200
-@@ -215,7 +215,40 @@
+@@ -215,7 +215,32 @@
  	void tuneContainerSize();
  	void addVertexData(VertexData* vertexData, bool useSharedVertexLookup);
  	template<typename IndexType>
