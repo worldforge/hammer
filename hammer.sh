@@ -440,10 +440,11 @@ function install_deps_freealut()
     cd $DEPS_SOURCE
 
     echo "  Downloading..."
-    curl -C - -OL http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-${FREEALUT_VER}-src.zip
-    unzip -o freealut-${FREEALUT_VER}-src.zip
-    cd freealut-${FREEALUT_VER}-src
+	wget -c http://pkgs.fedoraproject.org/repo/pkgs/freealut/freealut-${FREEALUT_VER}.tar.gz/e089b28a0267faabdb6c079ee173664a/freealut-${FREEALUT_VER}.tar.gz
+    tar -xzf freealut-${FREEALUT_VER}.tar.gz
+    cd freealut-${FREEALUT_VER}
     if [[ $OSTYPE == *darwin* ]] ; then
+      mkdir -p $PREFIX/lib/pkgconfig
       cp $SUPPORTDIR/openal.pc $PREFIX/lib/pkgconfig/openal.pc
     fi
     echo "  Running autogen..."
