@@ -508,9 +508,11 @@ function install_deps_tolua++()
     fi
     cd $DEPS_SOURCE
     if [ ! -d $TOLUA_VER ] ; then
-        curl -OL http://www.codenix.com/~tolua/${TOLUA_VER}.tar.bz2
+        #curl -OL http://www.codenix.com/~tolua/${TOLUA_VER}.tar.bz2
+		curl -OL ftp://ftp.tw.freebsd.org/pub/ports/distfiles/${TOLUA_VER}.tar.bz2
         tar -xjf ${TOLUA_VER}.tar.bz2
     fi
+	
     cd $TOLUA_VER
     mkdir -p $PREFIX/include
     cp include/tolua++.h $PREFIX/include/tolua++.h
