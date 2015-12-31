@@ -454,8 +454,8 @@ function install_deps_freealut()
     cd $DEPS_BUILD/freealut-${FREEALUT_VER}-src/$BUILDDIR
 
     echo "  Running configure..."
-    $DEPS_SOURCE/freealut-${FREEALUT_VER}-src/configure $CONFIGURE_FLAGS \
-    export CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
+    $DEPS_SOURCE/freealut-${FREEALUT_VER}/configure $CONFIGURE_FLAGS \
+    CFLAGS="$CFLAGS `pkg-config --cflags openal`" LDFLAGS="$LDFLAGS `pkg-config --libs openal`" > $LOGDIR/deps/freealut/$CONFIGLOG
 
     echo "  Building..."
     make $MAKE_FLAGS > $LOGDIR/deps/freealut/$MAKELOG
