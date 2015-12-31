@@ -111,11 +111,17 @@ export TARGET_OS="native" # Can be native or android.
 
 # NOTE: These are only valid for non-native builds
 export TARGET_ARCH="ARMv7" # Can be ARMv7 or x86. (ARMv6, ARMv8, ARM_NEON, MIPS may be added later)
-export HOST_ARCH="`uname -p`" # Can be x86_64 or x86.
-if [[ $HOST_ARCH = i[3456]86 ]] ; then
-  export HOST_ARCH=x86
+
+if [[ $OSTYPE == *darwin* ]] ; then
+  export HOST_ARCH="x86_64" # On OS X -p option returns i386, but in reality its 64 bit.
+  export HOST_OS="`uname -s`" # == "Darwin". On OS X -o option is unsupported.
+else
+  export HOST_ARCH="`uname -p`" # Can be x86_64 or x86.
+  if [[ $HOST_ARCH = i[3456]86 ]] ; then
+    export HOST_ARCH=x86
+  fi
+  export HOST_OS="`uname -o`" # Can be GNU/Linux.
 fi
-export HOST_OS="`uname -o`" # Can be GNU/Linux.
 
 # Directory hierarchy base
 export HAMMERDIR=$PWD # It should contain hammer.sh file only.
@@ -296,7 +302,7 @@ function buildwf()
     
     # Sometimes libtool installs some of our libs as relative, but with absolute path.
     # If a path in *.la file starts with =, then it is relative. Make them absolute.
-    find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i 's,=/,/,g'
+    find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
 }
 
 function checkoutwf()

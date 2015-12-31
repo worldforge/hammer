@@ -1,4 +1,4 @@
-prefix=/opt/local
+prefix=/System
 exec_prefix=${prefix}
 libdir=${exec_prefix}/Library/Frameworks
 includedir=${prefix}/include
