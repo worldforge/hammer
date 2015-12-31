@@ -494,18 +494,28 @@ function install_deps_basedir()
 function install_deps_tolua++()
 {
     # tolua++
-    #the "all" keyword will only work on mac, but "tolua++" will work on linux and mac, if you set LUA_CFLAGS and LUA_LDFLAGS.
-    NORMAL_LUA_VERSION="`pkg-config --modversion lua`"
-    if [[ ! $NORMAL_LUA_VERSION == 5.1* ]]; then
-        LUA_CFLAGS="`pkg-config --cflags lua5.1`"
-        LUA_LDFLAGS="`pkg-config --libs lua5.1`"
+	
+	set +e # ‹== Do not kill script if pkg-config exits with error code
+    for pkgname in lua5.1 lua-5.1 lua51 lua
+    do
+      echo "  Testing lua package '$pkgname'."
+	  LUA_VERSION="`pkg-config --modversion $pkgname 2> /dev/null`"
+      if [[ $LUA_VERSION == 5.1* ]]; then
+		echo "  Lua package '$pkgname' is suitable."
+        LUA_CFLAGS="`pkg-config --cflags $pkgname`"
+        LUA_LDFLAGS="`pkg-config --libs $pkgname`"
+		break;
+      fi
+    done
+	set -e
+	
+    if [ "x$LUA_VERSION" == "x" ] ; then
+      if [ "x$LUA_LDFLAGS" == "x" ] ; then
+        LUA_LDFLAGS="-llua"
+      fi
+      echo "  Failed to find suitable lua package, so we will just assume that '$LUA_LDFLAGS' will work."
     fi
-    if [ "x$LUA_CFLAGS" == "x" ] ; then
-      LUA_CFLAGS=""
-    fi
-    if [ "x$LUA_LDFLAGS" == "x" ] ; then
-      LUA_LDFLAGS="-llua"
-    fi
+
     cd $DEPS_SOURCE
     if [ ! -d $TOLUA_VER ] ; then
         #curl -OL http://www.codenix.com/~tolua/${TOLUA_VER}.tar.bz2
