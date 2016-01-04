@@ -12,7 +12,7 @@ export OUTPUT_VARIABLES="$OUTPUT_VARIABLES ANDROID_SDK ANDROID_NDK NDK_TOOLCHAIN
 
 function show_help()
 {
-    echo "Usage: eval \`setup_env.sh <command>\`"
+    echo "Usage: eval \$(setup_env.sh <command>)"
     echo "Commands:"
     echo "  get_env  - Returns the current output variables as a script. Ignores input variables."
     echo "  set_env  - Sets an environment based on input variables. Can't be undone."
@@ -45,7 +45,7 @@ elif [[ $1 = "pop_env" ]] ; then
   echo 'eval "$PREV_ENV"'
   exit 0
 elif [[ $1 = "push_env" ]] || [[ $1 = "push_cur" ]] ; then
-  val="`$0 get_env`"
+  val="$($0 get_env)"
   echo "export PREV_ENV=$(escapeString "$val")"
   if [[ $1 = "push_cur" ]] ; then
     exit 0
@@ -63,11 +63,11 @@ fi
 # + Other commands have exited +
 # ++++++++++++++++++++++++++++++
 
-
+# Same as export, but the command will be escaped and written to std out too.
 function pexport()
 {
   set -e
-  # Same as export, but the command will be escaped and printed too.
+  
   local id="${@%%=*}"
   local val="${@#*=}"
   # Debug check failed!
@@ -83,9 +83,9 @@ function pexport()
     echo "echo \"$id is not an output variable!\""
     exit 1
   fi
-  OUT="export $id=`escapeString \"$val\"`"
+  OUT="export $id=$(escapeString "$val")"
   # Print it.
-  echo $OUT
+  echo "$OUT"
   # Run it.
   eval $OUT
 }
@@ -105,9 +105,9 @@ done
 # ++++++++++++++++++++++++++++++++++
 
 # Worldforge source and build dir are equal in all builds. They are separated by BUILDDIR only.
-pexport SOURCE=$WORKDIR/source/worldforge
-pexport BUILD=$WORKDIR/build/worldforge
-pexport PREFIX=$WORKDIR/local
+pexport SOURCE="$WORKDIR/source/worldforge"
+pexport BUILD="$WORKDIR/build/worldforge"
+pexport PREFIX="$WORKDIR/local"
 
 if [ "$TARGET_OS" != "native" ] ; then
   if [ "$DEBUG_BUILD" = "1" ] ; then
@@ -128,14 +128,14 @@ if [ "$TARGET_OS" != "native" ] ; then
   pexport CPPFLAGS=" "
   pexport LDFLAGS=" "
 else
-  pexport BUILDDIR="native-`getconf LONG_BIT`"
+  pexport BUILDDIR="native-$(getconf LONG_BIT)"
   # Needed to find tolua++ program if installed in prefix.
   pexport PATH="$PATH:$PREFIX/bin"
 fi
 
-pexport DEPS_SOURCE=$WORKDIR/source
-pexport DEPS_BUILD=$WORKDIR/build
-pexport LOGDIR=$WORKDIR/logs
+pexport DEPS_SOURCE="$WORKDIR/source"
+pexport DEPS_BUILD="$WORKDIR/build"
+pexport LOGDIR="$WORKDIR/logs"
 pexport PKG_CONFIG_PATH="$PREFIX/lib64/pkgconfig:$PREFIX/lib/pkgconfig:/usr/local/lib/pkgconfig:/mingw/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
 pexport ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 # fixes libtool: link: warning: library * was moved.
@@ -160,7 +160,7 @@ pexport LDFLAGS="-L$PREFIX/lib $LDFLAGS $LINK_FLAGS"
 
 pexport CONFIGURE_FLAGS="--prefix=$PREFIX $CONFIGURE_FLAGS"
 # This is set so CEGUI can find its dependencies in the local prefix.
-pexport CMAKE_PREFIX_PATH=$PREFIX
+pexport CMAKE_PREFIX_PATH="$PREFIX"
 
 if [[ "$TARGET_OS" = "android" ]] ; then
   if [[ x"$HOST_OS" != x"GNU/Linux" ]] ; then
@@ -173,20 +173,16 @@ if [[ "$TARGET_OS" = "android" ]] ; then
   fi
   
   # Set up hammer directory structure
-  pexport TOOLCHAIN=$WORKDIR/toolchain
-  pexport HOSTTOOLS=$WORKDIR/host_tools
+  pexport TOOLCHAIN="$WORKDIR/toolchain"
+  pexport HOSTTOOLS="$WORKDIR/host_tools"
 
   # Setup directories
-  mkdir -p $PREFIX
-  mkdir -p $DEPS_SOURCE
-  mkdir -p $DEPS_BUILD
-  mkdir -p $LOGDIR
-  mkdir -p $HOSTTOOLS/bin
+  mkdir -p "$PREFIX" "$DEPS_SOURCE" "$DEPS_BUILD" "$LOGDIR" "$HOSTTOOLS/bin"
 
   # These are used by cmake to identify android kits
-  pexport ANDROID_SDK=$DEPS_SOURCE/android-sdk-linux
-  pexport ANDROID_NDK=$DEPS_SOURCE/android-ndk-r10-$HOST_ARCH
-  pexport ANDROID_STANDALONE_TOOLCHAIN=$TOOLCHAIN
+  pexport ANDROID_SDK="$DEPS_SOURCE/android-sdk-linux"
+  pexport ANDROID_NDK="$DEPS_SOURCE/android-ndk-r10-$HOST_ARCH"
+  pexport ANDROID_STANDALONE_TOOLCHAIN="$TOOLCHAIN"
   pexport NDK_TOOLCHAIN_VERSION=4.8
   
   # These are used by autoconfig for cross-compiling
@@ -195,16 +191,16 @@ if [[ "$TARGET_OS" = "android" ]] ; then
   else
     pexport CROSS_COMPILER=i686-linux-android
   fi
-  pexport SYSROOT=$TOOLCHAIN/sysroot
+  pexport SYSROOT="$TOOLCHAIN/sysroot"
   
   # Set android toolchain to the beginning of PATH, so that any call to "gcc" or "g++" will end up into android toolchain.
-  pexport PATH=$TOOLCHAIN/bin:$TOOLCHAIN/$CROSS_COMPILER/bin:$ANDROID_SDK/platform-tools:$ANDROID_SDK/tools:$ANDROID_NDK:$HOSTTOOLS/bin:$PATH
+  pexport PATH="$TOOLCHAIN/bin:$TOOLCHAIN/$CROSS_COMPILER/bin:$ANDROID_SDK/platform-tools:$ANDROID_SDK/tools:$ANDROID_NDK:$HOSTTOOLS/bin:$PATH"
 
   # Set up prefix path properly
-  pexport PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
-  pexport CC=$CROSS_COMPILER-gcc
-  pexport CXX=$CROSS_COMPILER-g++
-  pexport CPP=$CROSS_COMPILER-cpp
+  pexport PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig"
+  pexport CC="$CROSS_COMPILER-gcc"
+  pexport CXX="$CROSS_COMPILER-g++"
+  pexport CPP="$CROSS_COMPILER-cpp"
   # This helps to ignore system dependencies.
   pexport CFLAGS="$CFLAGS -mandroid --sysroot=$SYSROOT"
   
@@ -289,7 +285,7 @@ if [[ "$TARGET_OS" = "android" ]] ; then
   pexport CPATH="$CPATH:$PREFIX/include"
 
   # Transform CPATH into -I... compiler flags
-  INCFLAGS=-I$(echo $CPATH | sed "s/:/ -I/g")
+  INCFLAGS=-I$(echo "$CPATH" | sed "s/:/ -I/g")
   pexport CFLAGS="$CFLAGS $INCFLAGS"
 
   pexport CPPFLAGS="$CFLAGS"
@@ -301,17 +297,17 @@ if [[ "$TARGET_OS" = "android" ]] ; then
   pexport LD_LIBRARY_PATH="$LIBRARY_PATH"
 
   # Transform LIBRARY_PATH into -L... linker flags
-  LIBFLAGS=-L$(echo $LIBRARY_PATH | sed "s/:/ -L/g")
+  LIBFLAGS="-L$(echo "$LIBRARY_PATH" | sed "s/:/ -L/g")"
   pexport LDFLAGS="$LDFLAGS $LIBFLAGS"
 
   # Get common ancestor prefix, so that system paths like /usr/lib will be ignored by cmake
-  export CMAKE_ROOT_PATH=`printf "%s\n%s\n" "$PREFIX" "$TOOLCHAIN" | sed -e 'N;s/^\(.*\).*\n\1.*$/\1/'`
+  CMAKE_ROOT_PATH="$(printf "%s\n%s\n" "$PREFIX" "$TOOLCHAIN" | sed -e 'N;s/^\(.*\).*\n\1.*$/\1/')"
 
   # Set up cmake flags required for cross-compiling
   pexport CMAKE_CROSS_COMPILE="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_C_COMPILER=$TOOLCHAIN/$CROSS_COMPILER/bin/gcc -DCMAKE_MAKE_PROGRAM=make -DANDROID=true"
   pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DCMAKE_FIND_ROOT_PATH=$CMAKE_ROOT_PATH -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY"
   pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_INSTALL_PREFIX=$PREFIX"
-  pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DPKG_CONFIG_EXECUTABLE=`which pkg-config`"
+  pexport CMAKE_CROSS_COMPILE="$CMAKE_CROSS_COMPILE -DPKG_CONFIG_EXECUTABLE=$(which pkg-config)"
   
   #pexport CMAKE_CROSS_COMPILE="-DCMAKE_TOOLCHAIN_FILE=$(getAndroidCMakeToolchain) -DCMAKE_FIND_ROOT_PATH=$CMAKE_ROOT_PATH -DCMAKE_INSTALL_PREFIX=$PREFIX"
   
