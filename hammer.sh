@@ -297,7 +297,11 @@ function buildwf()
     
     # Sometimes libtool installs some of our libs as relative, but with absolute path.
     # If a path in *.la file starts with =, then it is relative. Make them absolute.
-    find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
+	if [[ $OSTYPE == *darwin* ]] ; then
+		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
+	else
+		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i 's,=/,/,g'
+	fi
 }
 
 function checkoutwf()
