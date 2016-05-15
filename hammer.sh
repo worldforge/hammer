@@ -300,7 +300,8 @@ function buildwf()
 	if [[ $OSTYPE == *darwin* ]] ; then
 		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
 	else
-		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i 's,=/,/,g'
+		find $PREFIX/lib/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
+		find $PREFIX/lib64/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
 	fi
 }
 
