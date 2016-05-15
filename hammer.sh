@@ -241,8 +241,8 @@ eval $($SUPPORTDIR/setup_env.sh push_env)
 echo "Building for $BUILDDIR!"
 
 # Define component versions
-CEGUI_VER=cegui-0.8.4
-CEGUI_DOWNLOAD=cegui-0.8.4.tar.bz2
+CEGUI_VER=cegui-0.8.7
+CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
 OGRE_VER=ogre_1_9_0
 OGRE_DOWNLOAD=v1-9-0.tar.bz2
 CG_VER=3.1
