@@ -261,7 +261,7 @@ CONFIGLOG=config.log    # Configure output
 MAKELOG=build.log       # Make output
 INSTALLLOG=install.log  # Install output
 
-function buildwf()
+function buildwfautotools()
 {
     if [ x"$2" = x"" ]; then
       PRJNAME="$1"
@@ -290,6 +290,43 @@ function buildwf()
       "$SOURCE/$1/configure" $CONFIGURE_FLAGS > "$LOGDIR/$PRJNAME/$CONFIGLOG"
     fi
 
+    echo "  Building..."
+    make $MAKE_FLAGS > "$LOGDIR/$PRJNAME/$MAKELOG"
+    echo "  Installing..."
+    make install > "$LOGDIR/$PRJNAME/$INSTALLLOG"
+    
+    # Sometimes libtool installs some of our libs as relative, but with absolute path.
+    # If a path in *.la file starts with =, then it is relative. Make them absolute.
+	if [[ $OSTYPE == *darwin* ]] ; then
+		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
+	else
+		find $PREFIX/lib/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
+		find $PREFIX/lib64/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
+	fi
+}
+
+
+function buildwf()
+{
+    if [ x"$2" = x"" ]; then
+      PRJNAME="$1"
+    else
+      PRJNAME="$2"
+    fi
+
+    mkdir -p "$LOGDIR/$PRJNAME"
+    
+    if [ ! -d "$SOURCE/$1" ] ; then
+      echo "The source directory is missing!"
+      echo "Try: ./hammer.sh help checkout"
+      exit 1
+    fi
+    
+    mkdir -p "$BUILD/$1/$BUILDDIR"
+    cd "$BUILD/$1/$BUILDDIR"
+    echo "  Configuring..."
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" $CMAKE_FLAGS "$SOURCE/$1" > "$LOGDIR/$PRJNAME/$CONFIGLOG"
+    
     echo "  Building..."
     make $MAKE_FLAGS > "$LOGDIR/$PRJNAME/$MAKELOG"
     echo "  Installing..."
@@ -626,12 +663,12 @@ function ember_fetch_media()
 {
   if [ x"$MEDIA_VER" = x"dev" ] ; then
     MEDIAURL="http://amber.worldforge.org/media/media-dev/"
-    MEDIAVERSION="devmedia"
+    MEDIAVERSION="media-dev"
     MEDIA_PREFETCH="set +e"
     MEDIA_POSTFETCH="set -e"
   else
     MEDIAURL="http://downloads.sourceforge.net/worldforge/ember-media-${MEDIA_VER}.tar.bz2"
-    MEDIAVERSION="releasemedia"
+    MEDIAVERSION="media-release"
     MEDIA_PREFETCH=""
     MEDIA_POSTFETCH=""
   fi
@@ -870,7 +907,7 @@ elif [ "$1" = "build" ] ; then
     echo "  metaserver-ng..."
     CONFIGURE_FLAGS_SAVED="$CONFIGURE_FLAGS"
     export CONFIGURE_FLAGS="$CONFIGURE_FLAGS --sysconfdir=$PREFIX/etc/metaserver-ng"
-    buildwf "servers/metaserver-ng"
+    buildwfautotools "servers/metaserver-ng"
     export CONFIGURE_FLAGS="$CONFIGURE_FLAGS_SAVED"
     echo "  Done."
   fi
