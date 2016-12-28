@@ -8,7 +8,7 @@ export INPUT_VARIABLES="DEBUG_BUILD MAKE_FLAGS CONFIGURE_FLAGS CMAKE_FLAGS COMPI
 # Output environment variables for thi script.
 export OUTPUT_VARIABLES="SOURCE BUILD BUILDDIR WORKDIR PREFIX DEPS_SOURCE DEPS_BUILD LOGDIR PKG_CONFIG_PATH PATH CPATH LIBRARY_PATH LD_LIBRARY_PATH CMAKE_FLAGS MAKE_FLAGS"
 export OUTPUT_VARIABLES="$OUTPUT_VARIABLES CFLAGS CXXFLAGS CPPFLAGS LDFLAGS CONFIGURE_FLAGS CMAKE_PREFIX_PATH TOOLCHAIN HOSTTOOLS ACLOCAL_ARGS DEBUG_STR CMAKE_BUILD_DEBUG"
-export OUTPUT_VARIABLES="$OUTPUT_VARIABLES ANDROID_SDK ANDROID_NDK NDK_TOOLCHAIN_VERSION ANDROID_STANDALONE_TOOLCHAIN CROSS_COMPILER SYSROOT CONFIGURE_CROSS_COMPILE CMAKE_CROSS_COMPILE PKG_CONFIG_LIBDIR CC CXX CPP"
+export OUTPUT_VARIABLES="$OUTPUT_VARIABLES ANDROID_SDK ANDROID_NDK NDK_TOOLCHAIN_VERSION ANDROID_STANDALONE_TOOLCHAIN CROSS_COMPILER SYSROOT CONFIGURE_CROSS_COMPILE CMAKE_CROSS_COMPILE CMAKE_MODULE_PATH PKG_CONFIG_LIBDIR CC CXX CPP"
 
 function show_help()
 {
@@ -144,6 +144,7 @@ pexport ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 pexport CPATH="$PREFIX/include:$CPATH"
 pexport LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
 pexport LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
+pexport CMAKE_MODULE_PATH="$PREFIX/CMake"
 
 if [ x"$COMPILE_FLAGS" != x"" ] ; then
   pexport CFLAGS="$COMPILE_FLAGS $CFLAGS"
@@ -319,14 +320,18 @@ elif [ "$TARGET_OS" = "native" ] && [[ $OSTYPE == *darwin* ]] ; then
   #the default architecture is universal build: i864;x86_64
   #To save space and time, we will only build x86_64
   pexport CMAKE_FLAGS="$CMAKE_FLAGS -GXcode -DCMAKE_OSX_ARCHITECTURES=x86_64"
+  
+  #There are 2 libiconv and libpcre on OS X, but we want to prefer the one from macports instead of system one.
+  #This fixes linking error in CEGUI.
+  pexport CMAKE_FLAGS="$CMAKE_FLAGS -DCMAKE_LIBRARY_PATH=/opt/local/lib"
 
   #on mac libtool is called glibtool.
   #Automake should set this, but it has messed up the order of variable definitions.
   pexport MAKE_FLAGS="$MAKE_FLAGS LIBTOOL=glibtool"
-
-  pexport CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
-  pexport CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_STATIC -I$PREFIX/include -I/opt/local/include $CFLAGS"
-  pexport LDFLAGS="$LDFLAGS -L$PREFIX/lib -L/opt/local/lib"
+  
+  pexport CXXFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_OGRE_VERSION=67840 -I$PREFIX/include -I/opt/local/include $CXXFLAGS"
+  pexport CFLAGS="-O2 -g -DTOLUA_EXPORT -DCEGUI_OGRE_VERSION=67840 -I$PREFIX/include -I/opt/local/include $CFLAGS"
+  pexport LDFLAGS="-L$PREFIX/lib -L/opt/local/lib $LDFLAGS"
 
   #without CPATH cegui is not finding freeimage.
   pexport CPATH="/opt/local/include:$CPATH"

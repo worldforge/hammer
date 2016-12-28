@@ -428,7 +428,7 @@ function install_deps_ogre()
       if [[ $OSTYPE == *darwin* ]] ; then
         cd "$OGRE_SOURCE"
         echo "  Patching..."
-        patch -p1 < "$SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch"
+        #patch -p1 < "$SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch"
       fi
       cd "$OGRE_SOURCE"
       patch -p1 < "$SUPPORTDIR/ogre-1.9.0-03_move_stowed_template_func.patch"
@@ -445,13 +445,13 @@ function install_deps_ogre()
     -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" \
     -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_FLAGS > "$LOGDIR/deps/ogre/$CONFIGLOG"
     if [[ $OSTYPE == *darwin* ]] ; then
-      echo "  Building..."
-        xcodebuild -configuration RelWithDebInfo > "$LOGDIR/deps/ogre/$MAKELOG"
+        echo "  Building..."
+        xcodebuild -configuration RelWithDebInfo #> "$LOGDIR/deps/ogre/$MAKELOG"
         echo "  Installing..."
-        xcodebuild -configuration RelWithDebInfo -target install > "$LOGDIR/deps/ogre/$INSTALLLOG"
-        cp -r lib/RelWithDebInfo/* "$PREFIX/lib"
+        xcodebuild -configuration RelWithDebInfo -target install #> "$LOGDIR/deps/ogre/$INSTALLLOG"
+        #cp -r lib/macosx/RelWithDebInfo/* "$PREFIX/lib"
         #on mac, we have only Ogre.framework
-        sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-F\${libdir} -framework Ogre/g" "$PREFIX/lib/pkgconfig/OGRE.pc"
+        #sed -i "" -e "s/-L\$[{]libdir[}]\ -lOgreMain/-F\${libdir} -framework Ogre/g" "$PREFIX/lib/pkgconfig/OGRE.pc"
         echo "  Done."
     else
         echo "  Building..."
@@ -580,30 +580,39 @@ function install_deps_cegui()
     mkdir -p "$LOGDIR/deps/CEGUI"    # create CEGUI log directory
     cd "$DEPS_SOURCE"
     if [ ! -d "$CEGUI_VER" ] ; then
-      echo "  Downloading..."
-      curl -C - -OL "http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD"
-      tar -xjf "$CEGUI_DOWNLOAD"
-      if [[ $OSTYPE == *darwin* ]] ; then
-        echo "  Patching..."
-        cd "$DEPS_SOURCE/$CEGUI_VER"
-        sed -i "" -e "s/\"macPlugins.h\"/\"implementations\/mac\/macPlugins.h\"/g" cegui/src/CEGUIDynamicModule.cpp
-        sed -i "" -e '1i\#include<CoreFoundation\/CoreFoundation.h>' cegui/include/CEGUIDynamicModule.h
-      fi
+	    echo "  Downloading..."
+        curl -C - -OL "http://downloads.sourceforge.net/sourceforge/crayzedsgui/$CEGUI_DOWNLOAD"
+        tar -xjf "$CEGUI_DOWNLOAD"	  
     fi
     
     mkdir -p "$DEPS_BUILD/$CEGUI_VER/$BUILDDIR"
     cd "$DEPS_BUILD/$CEGUI_VER/$BUILDDIR"
     echo "  Configuring..."
-    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C "${SUPPORTDIR}/CEGUI_defaults.cmake" $CMAKE_FLAGS "$DEPS_SOURCE/$CEGUI_VER"  > "$LOGDIR/deps/CEGUI/$CONFIGLOG"
-    echo "  Building..."
-    make $MAKE_FLAGS > "$LOGDIR/deps/CEGUI/$MAKELOG"
-    echo "  Installing..."
-    make install > "$LOGDIR/deps/CEGUI/$INSTALLLOG"
-    if [[ $OSTYPE == *darwin* ]] ; then
-      #on mac we use -DCEGUI_STATIC, which will disable the plugin interface and we need to link the libraries manually.
-      sed -i "" -e "s/-lCEGUIBase/-lCEfrGUIBase -lCEGUIFalagardWRBase -lCEGUIFreeImageImageCodec -lCEGUITinyXMLParser/g" "$PREFIX/lib/pkgconfig/CEGUI.pc"
+	
+	if [[ $OSTYPE == *darwin* ]] ; then #Fast hack to get cegui building on OS X. Should be fixed upstream in CEGUI.
+	  export CXXFLAGS="$CXXFLAGS -I/opt/local/include -I/opt/local/include/lua-5.1"
+	  export LDFLAGS="$LDFLAGS -L/opt/local/lib/lua-5.1 -llua-5.1"
+	  export LDFLAGS="$LDFLAGS -L/opt/local/lib -lboost_system-mt" # Required by Ogre includes
+	  export CXXFLAGS="$CXXFLAGS -I$PREFIX/include/OGRE -DCEGUI_OGRE_VERSION=67840" # Ogre 1.9.0
+	  export LDFLAGS="$LDFLAGS -F$PREFIX/lib/RelWithDebInfo -L$PREFIX/lib/RelWithDebInfo -framework Ogre"
     fi
-    echo "  Done."
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C "${SUPPORTDIR}/CEGUI_defaults.cmake" $CMAKE_FLAGS "$DEPS_SOURCE/$CEGUI_VER"  > "$LOGDIR/deps/CEGUI/$CONFIGLOG"
+		
+    if [[ $OSTYPE == *darwin* ]] ; then
+      echo "  Building..."
+      xcodebuild -configuration RelWithDebInfo #> "$LOGDIR/deps/CEGUI/$MAKELOG"
+      echo "  Installing..."
+      xcodebuild -configuration RelWithDebInfo -target install > "$LOGDIR/deps/CEGUI/$INSTALLLOG"
+      #on mac we use -DCEGUI_STATIC, which will disable the plugin interface and we need to link the libraries manually.
+      #sed -i "" -e "s/-lCEGUIBase/-lCEGUIBase -lCEGUIFalagardWRBase -lCEGUIFreeImageImageCodec -lCEGUITinyXMLParser/g" "$PREFIX/lib/pkgconfig/CEGUI.pc"
+	  echo "  Done."
+    else
+      echo "  Building..."
+      make $MAKE_FLAGS > "$LOGDIR/deps/CEGUI/$MAKELOG"
+      echo "  Installing..."
+      make install > "$LOGDIR/deps/CEGUI/$INSTALLLOG"
+      echo "  Done."
+    fi
 }
 function install_deps_all()
 {
