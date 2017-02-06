@@ -508,9 +508,9 @@ function install_deps_basedir()
     cd "$DEPS_SOURCE"
 
     echo "  Downloading..."
-    curl -OL "http://nevill.ch/libxdg-basedir/downloads/libxdg-basedir-$BASEDIR_VER.tar.gz"
+    curl -OL "https://github.com/devnev/libxdg-basedir/archive/libxdg-basedir-$BASEDIR_VER.tar.gz"
     tar -xf "libxdg-basedir-$BASEDIR_VER.tar.gz"
-    cd "libxdg-basedir-$BASEDIR_VER"
+    cd "libxdg-basedir-libxdg-basedir-$BASEDIR_VER"
     echo "  Running autogen..."
     #This library is currently not compatible with automake 1.12, the following line fixes this:
     sed -i 's/AC_PROG_CC/m4_ifdef([AM_PROG_AR], [AM_PROG_AR])\nAC_PROG_CC/' configure.ac
@@ -520,7 +520,7 @@ function install_deps_basedir()
     cd "$DEPS_BUILD/libxdg-basedir/$BUILDDIR"
 
     echo "  Running configure..."
-    "$DEPS_SOURCE/libxdg-basedir-$BASEDIR_VER/configure" $CONFIGURE_FLAGS > "$LOGDIR/deps/libxdg-basedir/$CONFIGLOG"
+    "$DEPS_SOURCE/libxdg-basedir-libxdg-basedir-$BASEDIR_VER/configure" $CONFIGURE_FLAGS > "$LOGDIR/deps/libxdg-basedir/$CONFIGLOG"
 
     echo "  Building..."
     make $MAKE_FLAGS > "$LOGDIR/deps/libxdg-basedir/$MAKELOG"
