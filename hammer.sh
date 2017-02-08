@@ -40,7 +40,6 @@ function show_help()
     echo "  ogre     -  3D rendering engine"
     echo "  cg       -  interactive effects toolkit"
     echo "  basedir  -  implementation of the XDG Base Directory specifications"
-    ,
     echo "Hint: build ogre first then cegui"
   elif [ "$1" = "checkout" ] ; then
     echo "Fetch latest source code for worldforge libraries and clients."
