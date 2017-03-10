@@ -293,15 +293,6 @@ function buildwfautotools()
     make $MAKE_FLAGS > "$LOGDIR/$PRJNAME/$MAKELOG"
     echo "  Installing..."
     make install > "$LOGDIR/$PRJNAME/$INSTALLLOG"
-    
-    # Sometimes libtool installs some of our libs as relative, but with absolute path.
-    # If a path in *.la file starts with =, then it is relative. Make them absolute.
-	if [[ $OSTYPE == *darwin* ]] ; then
-		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
-	else
-		find $PREFIX/lib/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
-		find $PREFIX/lib64/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
-	fi
 }
 
 
@@ -331,14 +322,6 @@ function buildwf()
     echo "  Installing..."
     make install > "$LOGDIR/$PRJNAME/$INSTALLLOG"
     
-    # Sometimes libtool installs some of our libs as relative, but with absolute path.
-    # If a path in *.la file starts with =, then it is relative. Make them absolute.
-	if [[ $OSTYPE == *darwin* ]] ; then
-		find $PREFIX/lib/*.la -type f -print0 | xargs -0 sed -i '' -e 's,=/,/,g'
-	else
-		find $PREFIX/lib/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
-		find $PREFIX/lib64/*.la -type f -print0 | xargs -r -0 sed -i 's,=/,/,g'
-	fi
 }
 
 function checkoutwf()
