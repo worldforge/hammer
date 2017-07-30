@@ -347,7 +347,11 @@ function checkoutwf()
     if [ x"$HAMMERALWAYSSTASH" = x"yes" ]; then
       git stash save "Hammer stash"
     fi
-    git remote set-url origin "https://github.com/$USER/$1.git" && git fetch && git rebase "origin/$BRANCH" && cd ..
+    if [ `git remote get-url origin | grep -c git.worldforge.org` != 0 ]; then
+        echo "Updating to github url."
+        git remote set-url origin "https://github.com/$USER/$1.git"
+    fi
+    git fetch && git rebase "origin/$BRANCH" && cd ..
   fi
 }
 
