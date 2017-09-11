@@ -242,8 +242,8 @@ echo "Building for $BUILDDIR!"
 # Define component versions
 CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
-OGRE_VER=ogre_1_9_0
-OGRE_DOWNLOAD=v1-9-0.tar.bz2
+OGRE_VER=sinbad-ogre-f261de901e97
+OGRE_DOWNLOAD=v1-10-8.tar.bz2
 CG_VER=3.1
 CG_FULLVER=${CG_VER}.0013
 CG_DOWNLOAD=Cg-3.1_April2012
@@ -430,8 +430,6 @@ function install_deps_ogre()
         echo "  Patching..."
         #patch -p1 < "$SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch"
       fi
-      cd "$OGRE_SOURCE"
-      patch -p1 < "$SUPPORTDIR/ogre-1.9.0-03_move_stowed_template_func.patch"
     else
       OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER/$(ls "$DEPS_SOURCE/$OGRE_VER")"
     fi
@@ -439,11 +437,11 @@ function install_deps_ogre()
     cd "$DEPS_BUILD/$OGRE_VER/$BUILDDIR"
     echo "  Configuring..."
     OGRE_EXTRA_FLAGS=""
-    # Note: The -DOIS_INCLUDE_DIR flag is only set because of sample-related build failures
-    #       which appear to be caused by Ogre 1.9.0. When fixed, this flag should be removed.
-    cmake "$OGRE_SOURCE" -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES="ON" -DOIS_FOUND="OFF" \
-    -DOGRE_INSTALL_SAMPLES="OFF" -DOGRE_INSTALL_DOCS="OFF" -DOGRE_BUILD_TOOLS="OFF" -DOGRE_BUILD_PLUGIN_PCZ="OFF" \
-    -DOGRE_BUILD_PLUGIN_BSP="OFF" $OGRE_EXTRA_FLAGS $CMAKE_FLAGS > "$LOGDIR/deps/ogre/$CONFIGLOG"
+    
+    cmake "$OGRE_SOURCE" -DCMAKE_INSTALL_PREFIX="$PREFIX" -DOGRE_BUILD_SAMPLES="FALSE" -DOGRE_NODE_STORAGE_LEGACY="FALSE" -DOGRE_RESOURCEMANAGER_STRICT=true \
+    -DOGRE_INSTALL_SAMPLES="FALSE" -DOGRE_INSTALL_DOCS="FALSE" -DOGRE_BUILD_TOOLS="FALSE" -DOGRE_BUILD_PLUGIN_PCZ="FALSE" \
+    -DOGRE_BUILD_PLUGIN_BSP="FALSE" -DOGRE_BUILD_COMPONENT_PYTHON="FALSE" -DOGRE_BUILD_COMPONENT_BITES="FALSE" \
+    -DOGRE_BUILD_COMPONENT_PROPERTY="FALSE" -DOGRE_BUILD_COMPONENT_VOLUME="FALSE" -DOGRE_BUILD_COMPONENT_JAVA="FALSE" $OGRE_EXTRA_FLAGS $CMAKE_FLAGS > "$LOGDIR/deps/ogre/$CONFIGLOG"
     if [[ $OSTYPE == *darwin* ]] ; then
         echo "  Building..."
         xcodebuild -configuration RelWithDebInfo #> "$LOGDIR/deps/ogre/$MAKELOG"
