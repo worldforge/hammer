@@ -663,12 +663,10 @@ function ember_fetch_media()
 {
   if [ x"$MEDIA_VER" = x"dev" ] ; then
     MEDIAURL="http://amber.worldforge.org/media/media-dev/"
-    MEDIAVERSION="media-dev"
     MEDIA_PREFETCH="set +e"
     MEDIA_POSTFETCH="set -e"
   else
     MEDIAURL="http://downloads.sourceforge.net/worldforge/ember-media-${MEDIA_VER}.tar.bz2"
-    MEDIAVERSION="media-release"
     MEDIA_PREFETCH=""
     MEDIA_POSTFETCH=""
   fi
@@ -677,7 +675,7 @@ function ember_fetch_media()
       echo "Fetching media..."
       cd "$BUILD/clients/ember/$BUILDDIR"
       $MEDIA_PREFETCH
-      make $MEDIAVERSION &> "$LOGDIR/clients/ember/media.log"
+      make media-download &> "$LOGDIR/clients/ember/media.log"
       if [ $? != 0 ] ; then
         echo "Could not fetch media. This may be caused by the media server being down, by the network being down, or by a firewall which prevents rsync from running. You need to get the media manually from $MEDIAURL"
       else
