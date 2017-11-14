@@ -242,8 +242,8 @@ echo "Building for $BUILDDIR!"
 # Define component versions
 CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
-OGRE_VER=sinbad-ogre-f261de901e97
-OGRE_DOWNLOAD=v1-10-8.tar.bz2
+OGRE_VER=sinbad-ogre-e3f9185ed3d1
+OGRE_DOWNLOAD=v1-10-9.tar.bz2
 CG_VER=3.1
 CG_FULLVER=${CG_VER}.0013
 CG_DOWNLOAD=Cg-3.1_April2012
@@ -434,10 +434,6 @@ function install_deps_ogre()
       OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER/$(ls "$DEPS_SOURCE/$OGRE_VER")"
     fi
     
-    #Remove this once OGRE 1.10.9 is released
-    cd "$OGRE_SOURCE"
-    patch --forward --reject-file=- -p1 < "$SUPPORTDIR/OGRE-InstanceBatch.patch" || true
-
     mkdir -p "$DEPS_BUILD/$OGRE_VER/$BUILDDIR"
     cd "$DEPS_BUILD/$OGRE_VER/$BUILDDIR"
     echo "  Configuring..."
