@@ -38,7 +38,6 @@ function show_help()
     echo "  cegui    -  a free library providing windowing and widgets for "
     echo "              graphics APIs / engines"
     echo "  ogre     -  3D rendering engine"
-    echo "  cg       -  interactive effects toolkit"
     echo "  basedir  -  implementation of the XDG Base Directory specifications"
     echo "Hint: build ogre first then cegui"
   elif [ "$1" = "checkout" ] ; then
@@ -244,9 +243,6 @@ CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
 OGRE_VER=sinbad-ogre-e3f9185ed3d1
 OGRE_DOWNLOAD=v1-10-9.tar.bz2
-CG_VER=3.1
-CG_FULLVER=${CG_VER}.0013
-CG_DOWNLOAD=Cg-3.1_April2012
 FREEALUT_VER=1.1.0
 TOLUA_VER="tolua++-1.0.93"
 BASEDIR_VER=1.2.0
@@ -374,43 +370,6 @@ function cyphesis_post_install()
   chmod +x cyphesis
 }
 
-
-
-function install_deps_cg()
-{
-    # Cg Toolkit
-    echo "  Installing Cg Toolkit..."
-    if [[ $OSTYPE == *darwin* ]] ; then
-      CG_DOWNLOAD+=".dmg"
-      CG_LIB_LOCATION="Library/Frameworks/Cg.framework/Versions/1.0/Cg"
-    elif [[ $OSTYPE == linux-gnu ]] ; then
-      if [[ $BUILDDIR == native-64 ]] ; then
-        CG_DOWNLOAD+="_x86_64.tgz"
-        CG_LIB_LOCATION="usr/lib64/libCg.so"
-      elif [[ $BUILDDIR == native-32 ]] ; then
-        CG_DOWNLOAD+="_x86.tgz"
-        CG_LIB_LOCATION="usr/lib/libCg.so"
-      fi
-    fi
-    mkdir -p "$LOGDIR/deps/cg"
-    cd "$DEPS_SOURCE"
-    if [ ! -d "Cg_$CG_FULLVER" ]; then
-      echo "  Downloading..."
-      curl -C - -OL "http://developer.download.nvidia.com/cg/Cg_$CG_VER/$CG_DOWNLOAD"
-      if [[ $OSTYPE == *darwin* ]] ; then
-        hdiutil mount "$CG_DOWNLOAD"
-        cp "/Volumes/Cg-${CG_FULLVER}/Cg-${CG_FULLVER}.app/Contents/Resources/Installer Items/NVIDIA_Cg.tgz" .
-        hdiutil unmount "/Volumes/Cg-$CG_FULLVER/"
-        CG_DOWNLOAD="NVIDIA_Cg.tgz"
-      fi
-      mkdir -p "Cg_$CG_FULLVER"
-      cd "Cg_$CG_FULLVER"
-      tar -xf "../$CG_DOWNLOAD"
-    fi
-    mkdir -p "$PREFIX/lib"
-    cp "$DEPS_SOURCE/Cg_${CG_FULLVER}/$CG_LIB_LOCATION" "$PREFIX/lib"
-    echo "  Done."
-}
 
 function install_deps_ogre()
 {
@@ -712,7 +671,7 @@ if [ x"$1" = x"install-deps" ] ; then
   mkdir -p "$LOGDIR/deps"
 
   if [ "$2" = "all" ] || [ "$2" = "ogre" ] || [ "$2" = "cegui" ] ||
-     [ "$2" = "cg" ] || [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ||
+     [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ||
      [ "$2" = "basedir" ] ; then
     install_deps_$2
   else
@@ -995,7 +954,6 @@ elif [ "$1" = "release_ember" ] ; then
   # Install external dependencies
   echo "Installing 3rd party dependencies..."
   "$HAMMER" --compile_flags="$CXXFLAGS" install-deps all
-  "$HAMMER" --compile_flags="$CXXFLAGS" install-deps cg
   HAMMER_EXTRA_FLAGS=""
 
   # Source checkout
