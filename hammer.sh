@@ -393,6 +393,10 @@ function install_deps_ogre()
       OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER/$(ls "$DEPS_SOURCE/$OGRE_VER")"
     fi
     
+    #Remove this once OGRE 1.10.10 is released
+    cd "$OGRE_SOURCE"
+    patch --forward --reject-file=- -p1 < "$SUPPORTDIR/OGRE-InstanceManager.patch" || true
+    
     mkdir -p "$DEPS_BUILD/$OGRE_VER/$BUILDDIR"
     cd "$DEPS_BUILD/$OGRE_VER/$BUILDDIR"
     echo "  Configuring..."

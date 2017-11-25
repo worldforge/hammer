@@ -1,0 +1,15 @@
+diff --git a/OgreMain/src/OgreInstanceManager.cpp b/OgreMain/src/OgreInstanceManager.cpp
+index 0769bcc3a..e8252ab16 100644
+--- a/OgreMain/src/OgreInstanceManager.cpp
++++ b/OgreMain/src/OgreInstanceManager.cpp
+@@ -528,7 +528,9 @@ namespace Ogre
+             TIndexType index = data[i];
+             if (indicesMap.find(index) == indicesMap.end()) 
+             {
+-                indicesMap[index] = (uint32)(indicesMap.size());
++                //We need to guarantee that the size is read before an entry is added, hence these are on separate lines.
++                uint32 size = (uint32)(indicesMap.size());
++                indicesMap[index] = size;
+             }
+         }
+ 
