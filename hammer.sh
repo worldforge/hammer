@@ -851,6 +851,8 @@ elif [ "$1" = "build" ] ; then
     
     # Ember media
     ember_fetch_media
+    echo "Ember is built and installed. Use this command to run the client:"
+    echo "$PREFIX/bin/ember"
   fi
 
   if [ "$2" = "cyphesis" ] || [ "$2" = "all" ] ; then
@@ -859,6 +861,8 @@ elif [ "$1" = "build" ] ; then
     buildwf "servers/cyphesis"
     cyphesis_post_install
     echo "  Done."
+    echo "Cyphesis is built and installed. Use this command to run the server:"
+    echo "$PREFIX/bin/cyphesis"
   fi
 
   if [ "$2" = "metaserver-ng" ] ; then
