@@ -809,14 +809,14 @@ elif [ "$1" = "build" ] ; then
     buildwf "libs/varconf"
     echo "  Done."
 
-    # Wfmath
-    echo "  Wfmath..."
-    buildwf "libs/wfmath"
-    echo "  Done."
-
     # Atlas-C++
     echo "  Atlas-C++..."
     buildwf "libs/atlas-cpp"
+    echo "  Done."
+
+    # Wfmath
+    echo "  Wfmath..."
+    buildwf "libs/wfmath"
     echo "  Done."
 
     # Mercator
