@@ -859,6 +859,12 @@ elif [ "$1" = "build" ] ; then
     # Cyphesis
     echo "  Cyphesis..."
     buildwf "servers/cyphesis"
+    echo "  Getting assets..."
+    if  [[ $OSTYPE == *darwin* ]] ; then
+      xcodebuild -configuration RelWithDebInfo assets-download >> "$LOGDIR/$PRJNAME/$MAKELOG"
+    else
+      make assets-download >> "$LOGDIR/$PRJNAME/$MAKELOG"
+    fi
     cyphesis_post_install
     echo "  Done."
     echo "Cyphesis is built and installed. Use this command to run the server:"
