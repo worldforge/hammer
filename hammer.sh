@@ -731,7 +731,7 @@ elif [ "$1" = "checkout" ] ; then
     echo "  Done."
   fi
 
-  if [ "$2" = "worlds" ] || [ "$2" = "all" ] ; then
+  if [ "$2" = "worlds" ] || [ "$2" = "all" ] || [ "$2" = "cyphesis" ] ; then
     # Worlds
     echo "  Worlds..."
     mkdir -p "$SOURCE"
@@ -832,7 +832,7 @@ elif [ "$1" = "build" ] ; then
 
   fi
 
-  if [ "$2" = "worlds" ] || [ "$2" = "all" ] ; then
+  if [ "$2" = "worlds" ] || [ "$2" = "all" ] || [ "$2" = "cyphesis" ] ; then
     # Worlds
     echo "  Worlds..."
     buildwf "worlds"
