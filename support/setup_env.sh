@@ -127,6 +127,7 @@ if [ "$TARGET_OS" != "native" ] ; then
   pexport CXXFLAGS=" "
   pexport CPPFLAGS=" "
   pexport LDFLAGS=" "
+
 else
   pexport BUILDDIR="native-$(getconf LONG_BIT)"
   # Needed to find tolua++ program if installed in prefix.
@@ -141,9 +142,6 @@ pexport ACLOCAL_ARGS="$ACLOCAL_ARGS -I $PREFIX/share/aclocal"
 # fixes libtool: link: warning: library * was moved.
 #pexport DESTDIR="$PREFIX/lib"
 
-pexport CPATH="$PREFIX/include:$CPATH"
-pexport LIBRARY_PATH="$PREFIX/lib:$LIBRARY_PATH"
-pexport LD_LIBRARY_PATH="$PREFIX/lib:$LD_LIBRARY_PATH"
 pexport CMAKE_MODULE_PATH="$PREFIX/CMake"
 
 if [ x"$COMPILE_FLAGS" != x"" ] ; then
@@ -157,11 +155,8 @@ else
     pexport CFLAGS="-O2 -g -DNDEBUG $CFLAGS"
   fi
 fi
-pexport LDFLAGS="-L$PREFIX/lib $LDFLAGS $LINK_FLAGS"
 
 pexport CONFIGURE_FLAGS="--prefix=$PREFIX $CONFIGURE_FLAGS"
-# This is set so CEGUI can find its dependencies in the local prefix.
-pexport CMAKE_PREFIX_PATH="$PREFIX"
 
 if [[ "$TARGET_OS" = "android" ]] ; then
   if [[ x"$HOST_OS" != x"GNU/Linux" ]] ; then
