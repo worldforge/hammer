@@ -239,6 +239,10 @@ done
 eval $($SUPPORTDIR/setup_env.sh push_env)
 echo "Building for $BUILDDIR!"
 
+#Add RPATH/RUNPATH entries to our install locations
+export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_INSTALL_RPATH=${PREFIX}/lib64:${PREFIX}/lib"
+
+
 # Define component versions
 CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
