@@ -40,3 +40,14 @@ You can then run the client through
 ```
 
 This will start a server instance and populate with the default world. If you haven't configured Postgres no data will be stored. I.e. the world will be wiped when shut down.
+
+# Linux
+
+You will need a couple of dependencies in order to build everything. On Ubuntu, install these
+```
+sudo apt-get -y install g++ make autoconf automake libtool liblua5.1-0-dev libtolua++5.1-dev libzzip-dev \
+                   libbz2-dev libxaw7-dev libopenal-dev libalut-dev libsigc++-2.0-dev libcurl4-openssl-dev \
+                   libjpeg62-dev libpng12-dev libpcre3-dev libxrandr-dev \
+                   libgcrypt-dev libboost-all-dev cmake-core libfreeimage-dev curl rsync \
+                   libtinyxml-dev libsdl2-dev libglew-dev libbullet-dev postgresql-server-dev-all python-dev
+```
