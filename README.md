@@ -45,9 +45,9 @@ This will start a server instance and populate with the default world. If you ha
 
 You will need a couple of dependencies in order to build everything. On Ubuntu, install these
 ```
-sudo apt-get -y install g++ make autoconf automake libtool liblua5.1-0-dev libtolua++5.1-dev libzzip-dev \
+sudo apt-get -y install g++ make liblua5.1-0-dev libtolua++5.1-dev libzzip-dev \
                    libbz2-dev libxaw7-dev libopenal-dev libalut-dev libsigc++-2.0-dev libcurl4-openssl-dev \
-                   libjpeg62-dev libpng12-dev libpcre3-dev libxrandr-dev \
-                   libgcrypt-dev libboost-all-dev cmake-core libfreeimage-dev curl rsync \
+                   libjpeg62-dev libpng-dev libpcre3-dev libxrandr-dev libxdg-basedir-dev \
+                   libgcrypt20-dev libboost-all-dev cmake libfreeimage-dev curl rsync \
                    libtinyxml-dev libsdl2-dev libglew-dev libbullet-dev postgresql-server-dev-all python-dev
 ```
