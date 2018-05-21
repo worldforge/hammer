@@ -49,5 +49,5 @@ sudo apt-get -y install g++ make liblua5.1-0-dev libtolua++5.1-dev libzzip-dev l
                    libbz2-dev libxaw7-dev libopenal-dev libalut-dev libsigc++-2.0-dev libcurl4-openssl-dev \
                    libjpeg62-dev libpng-dev libpcre3-dev libxrandr-dev libxdg-basedir-dev \
                    libgcrypt20-dev libboost-all-dev cmake libfreeimage-dev curl rsync \
-                   libtinyxml-dev libsdl2-dev libglew-dev libbullet-dev postgresql-server-dev-all python-dev
+                   libtinyxml-dev libsdl2-dev libglew-dev libbullet-dev libsqlite3-dev python3-dev
 ```
