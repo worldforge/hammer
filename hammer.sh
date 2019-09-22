@@ -246,8 +246,8 @@ export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_INSTALL_RPATH=${PREFIX}/lib64:${PREFI
 # Define component versions
 CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
-OGRE_VER=sinbad-ogre-e73af6d1c819
-OGRE_DOWNLOAD=v1-10-11.tar.bz2
+OGRE_VER=ogre-1.12.2
+OGRE_DOWNLOAD=v1.12.2.tar.gz
 FREEALUT_VER=1.1.0
 TOLUA_VER="tolua++-1.0.93"
 BASEDIR_VER=1.2.0
@@ -380,18 +380,12 @@ function install_deps_ogre()
     cd "$DEPS_SOURCE"
     if [ ! -d $OGRE_VER ]; then
       echo "  Downloading..."
-      curl -C - -OL "https://bitbucket.org/sinbad/ogre/get/$OGRE_DOWNLOAD"
-      mkdir -p "$OGRE_VER"
+      curl -C - -OL "https://github.com/OGRECave/ogre/archive/$OGRE_DOWNLOAD"
+      tar -xzf "$OGRE_DOWNLOAD"
       cd "$OGRE_VER"
-      tar -xjf "../$OGRE_DOWNLOAD"
-      OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER/$(ls "$DEPS_SOURCE/$OGRE_VER")"
-      if [[ $OSTYPE == *darwin* ]] ; then
-        cd "$OGRE_SOURCE"
-        echo "  Patching..."
-        #patch -p1 < "$SUPPORTDIR/ogre_cocoa_currentGLContext_support.patch"
-      fi
+      OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER"
     else
-      OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER/$(ls "$DEPS_SOURCE/$OGRE_VER")"
+      OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER"
     fi
    
     mkdir -p "$DEPS_BUILD/$OGRE_VER/$BUILDDIR"
@@ -551,9 +545,7 @@ function install_deps_cegui()
 	if [[ $OSTYPE == *darwin* ]] ; then #Fast hack to get cegui building on OS X. Should be fixed upstream in CEGUI.
 	  export CXXFLAGS="$CXXFLAGS -I/opt/local/include -I/opt/local/include/lua-5.1"
 	  export LDFLAGS="$LDFLAGS -L/opt/local/lib/lua-5.1 -llua-5.1"
-	  export LDFLAGS="$LDFLAGS -L/opt/local/lib -lboost_system-mt" # Required by Ogre includes
-	  export CXXFLAGS="$CXXFLAGS -I$PREFIX/include/OGRE -DCEGUI_OGRE_VERSION=67840" # Ogre 1.9.0
-	  export LDFLAGS="$LDFLAGS -F$PREFIX/lib/RelWithDebInfo -L$PREFIX/lib/RelWithDebInfo -framework Ogre"
+	  export LDFLAGS="$LDFLAGS -F$PREFIX/lib/RelWithDebInfo -L$PREFIX/lib/RelWithDebInfo"
     fi
     cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C "${SUPPORTDIR}/CEGUI_defaults.cmake" $CMAKE_FLAGS "$DEPS_SOURCE/$CEGUI_VER"  > "$LOGDIR/deps/CEGUI/$CONFIGLOG"
 		
@@ -945,7 +937,7 @@ elif [ "$1" = "clean" ] ; then
   if [ "$2" = "cegui" ] ; then
     rm -rf "${DEPS_BUILD:?}/${CEGUI_VER:?}/${BUILDDIR:?}"
   elif [ "$2" = "ogre" ] ; then
-    rm -rf "${DEPS_BUILD:?}/${OGRE_VER:?}/ogre/${BUILDDIR:?}"
+    rm -rf "${DEPS_BUILD:?}/${OGRE_VER:?}/${BUILDDIR:?}"
   else
     rm -rf "${BUILD:?}/${2:?}/${BUILDDIR:?}"
   fi
