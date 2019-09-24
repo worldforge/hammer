@@ -383,6 +383,8 @@ function install_deps_ogre()
       curl -C - -OL "https://github.com/OGRECave/ogre/archive/$OGRE_DOWNLOAD"
       tar -xzf "$OGRE_DOWNLOAD"
       cd "$OGRE_VER"
+      echo "Patching OGRE..."
+      patch -p1 < "$SUPPORTDIR/vertex_buffer_unlock_fix.patch"
       OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER"
     else
       OGRE_SOURCE="$DEPS_SOURCE/$OGRE_VER"

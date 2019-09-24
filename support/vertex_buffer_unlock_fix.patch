@@ -1,0 +1,12 @@
+diff --git a/OgreMain/src/OgreInstanceBatchShader.cpp b/OgreMain/src/OgreInstanceBatchShader.cpp
+index 940472a91..b190bb16a 100644
+--- a/OgreMain/src/OgreInstanceBatchShader.cpp
++++ b/OgreMain/src/OgreInstanceBatchShader.cpp
+@@ -201,7 +201,6 @@ namespace Ogre
+                 }
+             }
+ 
+-            vertexBuffer->unlock();
+         }
+     }
+     //-----------------------------------------------------------------------
