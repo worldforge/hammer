@@ -100,7 +100,7 @@ export DEBUG_BUILD=0 # Can be 0 (release build) or 1 (debug build). Only used if
 export MAKE_FLAGS="-j5"
 export CONFIGURE_FLAGS=""
 #Retain RPATH for installed binaries, since we'll be linking to our own shared libraries.
-export CMAKE_FLAGS="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE"
+export CMAKE_FLAGS="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 export COMPILE_FLAGS=""
 export LINK_FLAGS=""
 export FORCE_AUTOGEN=0 # Can be 0 or 1.
