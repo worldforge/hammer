@@ -248,7 +248,6 @@ CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
 OGRE_VER=ogre-13.3.4
 OGRE_DOWNLOAD=v13.3.4.tar.gz
-FREEALUT_VER=1.1.0
 BASEDIR_VER=1.2.0
 
 # setup directories
@@ -417,37 +416,6 @@ function install_deps_ogre()
     fi
 }
 
-function install_deps_freealut()
-{
-    # freealut
-    echo "  Installing freealut..."
-    mkdir -p "$LOGDIR/deps/freealut"
-    cd "$DEPS_SOURCE"
-
-    echo "  Downloading..."
-	wget -c "http://pkgs.fedoraproject.org/repo/pkgs/freealut/freealut-${FREEALUT_VER}.tar.gz/e089b28a0267faabdb6c079ee173664a/freealut-${FREEALUT_VER}.tar.gz"
-    tar -xzf "freealut-${FREEALUT_VER}.tar.gz"
-    cd "freealut-${FREEALUT_VER}"
-    if [[ $OSTYPE == *darwin* ]] ; then
-      mkdir -p "$PREFIX/lib/pkgconfig"
-      cp "$SUPPORTDIR/openal.pc" "$PREFIX/lib/pkgconfig/openal.pc"
-    fi
-    echo "  Running autogen..."
-    autoreconf --install --force --warnings=all
-
-    mkdir -p "$DEPS_BUILD/freealut-${FREEALUT_VER}-src/$BUILDDIR"
-    cd "$DEPS_BUILD/freealut-${FREEALUT_VER}-src/$BUILDDIR"
-
-    echo "  Running configure..."
-    "$DEPS_SOURCE/freealut-${FREEALUT_VER}/configure" $CONFIGURE_FLAGS \
-    CFLAGS="$CFLAGS $(pkg-config --cflags openal)" LDFLAGS="$LDFLAGS $(pkg-config --libs openal)" > "$LOGDIR/deps/freealut/$CONFIGLOG"
-
-    echo "  Building..."
-    make $MAKE_FLAGS > "$LOGDIR/deps/freealut/$MAKELOG"
-    echo "  Installing..."
-    make install > "$LOGDIR/deps/freealut/$INSTALLLOG"
-}
-
 function install_deps_basedir()
 {
     # libxdg-basedir
@@ -516,9 +484,6 @@ function install_deps_cegui()
 }
 function install_deps_all()
 {
-    if [[ $OSTYPE == *darwin* ]] ; then
-      install_deps_freealut
-    fi
     install_deps_ogre
     install_deps_cegui
     install_deps_basedir
@@ -612,7 +577,6 @@ if [ x"$1" = x"install-deps" ] ; then
   mkdir -p "$LOGDIR/deps"
 
   if [ "$2" = "all" ] || [ "$2" = "ogre" ] || [ "$2" = "cegui" ] ||
-     [ "$2" = "freealut" ] ||
      [ "$2" = "basedir" ] ; then
     install_deps_$2
   else
