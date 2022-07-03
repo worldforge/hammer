@@ -249,7 +249,6 @@ CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
 OGRE_VER=ogre-13.3.4
 OGRE_DOWNLOAD=v13.3.4.tar.gz
 FREEALUT_VER=1.1.0
-TOLUA_VER="tolua++-1.0.93"
 BASEDIR_VER=1.2.0
 
 # setup directories
@@ -477,58 +476,6 @@ function install_deps_basedir()
     make install > "$LOGDIR/deps/libxdg-basedir/$INSTALLLOG"
 }
 
-function install_deps_tolua++()
-{
-    # tolua++
-	
-	set +e # ‹== Do not kill script if pkg-config exits with error code
-    for pkgname in lua5.1 lua-5.1 lua51 lua
-    do
-      echo "  Testing lua package '$pkgname'."
-	  LUA_VERSION="$(pkg-config --modversion $pkgname 2> /dev/null)"
-      if [[ $LUA_VERSION == 5.1* ]]; then
-		echo "  Lua package '$pkgname' is suitable."
-        LUA_CFLAGS="$(pkg-config --cflags $pkgname)"
-        LUA_LDFLAGS="$(pkg-config --libs $pkgname)"
-		break;
-      fi
-    done
-	set -e
-	
-    if [ "x$LUA_VERSION" == "x" ] ; then
-      if [ "x$LUA_LDFLAGS" == "x" ] ; then
-        LUA_LDFLAGS="-llua"
-      fi
-      echo "  Failed to find suitable lua package, so we will just assume that '$LUA_LDFLAGS' will work."
-    fi
-
-    cd "$DEPS_SOURCE"
-    if [ ! -d "$TOLUA_VER" ] ; then
-        #curl -OL http://www.codenix.com/~tolua/${TOLUA_VER}.tar.bz2
-		curl -OL "ftp://ftp.tw.freebsd.org/pub/ports/distfiles/${TOLUA_VER}.tar.bz2"
-        tar -xjf "${TOLUA_VER}.tar.bz2"
-    fi
-	
-    cd "$TOLUA_VER"
-    mkdir -p "$PREFIX/include"
-    cp include/tolua++.h "$PREFIX/include/tolua++.h"
-    cd src/lib
-    gcc $CFLAGS -c -fPIC -I"$PREFIX/include" ./*.c $LUA_CFLAGS
-    mkdir -p "$PREFIX/lib"
-    if [[ $OSTYPE == *darwin* ]] ; then
-      ar cq libtolua++.a ./*.o
-      cp libtolua++.a "$PREFIX/lib/libtolua++.a"
-    else
-      gcc -shared -Wl,-soname,libtolua++.so -o libtolua++.so  ./*.o
-      cp libtolua++.so "$PREFIX/lib/libtolua++.so"
-    fi
-    cd ../bin
-    gcc $CFLAGS $LDFLAGS -o tolua++ -I"$PREFIX/include" $LUA_CFLAGS $LUA_LDFLAGS -L"$PREFIX/lib" tolua.c toluabind.c -ltolua++
-    mkdir -p "$PREFIX/bin"
-    cp tolua++ "$PREFIX/bin/tolua++"
-    cd ../../..
-}
-
 function install_deps_cegui()
 {
     # CEGUI
@@ -546,8 +493,7 @@ function install_deps_cegui()
     echo "  Configuring..."
 	
 	if [[ $OSTYPE == *darwin* ]] ; then #Fast hack to get cegui building on OS X. Should be fixed upstream in CEGUI.
-	  export CXXFLAGS="$CXXFLAGS -I/opt/local/include -I/opt/local/include/lua-5.1"
-	  export LDFLAGS="$LDFLAGS -L/opt/local/lib/lua-5.1 -llua-5.1"
+	  export CXXFLAGS="$CXXFLAGS -I/opt/local/include"
 	  export LDFLAGS="$LDFLAGS -F$PREFIX/lib/RelWithDebInfo -L$PREFIX/lib/RelWithDebInfo"
     fi
     cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -C "${SUPPORTDIR}/CEGUI_defaults.cmake" $CMAKE_FLAGS "$DEPS_SOURCE/$CEGUI_VER"  > "$LOGDIR/deps/CEGUI/$CONFIGLOG"
@@ -572,7 +518,6 @@ function install_deps_all()
 {
     if [[ $OSTYPE == *darwin* ]] ; then
       install_deps_freealut
-      install_deps_tolua++
     fi
     install_deps_ogre
     install_deps_cegui
@@ -667,7 +612,7 @@ if [ x"$1" = x"install-deps" ] ; then
   mkdir -p "$LOGDIR/deps"
 
   if [ "$2" = "all" ] || [ "$2" = "ogre" ] || [ "$2" = "cegui" ] ||
-     [ "$2" = "tolua++" ] || [ "$2" = "freealut" ] ||
+     [ "$2" = "freealut" ] ||
      [ "$2" = "basedir" ] ; then
     install_deps_$2
   else
