@@ -20,7 +20,6 @@
 #  export LDFLAGS="$LDFLAGS -Wl,-rpath,../lib -Wl,-rpath,lib -L$PREFIX/lib"
 #  export CXXFLAGS="$CXXFLAGS -O2 -g -DCEGUI_STATIC"
 # also set makefile jobs to -j1 in hammer, because firebreath needs 600MB/job, which caused for me with -j3 an OS freeze, when out of memory.
-#once you have built ember and got a cmake error in webember, install(it will install lot of dev packages): sudo apt-get install libgtk2.0-dev
 
 set -e
 

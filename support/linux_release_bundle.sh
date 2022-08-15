@@ -3,7 +3,6 @@
 # This script will copy everything from work/local to work/release; it will also
 # recursively detect all ember dependencies which are installed in the $WORK dir.
 # It will also automatically resolve symlinks and copies the file only, because symlinks are not rpath compatible.
-# It will also copy install.sh, uninstall.sh, and npWebEmber.so files for webember, if they are availible.
 
 WORK="$PWD/work/local"
 REL="$PWD/work/release"
@@ -30,7 +29,6 @@ cp $WORK/lib/OGRE/Plugin_CgProgramManager.so $REL/lib/OGRE
 cp $WORK/lib/OGRE/Plugin_OctreeSceneManager.so $REL/lib/OGRE
 cp $WORK/lib/OGRE/Plugin_ParticleFX.so $REL/lib/OGRE
 cp $WORK/lib/OGRE/RenderSystem_GL.so $REL/lib/OGRE
-cp $WORK/lib/libCg.so $REL/lib
 
 #remove temporary work file.
 if [ -f tmp_ldd.txt ] ; then
@@ -90,27 +88,6 @@ function copy_sharedlib()
 echo "gettings ember dependencies recursively"
 list_deps "$REL/bin/ember.bin" | while read line; do copy_sharedlib "$line"; done
 
-if [ -f ~/.mozilla/plugins/npWebEmber.so ] ; then
-cp ~/.mozilla/plugins/npWebEmber.so $REL/npWebEmber.so
-chmod 0755 ~/.mozilla/plugins/npWebEmber.so
-
-cp $WORK/lib/libWebEmber-0.1.so $REL/lib/libWebEmber-0.1.so
-chmod 0755 $REL/lib/libWebEmber-0.1.so
-
-echo -e \
-"# !/bin/bash\n  \
-SCRIPTDIR=\"\$( cd -P \"\$( dirname \"\$0\" )\" && pwd )\"\n  \
-mkdir -p ~/.mozilla/plugins/\n  \
-cp \$SCRIPTDIR/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so\n  \
-mkdir -p ~/.ember\n  \
-echo \$SCRIPTDIR > ~/.ember/webember.path\n" > $REL/install.sh
-chmod 0755 $REL/install.sh
-
-echo -e \
-"# !/bin/bash\n  \
-rm ~/.mozilla/plugins/npWebEmber.so\n  \
-rm ~/.ember/webember.path\n" > $REL/uninstall.sh
-chmod 0755 $REL/uninstall.sh
 
 fi
 

@@ -50,7 +50,6 @@ function show_help()
     echo "  all      - fetch everything"
     echo "  libs     - fetch libraries only"
     echo "  ember    - fetch ember only"
-    echo "  webember - fetch ember and webember"
     echo "  cyphesis - fetch cyphesis server only"
     echo "  worlds   - fetch worlds only"
   elif [ "$1" = "build" ] ; then
@@ -61,7 +60,6 @@ function show_help()
     echo "  all      - build everything"
     echo "  libs     - build libraries only"
     echo "  ember    - build ember only"
-    echo "  webember - build webember only"
     echo "  cyphesis - build cyphesis server only"
     echo "  worlds   - build worlds only"
     echo ""
@@ -129,7 +127,6 @@ export SUPPORTDIR=$HAMMERDIR/support # It should contain any other script.
 
 
 EMBER_VER="master"
-WEBEMBER_VER="master"
 VARCONF_VER="master"
 ATLAS_CPP_VER="master"
 SKSTREAM_VER="master"
@@ -139,7 +136,6 @@ LIBWFUT_VER="master"
 MERCATOR_VER="master"
 WORLDS_VER="master"
 CYPHESIS_VER="master"
-FIREBREATH_VER="master"
 MEDIA_VER="dev"
 
 while :
@@ -645,7 +641,7 @@ elif [ "$1" = "checkout" ] ; then
     echo "  Done."
   fi
 
-  if [ "$2" = "ember" ] || [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
+  if [ "$2" = "ember" ] || [ "$2" = "all" ] ; then
     # Ember client
     echo "  Ember client..."
     mkdir -p "$SOURCE/clients"
@@ -670,19 +666,6 @@ elif [ "$1" = "checkout" ] ; then
     cd "$SOURCE/servers"
     checkoutwf "metaserver-ng"
     echo "  Done."
-  fi
-
-  if [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
-    if [[ x$MSYSTEM != x"MINGW32" ]] ; then
-      echo "  FireBreath..."
-      mkdir -p "$SOURCE/clients/webember"
-      cd "$SOURCE/clients/webember"
-      checkoutwf "FireBreath" "sajty"
-      echo "  Done."
-      echo "  WebEmber..."
-      checkoutwf "webember"
-      echo "  Done."
-    fi
   fi
 
   echo "Checkout complete."
@@ -785,52 +768,6 @@ elif [ "$1" = "build" ] ; then
     echo "  Done."
   fi
 
-  if [ "$2" = "webember" ] || [ "$2" = "all" ] ; then
-
-    echo "  WebEmber..."
-    export CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-webember"
-    #we need to change the BUILDDIR to separate the ember and webember build directories.
-    #the strange thing is that if BUILDDIR is 6+ character on win32, the build will fail with missing headers.
-    export BUILDDIR="web${BUILDDIR}"
-    buildwf "clients/ember" "webember"
-    echo "  Done."
-
-    # WebEmber media
-    ember_fetch_media "dev"
-
-    # WebEmber
-    echo "  WebEmber plugin..."
-    if [[ x$MSYSTEM = x"MINGW32" ]] ; then
-      # Firebreath is not supporting mingw32 yet, we will use msvc prebuilt for webember.
-      mkdir -p "$BUILD/clients/ember/$BUILDDIR"
-      cd "$BUILD/clients/ember/$BUILDDIR"
-      curl -C - -OL http://sajty.elementfx.com/npWebEmber.tar.gz
-      tar -xzf npWebEmber.tar.gz
-      cp npWebEmber.dll "$PREFIX/bin/npWebEmber.dll"
-      regsvr32 -s "$PREFIX/bin/npWebEmber.dll"
-      #To uninstall: regsvr32 -u $PREFIX/bin/npWebEmber.dll
-    else
-      mkdir -p "$LOGDIR/webember_plugin"
-      mkdir -p "$BUILD/clients/webember/FireBreath/$BUILDDIR"
-      cd "$BUILD/clients/webember/FireBreath/$BUILDDIR"
-
-      cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -DFB_PROJECTS_DIR="$SOURCE/clients/webember/webember/plugin" $CMAKE_FLAGS "$SOURCE/clients/webember/FireBreath" > "$LOGDIR/webember_plugin/cmake.log"
-      if  [[ $OSTYPE == *darwin* ]] ; then
-        echo "  Building..."
-        xcodebuild -configuration RelWithDebInfo > "$LOGDIR/webember_plugin/$MAKELOG"
-        echo "  Installing..."
-        cp -r projects/WebEmber/RelWithDebInfo/webember.plugin "$PREFIX/lib"
-      else
-        echo "  Building..."
-        make $MAKE_FLAGS > "$LOGDIR/webember_plugin/build.log"
-        echo "  Installing..."
-        mkdir -p ~/.mozilla/plugins
-        cp bin/WebEmber/npWebEmber.so ~/.mozilla/plugins/npWebEmber.so
-      fi
-    fi
-    export BUILDDIR="$(getconf LONG_BIT)"
-    echo "  Done."
-  fi
   if [ $TARGET_OS = "android" ] && [ "$2" = "ember_apk" ] ; then
     echo "  Bundling Ember into ember.apk..."
     "$SUPPORTDIR/AppBundler.sh"

@@ -164,7 +164,6 @@ fi
 
 
 export EMBER_APP="$WORKDIR/ember.app"
-export WEBEMBER_PLUGIN="$WORKDIR/WebEmber.plugin"
 export DYLIBBUNDLER="$PREFIX/bin/dylibbundler"
 export OPENAL_FRAMEWORK="/opt/local/Library/Frameworks/OpenAl.framework"
 
@@ -190,17 +189,14 @@ if [ $# -eq 0 ] ; then
   echo "Usage: AppBundler.sh <target>"
   echo "Targets:"
   echo "  ember    - creates ember.app"
-  echo "  webember - creates webember.plugin"
   exit 0
 fi
 
 if [ $1 = "ember" ] ; then
   BUNDLE="$EMBER_APP"
-elif [ $1 = "webember" ] ; then
-  BUNDLE="$WEBEMBER_PLUGIN"
 fi
 
-#files for ember and webember
+#files for ember
 if [ x"$BUNDLE" != x"" ] ; then
   
   #prepare directories
@@ -262,38 +258,4 @@ if [ $1 = "ember" ] ; then
   
 
 fi
-
-if [ $1 = "webember" ] ; then
-  #install webember
-  cp $PREFIX/lib/libWebEmber-0.1.dylib $WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib
-
-  #install libraries
-  $DYLIBBUNDLER -od -b -x $WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib -d $WEBEMBER_PLUGIN/Contents/lib -p @loader_path/../lib
-
-  
-  #change framework linkage from @executable_path to @loader_path
-  install_name_tool -change \
-  "@executable_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
-  "@loader_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
-  "$WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib"
-
-  install_name_tool -change \
-  "@executable_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
-  "@loader_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
-  "$WEBEMBER_PLUGIN/Contents/lib/libCEGUIOgreRenderer-0.7.5.dylib"
-  
-  install_name_tool -change \
-  "@executable_path/../Frameworks/OpenAL.framework/Versions/A/OpenAL" \
-  "@loader_path/../Frameworks/OpenAL.framework/Versions/A/OpenAL" \
-  "$WEBEMBER_PLUGIN/Contents/lib/libWebEmber-0.1.dylib"
-  
-  for f in $WEBEMBER_PLUGIN/Contents/Plugins/*; do
-    install_name_tool -change \
-    "@executable_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
-    "@loader_path/../Frameworks/Ogre.framework/Versions/1.7.3/Ogre" \
-    "$f"
-  done
-  
-fi
-
 
