@@ -242,8 +242,8 @@ export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_INSTALL_RPATH=${PREFIX}/lib64:${PREFI
 # Define component versions
 CEGUI_VER=cegui-0.8.7
 CEGUI_DOWNLOAD=cegui-0.8.7.tar.bz2
-OGRE_VER=ogre-13.4.1
-OGRE_DOWNLOAD=v13.4.1.tar.gz
+OGRE_VER=ogre-13.4.2
+OGRE_DOWNLOAD=v13.4.2.tar.gz
 BASEDIR_VER=1.2.0
 
 # setup directories
