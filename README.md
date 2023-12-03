@@ -1,3 +1,7 @@
+# DEPRECATED
+
+This tool isn't used anymore as we've moved to a build system based on Conan. See more at [the Worldforge repository](https://github.com/worldforge/worldforge). 
+
 # Worldforge Hammer Script
 
 [![Join us on Gitter!](https://badges.gitter.im/Worldforge.svg)](https://gitter.im/Worldforge/Lobby)
